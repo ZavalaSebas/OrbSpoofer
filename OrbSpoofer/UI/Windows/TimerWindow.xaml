@@ -1,0 +1,39 @@
+<Window x:Class="OrbSpoofer.UI.Windows.TimerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OrbSpoofer Timer" Height="250" Width="400"
+        WindowStartupLocation="Manual"
+        ResizeMode="NoResize"
+        Background="{StaticResource SurfaceBrush}"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        ShowInTaskbar="True">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="TimerText" Text="15:00"
+                       FontSize="56" FontWeight="Bold"
+                       FontFamily="Cascadia Code, Consolas, Courier New"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <ProgressBar x:Name="TimerProgress" Grid.Row="1"
+                     Height="4" Minimum="0" Maximum="100" Value="100"
+                     Foreground="{StaticResource PrimaryBrush}"
+                     Background="{StaticResource BorderBrush}"
+                     BorderThickness="0" Margin="24,0,24,8"/>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                    Margin="0,0,0,16">
+            <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0"/>
+            <TextBlock x:Name="StatusText" Text="Running"
+                       FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+        </StackPanel>
+    </Grid>
+</Window>
