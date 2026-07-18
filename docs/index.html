@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OrbSpoofer — Discord Orb Quest Spoofer | Automate Quests, Skip Downloads</title>
+  <meta name="description" content="OrbSpoofer is a free, open-source Discord Orb Quest spoofer. Automate Discord orb quests without downloading 500GB+ games. Fake game detection, quest farming, and automatic quest completion. Works with Discord's official API. No code injection." />
+  <meta name="keywords" content="discord orb quest, discord obs quest, discord quest spoofer, discord orb spoofer, orbshacker, discord quest automation, discord quest farm, discord quest auto, discord fake game, discord quest game exes, discord quest spoof, discord orb quest automate, discord obs quest fake game, discord obs quest farm, discord quest bot, discord quest tool, skip game download, discord orbs free, discord quest hack, discord quest bypass, discord game spoofer, discord rich presence spoofer, discord game detection, discord playing status, discord quest helper, discord quest complete, discord orb farm, discord obs quest automation tool" />
+  <meta name="author" content="ZavalaSebas" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://zavalasebas.github.io/OrbSpoofer/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://zavalasebas.github.io/OrbSpoofer/" />
+  <meta property="og:title" content="OrbSpoofer — Discord Orb Quest Spoofer | Automate Quests, Skip Downloads" />
+  <meta property="og:description" content="Free, open-source Discord Orb Quest spoofer. Automate quests without downloading games. Fake game detection, quest farming, automatic completion." />
+  <meta property="og:image" content="https://zavalasebas.github.io/OrbSpoofer/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="OrbSpoofer" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="OrbSpoofer — Discord Orb Quest Spoofer" />
+  <meta name="twitter:description" content="Free, open-source Discord Orb Quest spoofer. Automate quests without downloading 500GB+ games." />
+  <meta name="twitter:image" content="https://zavalasebas.github.io/OrbSpoofer/og-image.svg" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "OrbSpoofer",
+    "alternateName": ["Discord Orb Quest Spoofer", "Discord Quest Spoofer", "Orb Quest Automator"],
+    "description": "Free, open-source Discord Orb Quest spoofer. Automate Discord orb quests without downloading 500GB+ games. Features fake game detection, quest farming, and automatic quest completion.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Windows 10/11",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "ZavalaSebas",
+      "url": "https://github.com/ZavalaSebas"
+    },
+    "softwareVersion": "1.0.0",
+    "fileSize": "66MB",
+    "downloadUrl": "https://github.com/ZavalaSebas/OrbSpoofer/releases/latest",
+    "screenshot": "https://zavalasebas.github.io/OrbSpoofer/assets/screenshot-1.png",
+    "featureList": [
+      "Discord Orb Quest automation",
+      "Fake game process spoofing",
+      "Quest farming and stacking",
+      "Automatic quest completion",
+      "Steam quest mode",
+      "Built-in 15-minute timer",
+      "Live Discord API integration",
+      "Auto-cleanup on completion"
+    ],
+    "keywords": "discord orb quest, discord obs quest, discord quest spoofer, orb quest farm, discord quest automation, discord fake game, discord quest game exes"
+  }
+  </script>
+
+  <meta name="theme-color" content="#5865F2" />
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WYSVXYZ667"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-WYSVXYZ667');
+  </script>
+
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --blurple: #5865F2;
+      --blurple-light: #7289da;
+      --blurple-dark: #4752c4;
+      --green: #57F287;
+      --yellow: #FEE75C;
+      --red: #ED4245;
+      --bg: #0d0f14;
+      --bg-card: #14161d;
+      --bg-card-hover: #1a1d27;
+      --text: #e8e8e8;
+      --text-muted: #8a8e9a;
+      --border: rgba(88, 101, 242, 0.15);
+      --glow: rgba(88, 101, 242, 0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ─── Page Decorations ─── */
+    .page-decor {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 120px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-decor.left { left: 2%; }
+    .page-decor.right { right: 2%; }
+
+    .page-decor .deco-line {
+      position: absolute;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(88,101,242,0.25), transparent);
+    }
+
+    .page-decor.left .deco-line:nth-child(1) { left: 10px; top: 10%; height: 200px; animation: float-line 6s ease-in-out infinite; }
+    .page-decor.left .deco-line:nth-child(2) { left: 50px; top: 30%; height: 140px; animation: float-line 8s ease-in-out infinite 1s; }
+    .page-decor.left .deco-line:nth-child(3) { left: 25px; top: 55%; height: 180px; animation: float-line 7s ease-in-out infinite 2s; }
+    .page-decor.left .deco-line:nth-child(4) { left: 70px; top: 75%; height: 120px; animation: float-line 9s ease-in-out infinite 0.5s; }
+
+    .page-decor.right .deco-line:nth-child(1) { right: 10px; top: 15%; height: 160px; animation: float-line 7s ease-in-out infinite 0.3s; }
+    .page-decor.right .deco-line:nth-child(2) { right: 45px; top: 35%; height: 200px; animation: float-line 6s ease-in-out infinite 1.5s; }
+    .page-decor.right .deco-line:nth-child(3) { right: 20px; top: 60%; height: 130px; animation: float-line 8s ease-in-out infinite 0.8s; }
+    .page-decor.right .deco-line:nth-child(4) { right: 60px; top: 80%; height: 170px; animation: float-line 7s ease-in-out infinite 2.5s; }
+
+    @keyframes float-line {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-15px); }
+    }
+
+    .page-decor .deco-dot {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--blurple);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(88,101,242,0.5);
+    }
+
+    .page-decor.left .deco-dot:nth-child(5) { left: 0; top: 8%; animation: float-dot 5s ease-in-out infinite; }
+    .page-decor.left .deco-dot:nth-child(6) { left: 50px; top: 28%; animation: float-dot 6s ease-in-out infinite 0.5s; }
+    .page-decor.left .deco-dot:nth-child(7) { left: 15px; top: 52%; animation: float-dot 5.5s ease-in-out infinite 1s; }
+    .page-decor.left .deco-dot:nth-child(8) { left: 65px; top: 72%; animation: float-dot 7s ease-in-out infinite 1.5s; }
+    .page-decor.left .deco-dot:nth-child(9) { left: 30px; top: 90%; animation: float-dot 6s ease-in-out infinite 2s; }
+
+    .page-decor.right .deco-dot:nth-child(5) { right: 0; top: 12%; animation: float-dot 5.5s ease-in-out infinite 0.3s; }
+    .page-decor.right .deco-dot:nth-child(6) { right: 40px; top: 32%; animation: float-dot 6s ease-in-out infinite 0.8s; }
+    .page-decor.right .deco-dot:nth-child(7) { right: 10px; top: 56%; animation: float-dot 5s ease-in-out infinite 1.3s; }
+    .page-decor.right .deco-dot:nth-child(8) { right: 55px; top: 76%; animation: float-dot 6.5s ease-in-out infinite 1.8s; }
+    .page-decor.right .deco-dot:nth-child(9) { right: 25px; top: 93%; animation: float-dot 5.5s ease-in-out infinite 0.6s; }
+
+    @keyframes float-dot {
+      0%, 100% { opacity: 0.4; transform: translate(0, 0) scale(1); }
+      50% { opacity: 1; transform: translate(0, -10px) scale(1.3); }
+    }
+
+    .page-decor .deco-ring {
+      position: absolute;
+      border: 1px solid rgba(88,101,242,0.12);
+      border-radius: 50%;
+      animation: pulse-ring 8s ease-in-out infinite;
+    }
+
+    .page-decor.left .deco-ring:nth-child(10) { width: 120px; height: 120px; left: -30px; top: 20%; }
+    .page-decor.left .deco-ring:nth-child(11) { width: 80px; height: 80px; left: 20px; top: 65%; animation-delay: 2s; }
+    .page-decor.right .deco-ring:nth-child(10) { width: 100px; height: 100px; right: -20px; top: 40%; animation-delay: 1s; }
+    .page-decor.right .deco-ring:nth-child(11) { width: 140px; height: 140px; right: -40px; top: 75%; animation-delay: 3s; }
+
+    @keyframes pulse-ring {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(1.08); }
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(88,101,242,0.08) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(88,101,242,0.1);
+      border: 1px solid rgba(88,101,242,0.3);
+      border-radius: 100px;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.85rem;
+      color: var(--blurple-light);
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 20px rgba(88,101,242,0.4));
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--blurple-light), var(--blurple), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--text-muted);
+      max-width: 600px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--blurple);
+      color: white;
+      box-shadow: 0 4px 20px rgba(88,101,242,0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--blurple-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(88,101,242,0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* ─── Section ─── */
+    section { padding: 6rem 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--blurple-light);
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+
+    /* ─── How it works ─── */
+    .steps-track {
+      position: relative;
+      padding-top: 60px;
+    }
+
+    .steps-line {
+      position: absolute;
+      top: 56px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(88,101,242,0.15);
+    }
+
+    .steps-cursor {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 14px;
+      height: 14px;
+      background: var(--blurple);
+      border-radius: 50%;
+      box-shadow: 0 0 16px rgba(88,101,242,0.7), 0 0 40px rgba(88,101,242,0.3);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      will-change: transform;
+      z-index: 2;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      position: relative;
+    }
+
+    .step {
+      text-align: center;
+      cursor: default;
+      padding: 0 1rem;
+      position: relative;
+    }
+
+    .step-dot {
+      width: 10px;
+      height: 10px;
+      background: rgba(88,101,242,0.3);
+      border-radius: 50%;
+      margin: 0 auto 1.2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step:hover .step-dot,
+    .step.active .step-dot {
+      background: var(--blurple);
+      box-shadow: 0 0 0 4px rgba(88,101,242,0.2), 0 0 16px rgba(88,101,242,0.5);
+      transform: scale(1.4);
+    }
+
+    .step-num {
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1;
+      color: rgba(88,101,242,0.08);
+      margin-bottom: 0.8rem;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+
+    .step:hover .step-num,
+    .step.active .step-num {
+      color: rgba(88,101,242,0.25);
+    }
+
+    .step-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--blurple-light);
+      margin-bottom: 0.4rem;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .step:hover .step-label,
+    .step.active .step-label {
+      opacity: 1;
+    }
+
+    .step h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      transition: color 0.3s ease;
+    }
+
+    .step:hover h3,
+    .step.active h3 {
+      color: #fff;
+    }
+
+    .step p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      max-width: 220px;
+      margin: 0 auto;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .step:hover p,
+    .step.active p {
+      opacity: 1;
+    }
+
+    /* ─── Screenshots ─── */
+    .screenshots-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .screenshot-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .screenshot-card:hover {
+      border-color: var(--blurple);
+    }
+
+    .screenshot-placeholder {
+      aspect-ratio: 16/10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      background: rgba(88,101,242,0.03);
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      display: block;
+    }
+
+    /* ─── Lightbox ─── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      transform: scale(0.95);
+      will-change: transform;
+      transition: transform 0.25s ease-out;
+    }
+
+    .lightbox.open img {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* ─── Features ─── */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(120px, auto);
+      gap: 1rem;
+    }
+
+    .bento-item {
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      transition: transform 0.3s ease;
+    }
+
+    .bento-item:hover {
+      transform: scale(1.01);
+    }
+
+    .bento-item h3 {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bento-item p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 1 — giant word hero */
+    .bento-giant {
+      grid-column: span 8;
+      grid-row: span 2;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .bento-giant .giant-word {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, var(--blurple-light), var(--blurple), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+    }
+
+    .bento-giant h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .bento-giant p {
+      font-size: 0.9rem;
+      max-width: 400px;
+    }
+
+    /* 2 — number stat card */
+    .bento-stat {
+      grid-column: span 4;
+      grid-row: span 2;
+      background: var(--blurple);
+      color: #fff;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .bento-stat .big-num {
+      font-size: clamp(4rem, 8vw, 7rem);
+      font-weight: 900;
+      line-height: 1;
+      opacity: 0.2;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .bento-stat h3 {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .bento-stat p {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* 3 — minimal with left border accent */
+    .bento-border {
+      grid-column: span 5;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      padding-left: 1.5rem;
+    }
+
+    .bento-border h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .bento-border p {
+      font-size: 0.88rem;
+    }
+
+    /* 4 — inverted / dark highlight */
+    .bento-dark {
+      grid-column: span 7;
+      background: rgba(88,101,242,0.06);
+      border: 1px solid rgba(88,101,242,0.12);
+      justify-content: center;
+    }
+
+    .bento-dark .bento-icon {
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .bento-dark h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .bento-dark p {
+      font-size: 0.88rem;
+      max-width: 420px;
+    }
+
+    /* 5 — diagonal stripe background */
+    .bento-stripe {
+      grid-column: span 12;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      flex-direction: row;
+      align-items: center;
+      gap: 3rem;
+      padding: 2.5rem 3rem;
+    }
+
+    .bento-stripe::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 20px,
+        rgba(88,101,242,0.03) 20px,
+        rgba(88,101,242,0.03) 40px
+      );
+      pointer-events: none;
+    }
+
+    .bento-stripe-left {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bento-stripe-left h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .bento-stripe-left p {
+      font-size: 0.88rem;
+    }
+
+    .bento-stripe-right {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .bento-stripe-pill {
+      background: rgba(88,101,242,0.1);
+      border: 1px solid rgba(88,101,242,0.2);
+      border-radius: 100px;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--blurple-light);
+      white-space: nowrap;
+    }
+
+    /* ─── Safety ─── */
+    .safety {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .safety-header {
+      padding: 2rem 3rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .safety-header h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .safety-header .verdict {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--green);
+      background: rgba(87,242,135,0.1);
+      border: 1px solid rgba(87,242,135,0.25);
+      border-radius: 100px;
+      padding: 0.3rem 0.9rem;
+    }
+
+    .safety-body {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      min-height: 200px;
+    }
+
+    .safety-col {
+      padding: 2.5rem 3rem;
+    }
+
+    .safety-divider {
+      background: var(--border);
+    }
+
+    .safety-col-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .safety-col p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .safety-col p:last-child {
+      margin-bottom: 0;
+    }
+
+    .safety-items {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .safety-items li {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      padding-left: 1.2rem;
+      position: relative;
+    }
+
+    .safety-items li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .safety-col.do .safety-items li::before {
+      background: var(--green);
+    }
+
+    .safety-col.dont .safety-items li::before {
+      background: var(--red);
+    }
+
+    .safety-col.do h4 {
+      color: var(--green);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .safety-col.dont h4 {
+      color: var(--red);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    /* ─── Disclaimer ─── */
+    .disclaimer {
+      margin-top: 2rem;
+      padding: 1.5rem 2rem;
+      border-left: 2px solid var(--text-muted);
+    }
+
+    .disclaimer p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.8;
+    }
+
+    .disclaimer strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ─── FAQ ─── */
+    .faq-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 2rem;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-item summary {
+      list-style: none;
+      padding: 1rem 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: color 0.2s ease;
+    }
+
+    .faq-item summary::-webkit-details-marker { display: none; }
+
+    .faq-item summary::after {
+      content: '+';
+      font-size: 1.1rem;
+      color: var(--blurple-light);
+      transition: transform 0.2s ease;
+    }
+
+    .faq-item[open] summary::after {
+      transform: rotate(45deg);
+    }
+
+    .faq-item summary:hover {
+      color: var(--blurple-light);
+    }
+
+    .faq-item p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      padding-bottom: 1rem;
+    }
+
+    /* ─── CTA ─── */
+    .cta {
+      text-align: center;
+      padding: 8rem 2rem;
+      position: relative;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--blurple));
+    }
+
+    .cta h2 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+    }
+
+    .cta p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--blurple-light);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    .footer-support {
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.8rem;
+      border-radius: 8px;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .safety-card {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem;
+      }
+      .feature-row { grid-template-columns: 1fr; }
+      .feature-block.wide { grid-template-columns: 1fr; text-align: center; }
+      .screenshots-row { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; }
+      .steps-track { padding-top: 0; }
+      .steps-line, .steps-cursor { display: none; }
+      .step { text-align: left; }
+      .step p { margin: 0; }
+      .bento { grid-template-columns: 1fr; }
+      .bento-giant, .bento-stat, .bento-border, .bento-dark, .bento-stripe { grid-column: span 1; }
+      .bento-giant { grid-row: span 1; }
+      .bento-stat { grid-row: span 1; }
+      .bento-stripe { flex-direction: column; gap: 1rem; padding: 2rem; }
+      .safety-body { grid-template-columns: 1fr; }
+      .safety-divider { height: 1px; width: 100%; }
+      .safety-col { padding: 1.5rem; }
+      .safety-header { padding: 1.5rem; }
+      .faq-list { grid-template-columns: 1fr; }
+      .hero { min-height: 90vh; }
+      .page-decor { display: none; }
+      section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Decorations -->
+  <div class="page-decor left">
+    <div class="deco-line"></div>
+    <div class="deco-line"></div>
+    <div class="deco-line"></div>
+    <div class="deco-line"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-ring"></div>
+    <div class="deco-ring"></div>
+  </div>
+  <div class="page-decor right">
+    <div class="deco-line"></div>
+    <div class="deco-line"></div>
+    <div class="deco-line"></div>
+    <div class="deco-line"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-dot"></div>
+    <div class="deco-ring"></div>
+    <div class="deco-ring"></div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Free &amp; Open Source
+    </div>
+    <img src="assets/logo.png" alt="OrbSpoofer" class="hero-logo" />
+    <h1><span class="gradient">OrbSpoofer</span></h1>
+    <p class="hero-sub">
+      Complete Discord orb quests without downloading 500GB+ games.<br/>
+      Just run the app, pick a game, done.
+    </p>
+    <div class="hero-buttons">
+      <a href="https://github.com/ZavalaSebas/OrbSpoofer/releases/latest" class="btn btn-primary">
+        ⬇ Download OrbSpoofer
+      </a>
+      <a href="https://github.com/ZavalaSebas/OrbSpoofer" class="btn btn-secondary" target="_blank">
+        View on GitHub →
+      </a>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section>
+    <div class="container">
+      <p class="section-label">How it works</p>
+      <h2 class="section-title">4 steps. Zero downloads.</h2>
+      <p class="section-desc">
+        Discord detects games by checking your running process list. OrbSpoofer creates a fake process with the exact name Discord expects.
+      </p>
+      <div class="steps-track">
+        <div class="steps-line"></div>
+        <div class="steps-cursor" id="stepsCursor"></div>
+        <div class="steps" id="stepsContainer">
+          <div class="step">
+            <div class="step-dot"></div>
+            <div class="step-num">01</div>
+            <div class="step-label">Step 01</div>
+            <h3>Launch the app</h3>
+            <p>Open OrbSpoofer. It fetches the official detectable games list from Discord's API automatically.</p>
+          </div>
+          <div class="step">
+            <div class="step-dot"></div>
+            <div class="step-num">02</div>
+            <div class="step-label">Step 02</div>
+            <h3>Find your game</h3>
+            <p>Search by name, abbreviation, or alias. The database is always current.</p>
+          </div>
+          <div class="step">
+            <div class="step-dot"></div>
+            <div class="step-num">03</div>
+            <div class="step-label">Step 03</div>
+            <h3>Hit spoof</h3>
+            <p>A fake process with the exact executable name Discord expects is created instantly.</p>
+          </div>
+          <div class="step">
+            <div class="step-dot"></div>
+            <div class="step-num">04</div>
+            <div class="step-label">Step 04</div>
+            <h3>Discord sees it</h3>
+            <p>Discord reads the process list, finds the match, and shows "Playing [Game]" on your profile.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshots -->
+  <section>
+    <div class="container">
+      <p class="section-label">Screenshots</p>
+      <h2 class="section-title">See it in action</h2>
+      <p class="section-desc">
+        The interface is clean and straightforward. Pick a game, hit spoof, done.
+      </p>
+      <div class="screenshots-row">
+        <div class="screenshot-card">
+          <img src="assets/screenshot-1.png" alt="OrbSpoofer main interface" />
+        </div>
+        <div class="screenshot-card">
+          <img src="assets/screenshot-2.png" alt="OrbSpoofer in action" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section>
+    <div class="container">
+      <p class="section-label">Features</p>
+      <h2 class="section-title">Everything you need</h2>
+      <p class="section-desc">
+        Built for simplicity. No terminal, no dependencies, no complicated setup.
+      </p>
+
+      <div class="bento">
+
+        <!-- Giant word -->
+        <div class="bento-item bento-giant">
+          <div class="giant-word">One<br/>file.</div>
+          <h3>Single .exe, zero setup</h3>
+          <p>No Python, no Node.js, no runtime. Download one file and it works.</p>
+        </div>
+
+        <!-- Stat -->
+        <div class="bento-item bento-stat">
+          <div class="big-num">1</div>
+          <h3>file to download</h3>
+          <p>Self-contained Windows executable</p>
+        </div>
+
+        <!-- Border accent -->
+        <div class="bento-item bento-border">
+          <h3>Live Discord data</h3>
+          <p>
+            Fetches the official detectable games list from Discord's API on every launch.
+            Always current, always accurate.
+          </p>
+        </div>
+
+        <!-- Dark inverted -->
+        <div class="bento-item bento-dark">
+          <div class="bento-icon">⚡</div>
+          <h3>Stack your quests</h3>
+          <p>
+            Launch multiple games at once. Discord sees them all running.
+            Complete several orb quests in a single session.
+          </p>
+        </div>
+
+        <!-- Stripe -->
+        <div class="bento-item bento-stripe">
+          <div class="bento-stripe-left">
+            <h3>Built for Discord quests</h3>
+            <p>Everything you need, nothing you don't.</p>
+          </div>
+          <div class="bento-stripe-right">
+            <span class="bento-stripe-pill">Auto-cleanup</span>
+            <span class="bento-stripe-pill">15min timer</span>
+            <span class="bento-stripe-pill">Steam mode</span>
+            <span class="bento-stripe-pill">Multi-game</span>
+            <span class="bento-stripe-pill">Live API</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Safety -->
+  <section>
+    <div class="container">
+      <p class="section-label">Safety</p>
+      <h2 class="section-title">How does this work?</h2>
+
+      <div class="safety">
+        <div class="safety-header">
+          <h3>OrbSpoofer</h3>
+          <span class="verdict">Safe</span>
+        </div>
+        <div class="safety-body">
+          <div class="safety-col do">
+            <p class="safety-col-label">What it does</p>
+            <p>
+              Creates a local Windows process with a specific executable name.
+              Discord reads your running process list, sees the name, and assumes the game is running.
+            </p>
+            <ul class="safety-items">
+              <li>Creates a local .exe with the right name</li>
+              <li>Discord detects it via process list</li>
+              <li>Shows "Playing [Game]" on your profile</li>
+              <li>Cleans up after itself</li>
+            </ul>
+          </div>
+          <div class="safety-divider"></div>
+          <div class="safety-col dont">
+            <p class="safety-col-label">What it never does</p>
+            <p>
+              OrbSpoofer doesn't touch Discord at all. No injection, no modified JavaScript, no fake network requests.
+            </p>
+            <ul class="safety-items">
+              <li>No code injection into Discord</li>
+              <li>No client modification</li>
+              <li>No fake network requests</li>
+              <li>No memory scanning</li>
+              <li>No stored credentials</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <p>
+          This tool is for <strong>educational purposes only</strong>. You are solely responsible for compliance with Discord's Terms of Service. OrbSpoofer automates a manual process — creating local files with specific names — so it's quite safe in principle, but always exercise caution.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="container">
+      <p class="section-label">FAQ</p>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>What is OrbSpoofer?</summary>
+          <p>
+            OrbSpoofer is a free, open-source Discord Orb Quest spoofer that automates Discord orb quests without downloading large games. It creates a fake game process that Discord detects as a real game, completing your quests automatically.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>How does Discord quest automation work?</summary>
+          <p>
+            Discord detects games by checking your running process list. OrbSpoofer creates a local Windows process with the exact executable name Discord expects. Discord sees the process and assumes the game is running, triggering quest progress.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I farm Discord orb quests?</summary>
+          <p>
+            Yes. OrbSpoofer supports quest farming and stacking — launch multiple fake games at once and Discord sees them all running. Complete several orb quests in a single session without downloading anything.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>What are Discord quest game exes?</summary>
+          <p>
+            Discord quest game exes are the specific executable filenames that Discord scans for to detect if a game is running. OrbSpoofer automatically fetches these from Discord's API and creates matching fake processes.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>Is this the same as orbshacker?</summary>
+          <p>
+            OrbSpoofer is inspired by orbshacker but rebuilt from scratch as a standalone Windows application. No Python, no dependencies — just a single .exe file that works out of the box.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>How does the quest auto-completion work?</summary>
+          <p>
+            Once the fake process is running, Discord's quest system detects the game and starts tracking playtime. OrbSpoofer includes a built-in 15-minute timer that automatically cleans up the process and files when the quest is complete.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to skip the downloads?</h2>
+      <p>Free, open source, and built by the community.</p>
+      <div class="hero-buttons" style="justify-content: center;">
+        <a href="https://github.com/ZavalaSebas/OrbSpoofer/releases/latest" class="btn btn-primary">
+          ⬇ Download v1.0.0
+        </a>
+        <a href="https://github.com/ZavalaSebas/OrbSpoofer" class="btn btn-secondary" target="_blank">
+          View Source Code →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-support">
+      <a href="https://github.com/sponsors/ZavalaSebas" target="_blank" class="btn btn-primary btn-sm">
+        ♥ GitHub Sponsors
+      </a>
+      <a href="https://ko-fi.com/sebastianzavala82573" target="_blank" class="btn btn-secondary btn-sm">
+        ☕ Ko-fi
+      </a>
+    </div>
+    <p>
+      Built with ❤ by <a href="https://github.com/ZavalaSebas" target="_blank">ZavalaSebas</a> ·
+      Based on the concept by <a href="https://github.com/strykey/orbshacker" target="_blank">orbshacker</a> ·
+      <a href="https://github.com/ZavalaSebas/OrbSpoofer/blob/main/LICENSE" target="_blank">GPL-3.0 License</a>
+    </p>
+  </footer>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">×</button>
+    <img id="lightboxImg" src="" alt="Screenshot preview" />
+  </div>
+
+  <script>
+    const track = document.querySelector('.steps-track');
+    const cursor = document.getElementById('stepsCursor');
+    const steps = document.querySelectorAll('.step');
+    const line = document.querySelector('.steps-line');
+
+    if (track && cursor && steps.length) {
+      let ticking = false;
+      let cachedPositions = [];
+      let lineRect = null;
+
+      function cachePositions() {
+        lineRect = line.getBoundingClientRect();
+        cachedPositions = Array.from(steps).map(step => {
+          const dot = step.querySelector('.step-dot');
+          const dotRect = dot.getBoundingClientRect();
+          return dotRect.left + dotRect.width / 2 - lineRect.left;
+        });
+      }
+
+      cachePositions();
+      window.addEventListener('resize', cachePositions);
+
+      track.addEventListener('mousemove', (e) => {
+        if (ticking) return;
+        ticking = true;
+
+        requestAnimationFrame(() => {
+          const x = Math.max(0, Math.min(e.clientX - lineRect.left, lineRect.width));
+          cursor.style.transform = `translate(calc(-50% + ${x}px), -50%)`;
+
+          let closest = 0;
+          let closestDist = Infinity;
+          cachedPositions.forEach((dotX, i) => {
+            const dist = Math.abs(x - dotX);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closest = i;
+            }
+          });
+
+          steps.forEach((s, i) => s.classList.toggle('active', i === closest));
+          ticking = false;
+        });
+      });
+
+      track.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%, -50%)';
+        steps.forEach(s => s.classList.remove('active'));
+      });
+    }
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    document.querySelectorAll('.screenshot-card').forEach(card => {
+      const img = card.querySelector('img');
+      const preload = new Image();
+      preload.src = img.src;
+
+      card.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('open');
+      });
+    });
+
+    lightboxClose.addEventListener('click', () => lightbox.classList.remove('open'));
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) lightbox.classList.remove('open');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') lightbox.classList.remove('open');
+    });
+  </script>
+
+  <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+  <script>
+    kofiWidgetOverlay.draw('sebastianzavala82573', {
+      'type': 'floating-chat',
+      'floating-chat.donateButton.text': 'Support me',
+      'floating-chat.donateButton.background-color': '#d9534f',
+      'floating-chat.donateButton.text-color': '#fff'
+    });
+  </script>
+
+</body>
+</html>
