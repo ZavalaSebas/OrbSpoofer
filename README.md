@@ -220,7 +220,7 @@ Made with ❤ by **ZavalaSebas** :D
 
 <br/>
 
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white&labelColor=1a1a2e)](https://ko-fi.com/sebastianzavala82573)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H7TIEJ8)
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor%20Me-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white&labelColor=1a1a2e)](https://github.com/sponsors/ZavalaSebas)
 
 <br/>
