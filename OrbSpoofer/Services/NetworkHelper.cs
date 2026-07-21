@@ -13,6 +13,7 @@ public static class NetworkHelper
     private static HttpClient CreateClient()
     {
         var client = new HttpClient();
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("OrbSpoofer");
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         client.Timeout = TimeSpan.FromSeconds(Config.RequestTimeout);
         return client;

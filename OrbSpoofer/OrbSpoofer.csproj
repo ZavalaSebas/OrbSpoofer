@@ -9,6 +9,7 @@
     <AssemblyName>OrbSpoofer</AssemblyName>
     <RootNamespace>OrbSpoofer</RootNamespace>
     <Version>1.1.0</Version>
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
     <Authors>OrbSpoofer</Authors>
     <Description>Discord Orb Quest Game Spoofer - WPF Edition</Description>
     <PublishSingleFile>true</PublishSingleFile>

@@ -11,6 +11,15 @@ public static class Updater
         return Environment.ProcessPath != null && File.Exists(Environment.ProcessPath);
     }
 
+    public static void CleanupOldExe()
+    {
+        if (Environment.ProcessPath == null) return;
+        var oldExe = Environment.ProcessPath + ".old";
+        if (!File.Exists(oldExe)) return;
+        try { File.Delete(oldExe); }
+        catch (Exception ex) { Debug.WriteLine($"Failed to delete old exe: {ex.Message}"); }
+    }
+
     public static async Task<(bool needsUpdate, string? tagName, string? downloadUrl)> CheckForUpdateAsync()
     {
         try
@@ -23,7 +32,7 @@ public static class Updater
 
             if (!Version.TryParse(tag.TrimStart('v'), out var remoteVersion))
                 return (false, null, null);
-            if (!Version.TryParse(Config.Version, out var localVersion))
+            if (!Version.TryParse(Config.AssemblyVersion, out var localVersion))
                 return (false, null, null);
 
             if (remoteVersion <= localVersion)

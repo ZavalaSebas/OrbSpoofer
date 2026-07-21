@@ -70,7 +70,7 @@ public partial class WelcomeWindow : Window
 
             if (lines.Length == 0) { SetFallbackWhatsNew(); return; }
 
-            WhatsNewHeader.Text = $"What's new in v{Config.Version}";
+            WhatsNewHeader.Text = $"What's new in v{Config.AssemblyVersion}";
             foreach (var line in lines)
             {
                 WhatsNewItems.Children.Add(new TextBlock
@@ -90,7 +90,7 @@ public partial class WelcomeWindow : Window
 
     private void SetFallbackWhatsNew()
     {
-        WhatsNewHeader.Text = $"What's new in v{Config.Version}";
+        WhatsNewHeader.Text = $"What's new in v{Config.AssemblyVersion}";
         var brush = TryFindResource("TextSecondaryBrush") as Brush ?? Brushes.Gray;
         WhatsNewItems.Children.Add(new TextBlock
         {
@@ -152,7 +152,7 @@ public partial class WelcomeWindow : Window
             {
                 Directory.CreateDirectory(Config.AppDataPath);
                 var flagPath = Path.Combine(Config.AppDataPath, Config.WelcomeSentinelFile);
-                File.WriteAllText(flagPath, Config.Version);
+                File.WriteAllText(flagPath, Config.AssemblyVersion);
             }
             catch (Exception ex) { Debug.WriteLine($"Failed to write welcome sentinel: {ex.Message}"); }
         }

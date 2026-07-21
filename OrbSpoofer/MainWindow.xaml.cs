@@ -36,6 +36,7 @@ public partial class MainWindow : Window
             }));
 
             CleanupLeftoverFakeExes();
+            Updater.CleanupOldExe();
 
             await _db.LoadAsync(msg =>
             {
@@ -47,7 +48,7 @@ public partial class MainWindow : Window
             StatusMessage.Text = $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
             HeaderStatusText.Text = $"{_db.Games.Count:N0} games loaded from {_db.Source}";
             HeaderStatusText.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondaryBrush");
-            VersionText.Text = $"v{Config.Version}";
+            VersionText.Text = $"v{Config.AssemblyVersion}";
             GameCount.Text = $"{_db.Games.Count:N0} games in database";
 
             var steamPath = SteamService.GetSteamPath();
