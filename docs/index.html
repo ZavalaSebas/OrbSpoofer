@@ -993,21 +993,54 @@
     footer a {
       color: var(--blurple-light);
       text-decoration: none;
+      transition: color 0.2s ease;
     }
 
-    footer a:hover { text-decoration: underline; }
+    footer a:hover { color: var(--blurple); text-decoration: underline; }
 
     .footer-support {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 0.8rem;
+      gap: 1rem;
       margin-bottom: 1.5rem;
+      font-size: 0.82rem;
     }
 
-    .btn-sm {
-      padding: 0.5rem 1.2rem;
-      font-size: 0.8rem;
-      border-radius: 8px;
+    .footer-support-label {
+      color: var(--text-muted);
+    }
+
+    .footer-support-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--red) !important;
+      background: rgba(237,66,69,0.06);
+      border: 1px solid rgba(237,66,69,0.2);
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-decoration: none !important;
+    }
+
+    .footer-support-link:hover {
+      background: rgba(237,66,69,0.12);
+      border-color: rgba(237,66,69,0.4);
+      color: var(--red) !important;
+      transform: translateY(-1px);
+    }
+
+    .footer-divider {
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      margin: 0 0.6rem;
+      vertical-align: middle;
+      opacity: 0.4;
     }
 
     /* ─── Responsive ─── */
@@ -1337,16 +1370,15 @@
 
   <footer>
     <div class="footer-support">
-      <a href="https://github.com/sponsors/ZavalaSebas" target="_blank" class="btn btn-primary btn-sm">
-        ♥ GitHub Sponsors
-      </a>
-      <a href="https://ko-fi.com/sebastianzavala82573" target="_blank" class="btn btn-secondary btn-sm">
-        ☕ Ko-fi
-      </a>
+      <span class="footer-support-label">Support OrbSpoofer:</span>
+      <a href="https://github.com/sponsors/ZavalaSebas?frequency=one-time" target="_blank" class="footer-support-link">♥ GitHub Sponsors</a>
+      <a href="https://ko-fi.com/sebastianzavala82573" target="_blank" class="footer-support-link">☕ Ko-fi</a>
     </div>
     <p>
-      Built with ❤ by <a href="https://github.com/ZavalaSebas" target="_blank">ZavalaSebas</a> ·
-      Based on the concept by <a href="https://github.com/strykey/orbshacker" target="_blank">orbshacker</a> ·
+      Built with ❤ by <a href="https://github.com/ZavalaSebas" target="_blank">ZavalaSebas</a>
+      <span class="footer-divider"></span>
+      Based on the concept by <a href="https://github.com/strykey/orbshacker" target="_blank">orbshacker</a>
+      <span class="footer-divider"></span>
       <a href="https://github.com/ZavalaSebas/OrbSpoofer/blob/main/LICENSE" target="_blank">GPL-3.0 License</a>
     </p>
   </footer>

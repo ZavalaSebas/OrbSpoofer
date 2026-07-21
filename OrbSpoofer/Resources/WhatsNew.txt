@@ -1,0 +1,2 @@
+Timer grace period to ensure Discord detects the game
+Initial release quality-of-life improvements

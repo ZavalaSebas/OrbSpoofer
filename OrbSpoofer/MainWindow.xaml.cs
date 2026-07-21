@@ -1,8 +1,12 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using OrbSpoofer.Models;
 using OrbSpoofer.Services;
 
@@ -12,6 +16,8 @@ public partial class MainWindow : Window
 {
     private readonly DiscordDatabase _db = new();
     private readonly GameFaker _faker = new();
+    private string? _pendingUpdateTag;
+    private string? _pendingUpdateUrl;
 
     public MainWindow()
     {
@@ -28,6 +34,8 @@ public partial class MainWindow : Window
                 LoadingText.Text = msg;
                 StatusMessage.Text = msg;
             }));
+
+            CleanupLeftoverFakeExes();
 
             await _db.LoadAsync(msg =>
             {
@@ -46,6 +54,17 @@ public partial class MainWindow : Window
             SteamPathText.Text = steamPath ?? "Steam not found";
 
             ShowView(DatabaseView);
+
+            if (UI.Windows.WelcomeWindow.ShouldShow())
+            {
+                var welcome = new UI.Windows.WelcomeWindow
+                {
+                    Owner = this
+                };
+                welcome.ShowDialog();
+            }
+
+            _ = CheckForUpdateAsync();
         }
         catch (Exception ex)
         {
@@ -89,7 +108,11 @@ public partial class MainWindow : Window
     private void BtnDatabase_Click(object sender, RoutedEventArgs e) => ShowView(DatabaseView);
     private void BtnManual_Click(object sender, RoutedEventArgs e) => ShowView(ManualView);
     private void BtnSteam_Click(object sender, RoutedEventArgs e) => ShowView(SteamView);
-    private void BtnCredits_Click(object sender, RoutedEventArgs e) => ShowView(CreditsView);
+    private void BtnCredits_Click(object sender, RoutedEventArgs e)
+    {
+        ShowView(CreditsView);
+        DispatchAnimation(AnimateCreditCardsAsync);
+    }
 
     private void OpenKofi()
     {
@@ -109,6 +132,22 @@ public partial class MainWindow : Window
 
     private void Kofi_Click(object sender, RoutedEventArgs e) => OpenKofi();
     private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => OpenKofi();
+
+    private void GitHubSponsor_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = Config.GitHubSponsorUrl,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            StatusMessage.Text = $"Could not open link: {ex.Message}";
+        }
+    }
 
     private void GitHubProfile_Click(object sender, MouseButtonEventArgs e)
     {
@@ -162,17 +201,17 @@ public partial class MainWindow : Window
     private void SearchBox_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
-            PerformDatabaseSearch();
+            PerformDatabaseSearch(animate: true);
     }
 
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
-        PerformDatabaseSearch();
+        PerformDatabaseSearch(animate: true);
     }
 
-    private void BtnSearch_Click(object sender, RoutedEventArgs e) => PerformDatabaseSearch();
+    private void BtnSearch_Click(object sender, RoutedEventArgs e) => PerformDatabaseSearch(animate: true);
 
-    private void PerformDatabaseSearch()
+    private void PerformDatabaseSearch(bool animate = false)
     {
         var query = SearchBox.Text.Trim();
 
@@ -211,7 +250,112 @@ public partial class MainWindow : Window
         {
             NoResultsText.Visibility = Visibility.Collapsed;
             StatusMessage.Text = $"Found {items.Count} game(s) for '{query}'";
+
+            if (animate)
+                DispatchAnimation(() => AnimateListBoxItemsAsync(ResultsList));
         }
+    }
+
+    private async Task AnimateListBoxItemsAsync(ListBox listBox, int delayMs = 40)
+    {
+        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
+        for (int i = 0; i < listBox.Items.Count; i++)
+        {
+            if (listBox.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem item)
+            {
+                item.Opacity = 0;
+                item.RenderTransform = new TranslateTransform(0, 12);
+
+                item.BeginAnimation(UIElement.OpacityProperty,
+                    new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.25)) { EasingFunction = ease });
+                ((TranslateTransform)item.RenderTransform).BeginAnimation(TranslateTransform.YProperty,
+                    new DoubleAnimation(12, 0, TimeSpan.FromSeconds(0.25)) { EasingFunction = ease });
+            }
+
+            await Task.Delay(delayMs);
+        }
+    }
+
+    private void DispatchAnimation(Func<Task> animation)
+    {
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(async () => await animation()));
+    }
+
+    private async Task AnimateCreditCardsAsync()
+    {
+        var cards = new UIElement[] { CreditAbout, CreditHowItWorks, CreditSteam, CreditDisclaimer, CreditSupport };
+        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
+        foreach (var card in cards)
+        {
+            card.Opacity = 0;
+            card.RenderTransform = new TranslateTransform(0, 15);
+
+            card.BeginAnimation(UIElement.OpacityProperty,
+                new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.3)) { EasingFunction = ease });
+            ((TranslateTransform)card.RenderTransform).BeginAnimation(TranslateTransform.YProperty,
+                new DoubleAnimation(15, 0, TimeSpan.FromSeconds(0.3)) { EasingFunction = ease });
+
+            await Task.Delay(100);
+        }
+    }
+
+    private static void CleanupLeftoverFakeExes()
+    {
+        var fakeDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Config.FakeExeDir);
+
+        try
+        {
+            if (!Directory.Exists(fakeDir)) return;
+
+            foreach (var file in Directory.GetFiles(fakeDir, "*.exe"))
+            {
+                try { File.Delete(file); }
+                catch (Exception ex) { Debug.WriteLine($"Failed to delete leftover fake exe: {ex.Message}"); }
+            }
+
+            if (!Directory.EnumerateFileSystemEntries(fakeDir).Any())
+                Directory.Delete(fakeDir);
+        }
+        catch (Exception ex) { Debug.WriteLine($"Failed to cleanup fake exe directory: {ex.Message}"); }
+    }
+
+    private async Task CheckForUpdateAsync()
+    {
+        try
+        {
+            var (needsUpdate, tagName, downloadUrl) = await Updater.CheckForUpdateAsync();
+
+            if (!needsUpdate || string.IsNullOrEmpty(downloadUrl)) return;
+
+            var updateWindow = new UI.Windows.UpdateWindow(tagName!, downloadUrl)
+            {
+                Owner = this
+            };
+            updateWindow.ShowDialog();
+
+            _pendingUpdateTag = tagName;
+            _pendingUpdateUrl = downloadUrl;
+            BtnUpdateReminder.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Update check failed: {ex.Message}");
+        }
+    }
+
+    private void UpdateReminder_Click(object sender, RoutedEventArgs e)
+    {
+        if (_pendingUpdateTag == null || _pendingUpdateUrl == null) return;
+
+        var updateWindow = new UI.Windows.UpdateWindow(_pendingUpdateTag, _pendingUpdateUrl)
+        {
+            Owner = this
+        };
+        updateWindow.ShowDialog();
     }
 
     private void SpoofGame_Click(object sender, RoutedEventArgs e)
@@ -311,6 +455,9 @@ public partial class MainWindow : Window
             StatusMessage.Text = items.Count > 0
                 ? $"Found {items.Count} results"
                 : $"No results for '{query}'";
+
+            if (items.Count > 0)
+                DispatchAnimation(() => AnimateListBoxItemsAsync(SteamResultsList));
         }
         catch (Exception ex)
         {
@@ -380,17 +527,3 @@ public partial class MainWindow : Window
     }
 }
 
-public class GameDisplayItem
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public List<string> Aliases { get; set; } = [];
-    public string AliasDisplay { get; set; } = "";
-    public DiscordGame Game { get; set; } = new();
-}
-
-public class SteamGameDisplayItem
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = "";
-}

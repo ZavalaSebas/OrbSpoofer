@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>OrbSpoofer</AssemblyName>
     <RootNamespace>OrbSpoofer</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>OrbSpoofer</Authors>
     <Description>Discord Orb Quest Game Spoofer - WPF Edition</Description>
     <PublishSingleFile>true</PublishSingleFile>
@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Resource Include="..\OS.png" Link="OS.png"/>
+    <EmbeddedResource Include="Resources\WhatsNew.txt"/>
   </ItemGroup>
 
 </Project>

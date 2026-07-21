@@ -7,7 +7,7 @@ using OrbSpoofer.Exceptions;
 
 namespace OrbSpoofer.Services;
 
-public class SteamService
+public static class SteamService
 {
     public static string? GetSteamPath()
     {

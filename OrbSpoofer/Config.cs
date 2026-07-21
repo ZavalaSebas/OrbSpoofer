@@ -1,9 +1,11 @@
+using System.IO;
+
 namespace OrbSpoofer;
 
 public static class Config
 {
     // App identity
-    public const string Version = "1.0.0";
+    public const string Version = "1.1.0";
     public const string Developer = "OrbSpoofer";
 
     // GitHub repo
@@ -11,6 +13,7 @@ public static class Config
     public const string GitHubRepoName = "OrbSpoofer";
     public const string RepoUrl = "https://github.com/" + GitHubRepoOwner + "/" + GitHubRepoName;
     public const string KofiUrl = "https://ko-fi.com/sebastianzavala82573";
+    public const string GitHubSponsorUrl = "https://github.com/sponsors/ZavalaSebas?frequency=one-time";
 
     // Discord API
     public const string DiscordApiUrl = "https://discord.com/api/v9/applications/detectable";
@@ -30,6 +33,11 @@ public static class Config
     public const string ManifestPartialBytes = "27262976";
     public const string ManifestStateFlags = "1026";
 
+    // App data
+    public static readonly string AppDataPath =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OrbSpoofer");
+    public const string WelcomeSentinelFile = "welcome.flag";
+
     // HTTP
     public const int RequestTimeout = 10;
     public const int DownloadBufferSize = 8192;
@@ -39,6 +47,7 @@ public static class Config
     public const int MaxSearchResults = 20;
     public const int MaxDisplayedAliases = 3;
     public const int TimerDurationMinutes = 15;
+    public const int TimerExtraSeconds = 30;
     public const string TimerCompleteColor = "#ff6b6b";
     public const int MaxProjectRootDepth = 10;
     public const int PublishTimeoutSeconds = 300;

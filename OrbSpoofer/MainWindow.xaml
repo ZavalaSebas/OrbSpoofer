@@ -81,6 +81,13 @@
                             HorizontalContentAlignment="Left" Margin="0,0,0,6"
                             Click="BtnCredits_Click"/>
 
+                    <Button x:Name="BtnUpdateReminder" Content="⬆  Update Available"
+                            Style="{StaticResource GhostButton}"
+                            HorizontalContentAlignment="Left" Margin="0,0,0,6"
+                            Visibility="Collapsed"
+                            Foreground="{StaticResource WarningBrush}"
+                            Click="UpdateReminder_Click"/>
+
                     <Separator Background="{StaticResource BorderBrush}" Margin="0,12,0,12"/>
                 </StackPanel>
             </Border>
@@ -324,7 +331,7 @@
                             <TextBlock Text="Credits &amp; Info" FontSize="22" FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,20"/>
 
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="12"
+                            <Border x:Name="CreditAbout" Background="{StaticResource CardBrush}" CornerRadius="12"
                                     Padding="20" Margin="0,0,0,12">
                                 <StackPanel>
                                     <TextBlock Text="About" FontSize="16" FontWeight="SemiBold"
@@ -338,7 +345,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="12"
+                            <Border x:Name="CreditHowItWorks" Background="{StaticResource CardBrush}" CornerRadius="12"
                                     Padding="20" Margin="0,0,0,12">
                                 <StackPanel>
                                     <TextBlock Text="How it works" FontSize="16" FontWeight="SemiBold"
@@ -355,7 +362,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="12"
+                            <Border x:Name="CreditSteam" Background="{StaticResource CardBrush}" CornerRadius="12"
                                     Padding="20" Margin="0,0,0,12">
                                 <StackPanel>
                                     <TextBlock Text="Steam Quest Mode" FontSize="16" FontWeight="SemiBold"
@@ -369,7 +376,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="12"
+                            <Border x:Name="CreditDisclaimer" Background="{StaticResource CardBrush}" CornerRadius="12"
                                     Padding="20" Margin="0,0,0,12">
                                 <StackPanel>
                                     <TextBlock Text="⚠ Disclaimer" FontSize="16" FontWeight="SemiBold"
@@ -383,20 +390,33 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Background="{StaticResource CardBrush}" CornerRadius="12"
+                            <Border x:Name="CreditSupport" Background="{StaticResource CardBrush}" CornerRadius="12"
                                     Padding="20" Margin="0,0,0,12">
                                 <StackPanel>
                                     <TextBlock Text="❤ Support" FontSize="16" FontWeight="SemiBold"
                                                Foreground="{StaticResource ErrorBrush}" Margin="0,0,0,10"/>
                                     <TextBlock TextWrapping="Wrap" FontSize="13"
-                                               Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22">
-                                        Enjoying OrbSpoofer? Buy me a coffee! Your support helps keep
-                                        the project alive and motivates new features.
+                                               Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22"
+                                               Margin="0,0,0,14">
+                                        Enjoying OrbSpoofer? Your support keeps the project alive!
                                     </TextBlock>
-                                    <Button Content="Buy me a coffee ☕" Style="{StaticResource PrimaryButton}"
-                                            Padding="16,8" FontSize="13" Margin="0,12,0,0" Cursor="Hand"
-                                            HorizontalAlignment="Left"
-                                            Click="Kofi_Click"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Content="Buy me a coffee ☕"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Padding="16,8" FontSize="13" Cursor="Hand"
+                                                Click="Kofi_Click"/>
+                                        <Button Grid.Column="2" Content="GitHub Sponsor ❤"
+                                                Style="{StaticResource GhostButton}"
+                                                Padding="16,8" FontSize="13" Cursor="Hand"
+                                                Foreground="{StaticResource ErrorBrush}"
+                                                BorderBrush="{StaticResource ErrorBrush}"
+                                                 Click="GitHubSponsor_Click"/>
+                                        </Grid>
                                 </StackPanel>
                             </Border>
 

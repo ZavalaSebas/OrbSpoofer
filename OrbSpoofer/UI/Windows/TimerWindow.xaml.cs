@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Media;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -12,6 +13,7 @@ public partial class TimerWindow : Window
     private readonly int _totalSeconds;
     private readonly string? _exePathToCleanup;
     private int _remaining;
+    private bool _cleanedUp;
 
     private static readonly SolidColorBrush CompleteBrush =
         new((Color)ColorConverter.ConvertFromString(Config.TimerCompleteColor));
@@ -20,7 +22,7 @@ public partial class TimerWindow : Window
     {
         InitializeComponent();
 
-        _totalSeconds = durationMinutes * 60;
+        _totalSeconds = durationMinutes * 60 + Config.TimerExtraSeconds;
         _remaining = _totalSeconds;
         _exePathToCleanup = exePathToCleanup;
 
@@ -40,7 +42,8 @@ public partial class TimerWindow : Window
 
     private void Cleanup()
     {
-        if (_exePathToCleanup == null) return;
+        if (_exePathToCleanup == null || _cleanedUp) return;
+        _cleanedUp = true;
 
         try
         {
@@ -60,10 +63,9 @@ public partial class TimerWindow : Window
     private void Timer_Tick(object? sender, EventArgs e)
     {
         if (_remaining > 0)
-        {
             _remaining--;
-        }
-        else
+
+        if (_remaining <= 0)
         {
             _timer.Stop();
             TimerText.Text = "00:00";
@@ -73,6 +75,11 @@ public partial class TimerWindow : Window
             StatusDot.Fill = CompleteBrush;
             TimerProgress.Value = 0;
 
+            SystemSounds.Asterisk.Play();
+
+            Activate();
+            Topmost = true;
+
             Dispatcher.BeginInvoke(() =>
             {
                 Cleanup();
@@ -81,8 +88,9 @@ public partial class TimerWindow : Window
             return;
         }
 
-        var m = _remaining / 60;
-        var s = _remaining % 60;
+        var displaySecs = Math.Max(0, _remaining - Config.TimerExtraSeconds);
+        var m = displaySecs / 60;
+        var s = displaySecs % 60;
         TimerText.Text = $"{m:D2}:{s:D2}";
         TimerProgress.Value = (double)_remaining / _totalSeconds * 100;
     }

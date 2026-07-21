@@ -76,7 +76,7 @@ public static class NetworkHelper
                 await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cts.Token);
                 totalRead += bytesRead;
                 if (totalBytes > 0)
-                    progress?.Report((double)totalRead / totalBytes * 100);
+                    progress?.Report((double)totalRead / totalBytes);
             }
         }
         catch (OperationCanceledException)
