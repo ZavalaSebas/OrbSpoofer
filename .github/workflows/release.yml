@@ -41,7 +41,9 @@ jobs:
             "changed=false" | Out-File $env:GITHUB_OUTPUT -Append
           }
 
-      - run: dotnet build OrbSpoofer/OrbSpoofer/OrbSpoofer.csproj -c Release
+      - run: dotnet build OrbSpoofer.slnx -c Release
+
+      - run: dotnet test OrbSpoofer.slnx -c Release --no-build
 
   release:
     if: needs.build.outputs.version_changed == 'true'
