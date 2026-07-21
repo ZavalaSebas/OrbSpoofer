@@ -23,7 +23,7 @@ public static class Updater
 
             if (!Version.TryParse(tag.TrimStart('v'), out var remoteVersion))
                 return (false, null, null);
-            if (!Version.TryParse(Config.Version, out var localVersion))
+            if (!Version.TryParse(Config.AssemblyVersion, out var localVersion))
                 return (false, null, null);
 
             if (remoteVersion <= localVersion)

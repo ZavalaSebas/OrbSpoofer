@@ -5,7 +5,7 @@ namespace OrbSpoofer;
 public static class Config
 {
     // App identity
-    public const string Version = "1.1.0";
+    public static string AssemblyVersion => typeof(Config).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
     public const string Developer = "OrbSpoofer";
 
     // GitHub repo
