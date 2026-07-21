@@ -1,0 +1,63 @@
+name: build & release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      new_version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - id: check
+        shell: pwsh
+        run: |
+          try {
+            $old = git show HEAD~1:OrbSpoofer/OrbSpoofer/OrbSpoofer.csproj
+            $oldVer = [regex]::Match($old, '<Version>(.*?)</Version>').Groups[1].Value
+          } catch {
+            "changed=false" | Out-File $env:GITHUB_OUTPUT -Append
+            exit 0
+          }
+          $newVer = [regex]::Match(
+            (Get-Content OrbSpoofer/OrbSpoofer/OrbSpoofer.csproj -Raw),
+            '<Version>(.*?)</Version>'
+          ).Groups[1].Value
+          if ($oldVer -ne $newVer) {
+            "changed=true"  | Out-File $env:GITHUB_OUTPUT -Append
+            "version=$newVer" | Out-File $env:GITHUB_OUTPUT -Append
+          } else {
+            "changed=false" | Out-File $env:GITHUB_OUTPUT -Append
+          }
+
+      - run: dotnet build OrbSpoofer/OrbSpoofer/OrbSpoofer.csproj -c Release
+
+  release:
+    if: needs.build.outputs.version_changed == 'true'
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - run: dotnet publish OrbSpoofer/OrbSpoofer/OrbSpoofer.csproj -c Release -r win-x64 --self-contained true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.new_version }}
+          files: OrbSpoofer/OrbSpoofer/bin/Release/net10.0-windows/win-x64/publish/OrbSpoofer.exe
+          generate_release_notes: true
