@@ -17,6 +17,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="GameNameText" Text="Unknown"
+                       FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource PrimaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,0,0,4"/>
             <TextBlock x:Name="TimerText" Text="15:00"
                        FontSize="56" FontWeight="Bold"
                        FontFamily="Cascadia Code, Consolas, Courier New"

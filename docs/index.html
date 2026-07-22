@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OrbSpoofer — Automate Discord Orb Quests, Skip Downloads</title>
-  <meta name="description" content="Free, open-source Discord Orb Quest spoofer. Automate quests without downloading 500GB+ games. Fake game detection, quest farming, and auto-completion." />
+  <meta name="description" content="Free, open-source Discord Orb Quest spoofer. Auto-fetches active quests, completes them without downloading 500GB+ games. Fake game detection, quest farming, and auto-completion." />
   <meta name="keywords" content="discord orb quest, discord obs quest, discord quest spoofer, discord orb spoofer, orbshacker, discord quest automation, discord quest farm, discord quest auto, discord fake game, discord quest game exes, discord quest spoof, discord orb quest automate, discord obs quest fake game, discord obs quest farm, discord quest bot, discord quest tool, skip game download, discord orbs free, discord quest hack, discord quest bypass, discord game spoofer, discord rich presence spoofer, discord game detection, discord playing status, discord quest helper, discord quest complete, discord orb farm, discord obs quest automation tool" />
   <meta name="author" content="ZavalaSebas" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -51,11 +51,12 @@
       "name": "ZavalaSebas",
       "url": "https://github.com/ZavalaSebas"
     },
-    "softwareVersion": "1.1.0",
+    "softwareVersion": "1.2.0",
     "fileSize": "66MB",
     "downloadUrl": "https://github.com/ZavalaSebas/OrbSpoofer/releases/latest",
     "screenshot": "https://zavalasebas.github.io/OrbSpoofer/assets/screenshot-1.png",
     "featureList": [
+      "Active Quests auto-fetch on launch",
       "Discord Orb Quest automation",
       "Fake game process spoofing",
       "Quest farming and stacking",
@@ -63,7 +64,8 @@
       "Steam quest mode",
       "Built-in 15-minute timer",
       "Live Discord API integration",
-      "Auto-cleanup on completion"
+      "Auto-cleanup on completion",
+      "Local cache for offline mode"
     ],
     "keywords": "discord orb quest, discord obs quest, discord quest spoofer, orb quest farm, discord quest automation, discord fake game, discord quest game exes"
   }
@@ -1114,7 +1116,7 @@
     <h1><span class="gradient">OrbSpoofer</span></h1>
     <p class="hero-sub">
       Complete Discord orb quests without downloading 500GB+ games.<br/>
-      Just run the app, pick a game, done.
+      Active quests auto-detected. Just pick one, done.
     </p>
     <div class="hero-buttons">
       <a href="https://github.com/ZavalaSebas/OrbSpoofer/releases/latest" class="btn btn-primary">
@@ -1144,28 +1146,28 @@
             <div class="step-num">01</div>
             <div class="step-label">Step 01</div>
             <h3>Launch the app</h3>
-            <p>Open OrbSpoofer. It fetches the official detectable games list from Discord's API automatically.</p>
+            <p>Open OrbSpoofer. It fetches your active Discord quests and the detectable games list automatically.</p>
           </div>
           <div class="step">
             <div class="step-dot"></div>
             <div class="step-num">02</div>
             <div class="step-label">Step 02</div>
-            <h3>Find your game</h3>
-            <p>Search by name, abbreviation, or alias. The database is always current.</p>
+            <h3>Pick a quest</h3>
+            <p>Active Quests appear on launch. Double-click a quest or hit ▶. No quests? Switch to Database or Steam mode and search manually.</p>
           </div>
           <div class="step">
             <div class="step-dot"></div>
             <div class="step-num">03</div>
             <div class="step-label">Step 03</div>
             <h3>Hit spoof</h3>
-            <p>A fake process with the exact executable name Discord expects is created instantly.</p>
+            <p>A fake process with the exact executable name Discord expects is created instantly. A timer tracks your quest progress.</p>
           </div>
           <div class="step">
             <div class="step-dot"></div>
             <div class="step-num">04</div>
             <div class="step-label">Step 04</div>
             <h3>Discord sees it</h3>
-            <p>Discord reads the process list, finds the match, and shows "Playing [Game]" on your profile.</p>
+            <p>Discord reads the process list, finds the match, and shows "Playing [Game]" on your profile. Wait 15 min, done.</p>
           </div>
         </div>
       </div>
@@ -1220,7 +1222,7 @@
         <div class="bento-item bento-border">
           <h3>Live Discord data</h3>
           <p>
-            Fetches the official detectable games list from Discord's API on every launch.
+            Fetches your active quests and the detectable games list from Discord's API on every launch.
             Always current, always accurate.
           </p>
         </div>
@@ -1242,6 +1244,7 @@
             <p>Everything you need, nothing you don't.</p>
           </div>
           <div class="bento-stripe-right">
+            <span class="bento-stripe-pill">Active Quests</span>
             <span class="bento-stripe-pill">Auto-cleanup</span>
             <span class="bento-stripe-pill">15min timer</span>
             <span class="bento-stripe-pill">Steam mode</span>
@@ -1358,7 +1361,7 @@
       <p>Free, open source, and built by the community.</p>
       <div class="hero-buttons" style="justify-content: center;">
         <a href="https://github.com/ZavalaSebas/OrbSpoofer/releases/latest" class="btn btn-primary">
-          ⬇ Download v1.1.0
+          ⬇ Download v1.2.0
         </a>
         <a href="https://github.com/ZavalaSebas/OrbSpoofer" class="btn btn-secondary" target="_blank">
           View Source Code →
@@ -1464,6 +1467,21 @@
     });
   </script>
 
+  <script>
+    fetch('https://api.github.com/repos/ZavalaSebas/OrbSpoofer/releases/latest')
+      .then(r => r.json())
+      .then(data => {
+        if (data.tag_name) {
+          var v = data.tag_name.replace(/^v/, '');
+          document.querySelectorAll('.btn-primary').forEach(function(btn) {
+            if (btn.textContent.includes('Download')) {
+              btn.innerHTML = '&#11015; Download v' + v;
+            }
+          });
+        }
+      })
+      .catch(function() {});
+  </script>
   <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
   <script>
     kofiWidgetOverlay.draw('sebastianzavala82573', {

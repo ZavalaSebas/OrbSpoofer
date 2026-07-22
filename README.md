@@ -8,14 +8,14 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-1.2.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
 Earn Discord orb quests without installing games.  
 EZ :P
 
-[Get Started](#-get-started) · [How It Works](#how-it-works) · [Usage](#usage) · [Features](#features) · [Steam Quest](#steam-quest-mode)
+[Get Started](#-get-started) · [How It Works](#how-it-works) · [Usage](#usage) · [Active Quests](#active-quests) · [Features](#features) · [Steam Quest](#steam-quest-mode)
 
 </div>
 
@@ -40,10 +40,11 @@ Born from the idea behind [orbshacker](https://github.com/strykey/orbshacker) by
 The way Discord detects what you're playing is by reading your Windows process list. Lets say `roblox.exe` running? Must be Roblox!. There's no deeper verification — no hash check, no memory scan, nothing. The name is all it checks.
 
 1. Launch OrbSpoofer
-2. It fetches Discord's game database via their public API
-3. You search for a game
-4. Click **Spoof**
-5. Done — Discord thinks you're playing
+2. **Active Quests** appear automatically — fetched live from Discord's quest API
+3. Double-click a quest (or hit the ▶ button) to start spoofing
+4. Done — Discord thinks you're playing
+
+No active quests? Switch to **Database** or **Steam** mode and search manually. Same result.
 
 The fake process runs until you close it. Discord keeps detecting it the entire time. No kernel-level anti-cheat is involved in orb quests, so there's nothing watching for renamed executables.
 
@@ -130,13 +131,36 @@ Select a game, hit Spoof, go back to the menu, pick another one, repeat. All pro
 
 <br/>
 
+## Active Quests
+
+When OrbSpoofer launches, it automatically fetches your active Discord quests from `api.discordquest.com`. If you have any quests in progress, they appear right away — no searching needed.
+
+1. Open OrbSpoofer — Active Quests are shown by default
+2. **Double-click** a quest card (or click the ▶ button) to start spoofing
+3. A timer window opens — keep it running until the quest is done
+
+**A few things to know:**
+
+- Quests are filtered to **PLAY_ON_DESKTOP** only (the type OrbSpoofer handles)
+- Quests may vary depending on your **region** — not all quests are available everywhere
+- Only games in Discord's detectable games list are shown
+- Promotional quests (published by Discord) are filtered out
+
+**If Active Quests don't load** (API down, no internet, etc.), the app automatically falls back to **Database** mode. You can also switch modes manually from the sidebar at any time.
+
+<br/>
+
 ## Features
+
+**Active Quests** — Fetches your live Discord quests on launch. Double-click or press ▶ to start spoofing. Falls back to Database mode if the API is unavailable.
 
 **Dark Native UI** — Built entirely in WPF with a dark theme, sidebar navigation, styled cards, and smooth interactions. No terminal, no ugly text.
 
 **Discord Game Database** — Pulls the official detectable games list live from Discord's API, with a GitHub-hosted backup if the API is down.
 
 **Smart Search** — Find games by name, abbreviation, or alias. Results are filtered and deduplicated.
+
+**Game Images** — Results show game images resolved from Discord's CDN or Steam's store automatically.
 
 **Manual Mode** — Spoof any executable name directly for games not in the database.
 
@@ -173,10 +197,13 @@ OrbSpoofer/
 │   ├── AssemblyInfo.cs              Assembly metadata
 │   ├── Models/
 │   │   ├── DiscordGame.cs           Discord game data models
+│   │   ├── QuestItem.cs             Active quest display model
 │   │   └── SteamGameInfo.cs         Steam data models
 │   ├── Services/
 │   │   ├── DiscordDatabase.cs       Fetch & search Discord's game list
 │   │   ├── GameFaker.cs             Create & launch fake processes
+│   │   ├── GameImageService.cs      Resolve game images (Discord CDN / Steam)
+│   │   ├── QuestService.cs          Fetch & filter live Discord quests
 │   │   ├── SteamService.cs          Steam detection, API, appmanifest generation
 │   │   ├── NetworkHelper.cs         Centralized HTTP client
 │   │   └── Updater.cs               GitHub-based update checker
@@ -186,7 +213,8 @@ OrbSpoofer/
 │   │   └── DarkTheme.xaml           Full dark theme with custom controls
 │   └── UI/
 │       └── Windows/
-│           └── TimerWindow.xaml/.cs  15-minute quest countdown
+│           ├── WelcomeWindow.xaml/.cs   First-launch welcome & what's new
+│           └── TimerWindow.xaml/.cs     15-minute quest countdown
 └── README.md
 ```
 
@@ -197,6 +225,8 @@ OrbSpoofer/
 No MVVM frameworks, no NuGet dependencies — pure .NET base class library.
 
 - **Dual-mode launch**: The same exe runs as either the main UI or a hidden timer process via `--timer-mode`. When you spoof a game, OrbSpoofer copies itself, renames the copy, and relaunches it as the fake process.
+- **QuestService**: Fetches live quests from `api.discordquest.com`, filters by type (PLAY_ON_DESKTOP), deduplicates, cross-references with the detectable games DB, and excludes promotional quests.
+- **GameImageService**: Resolves game images from Discord's CDN (via icon hashes) or Steam Store search (header.jpg). Results are cached in memory.
 - **DiscordDatabase**: Tries the official API first, falls back to a GitHub-hosted Gist. Parses executables per platform and filters out anti-cheat launchers and uninstallers.
 - **GameFaker**: Copies the OrbSpoofer executable to `~/Desktop/Win64/<GameExe>.exe`, renames it, and launches it hidden.
 - **SteamService**: Reads the Steam registry for your install path and user ID, searches the SteamCMD API for game metadata, and generates realistic VDF-format appmanifest files.

@@ -147,14 +147,14 @@ public class GameFaker
         }
     }
 
-    public bool LaunchExecutable(string exePath)
+    public bool LaunchExecutable(string exePath, string? gameName = null)
     {
         try
         {
             var psi = new ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = $"--timer-mode --exe-path \"{exePath}\"",
+                Arguments = $"--timer-mode --exe-path \"{exePath}\" --game-name \"{gameName ?? Path.GetFileNameWithoutExtension(exePath)}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };

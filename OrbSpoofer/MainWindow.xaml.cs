@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,10 +19,27 @@ public partial class MainWindow : Window
     private readonly GameFaker _faker = new();
     private string? _pendingUpdateTag;
     private string? _pendingUpdateUrl;
+    private bool _questsLoadedOnce;
+    private readonly DispatcherTimer _searchDebounceTimer;
+    private readonly DispatcherTimer _steamSearchDebounceTimer;
+    private CancellationTokenSource? _imageResolutionCts;
+    private Brush _textSecondaryBrush = System.Windows.Media.Brushes.Gray;
 
     public MainWindow()
     {
         InitializeComponent();
+        _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _searchDebounceTimer.Tick += (_, _) =>
+        {
+            _searchDebounceTimer.Stop();
+            PerformDatabaseSearch(animate: true);
+        };
+        _steamSearchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _steamSearchDebounceTimer.Tick += (_, _) =>
+        {
+            _steamSearchDebounceTimer.Stop();
+            _ = PerformSteamSearch();
+        };
         Loaded += MainWindow_Loaded;
     }
 
@@ -29,6 +47,7 @@ public partial class MainWindow : Window
     {
         try
         {
+            _textSecondaryBrush = (Brush)FindResource("TextSecondaryBrush");
             await _faker.InitializeAsync(new Progress<string>(msg =>
             {
                 LoadingText.Text = msg;
@@ -45,16 +64,28 @@ public partial class MainWindow : Window
             });
 
             DbSourceText.Text = $"Database: {_db.Source} ({_db.Games.Count:N0} games)";
-            StatusMessage.Text = $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
-            HeaderStatusText.Text = $"{_db.Games.Count:N0} games loaded from {_db.Source}";
-            HeaderStatusText.Foreground = (System.Windows.Media.Brush)FindResource("TextSecondaryBrush");
+
+            if (_db.CacheAgeDays.HasValue)
+            {
+                StatusMessage.Text = $"Database: Local Cache ({_db.Games.Count:N0} games, {_db.CacheAgeDays.Value}d old)";
+                StatusMessage.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+            }
+            else
+            {
+                StatusMessage.Text = $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
+            }
+            HeaderStatusText.Text = _db.CacheAgeDays.HasValue
+                ? $"{_db.Games.Count:N0} games (cached {_db.CacheAgeDays.Value}d ago)"
+                : $"{_db.Games.Count:N0} games loaded from {_db.Source}";
+            HeaderStatusText.Foreground = _textSecondaryBrush;
             VersionText.Text = $"v{Config.AssemblyVersion}";
             GameCount.Text = $"{_db.Games.Count:N0} games in database";
 
             var steamPath = SteamService.GetSteamPath();
             SteamPathText.Text = steamPath ?? "Steam not found";
 
-            ShowView(DatabaseView);
+            var questsOk = await LoadQuestsAsync();
+            ShowView(questsOk ? QuestsView : DatabaseView);
 
             if (UI.Windows.WelcomeWindow.ShouldShow())
             {
@@ -81,6 +112,7 @@ public partial class MainWindow : Window
         ManualView.Visibility = Visibility.Collapsed;
         SteamView.Visibility = Visibility.Collapsed;
         CreditsView.Visibility = Visibility.Collapsed;
+        QuestsView.Visibility = Visibility.Collapsed;
         view.Visibility = Visibility.Visible;
 
         ResetButtonStyles();
@@ -90,6 +122,7 @@ public partial class MainWindow : Window
             _ when view == ManualView => BtnManual,
             _ when view == SteamView => BtnSteam,
             _ when view == CreditsView => BtnCredits,
+            _ when view == QuestsView => BtnQuests,
             _ => null
         };
         if (btn != null)
@@ -99,10 +132,16 @@ public partial class MainWindow : Window
     private void ResetButtonStyles()
     {
         var transparent = System.Windows.Media.Brushes.Transparent;
+        BtnQuests.Background = transparent;
         BtnDatabase.Background = transparent;
         BtnManual.Background = transparent;
         BtnSteam.Background = transparent;
         BtnCredits.Background = transparent;
+    }
+
+    private void ResetStatusColor()
+    {
+        StatusMessage.Foreground = _textSecondaryBrush;
     }
 
     // Navigation
@@ -111,84 +150,139 @@ public partial class MainWindow : Window
     private void BtnSteam_Click(object sender, RoutedEventArgs e) => ShowView(SteamView);
     private void BtnCredits_Click(object sender, RoutedEventArgs e)
     {
+        foreach (var card in new UIElement[] { CreditAbout, CreditHowItWorks, CreditSteam, CreditDisclaimer, CreditSupport })
+        {
+            card.Opacity = 0;
+            card.RenderTransform = new TranslateTransform(0, 15);
+        }
+
         ShowView(CreditsView);
         DispatchAnimation(AnimateCreditCardsAsync);
     }
 
-    private void OpenKofi()
+    private async void BtnQuests_Click(object sender, RoutedEventArgs e)
     {
+        ShowView(QuestsView);
+        if (_questsLoadedOnce)
+        {
+            if (QuestsList.ItemsSource != null)
+            {
+                _ = Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+                {
+                    HideAllListBoxItems(QuestsList);
+                    DispatchAnimation(() => AnimateListBoxItemsAsync(QuestsList));
+                }));
+            }
+            else if (QuestsEmptyText.Visibility != Visibility.Visible)
+                QuestsEmptyText.Visibility = Visibility.Visible;
+            return;
+        }
+        await LoadQuestsAsync();
+    }
+
+    private async Task<bool> LoadQuestsAsync()
+    {
+        _questsLoadedOnce = true;
         try
         {
-            using var process = Process.Start(new ProcessStartInfo
+            QuestsLoadingText.Visibility = Visibility.Visible;
+            QuestsList.Visibility = Visibility.Collapsed;
+            QuestsEmptyText.Visibility = Visibility.Collapsed;
+
+            var allQuests = await QuestService.GetActivePlayQuestsAsync();
+
+            var spoofableIds = new HashSet<string>(
+                _db.Games.Where(g => DiscordDatabase.GetWin32Executable(g) != null).Select(g => g.Id));
+
+            var quests = allQuests.Where(q => spoofableIds.Contains(q.ApplicationId ?? "")).ToList();
+
+            if (quests.Count == 0)
             {
-                FileName = Config.KofiUrl,
-                UseShellExecute = true,
-            });
+                QuestsEmptyText.Text = "No active quests found. Try Discord Database mode to spoof manually.";
+                QuestsEmptyText.Visibility = Visibility.Visible;
+                return false;
+            }
+
+            QuestsList.ItemsSource = quests;
+            QuestsList.Visibility = Visibility.Visible;
+            StatusMessage.Text = $"{quests.Count} active quest(s) loaded";
+            _ = Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+            {
+                HideAllListBoxItems(QuestsList);
+                DispatchAnimation(() => AnimateListBoxItemsAsync(QuestsList));
+            }));
+            return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            StatusMessage.Text = $"Could not open link: {ex.Message}";
+            QuestsEmptyText.Text = "No active quests found. The API may be unavailable — use Discord Database mode to spoof manually.";
+            QuestsEmptyText.Visibility = Visibility.Visible;
+            return false;
+        }
+        finally
+        {
+            QuestsLoadingText.Visibility = Visibility.Collapsed;
         }
     }
 
-    private void Kofi_Click(object sender, RoutedEventArgs e) => OpenKofi();
-    private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => OpenKofi();
-
-    private void GitHubSponsor_Click(object sender, RoutedEventArgs e)
+    private async void QuestsSpoof_Click(object sender, RoutedEventArgs e)
     {
-        try
+        if (sender is Button { Tag: Models.QuestItem quest })
         {
-            using var process = Process.Start(new ProcessStartInfo
+            StatusMessage.Text = $"Looking up game: {quest.GameName}...";
+
+            var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
+            if (matches.Count == 0)
+                matches = _db.Games.Where(g =>
+                    g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) ||
+                    quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (matches.Count == 0)
             {
-                FileName = Config.GitHubSponsorUrl,
-                UseShellExecute = true,
-            });
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Text = $"Could not open link: {ex.Message}";
+                StatusMessage.Text = $"No matching game found for: {quest.GameName}";
+                return;
+            }
+
+            var game = matches[0];
+            var exeName = DiscordDatabase.GetWin32Executable(game);
+            if (exeName == null)
+            {
+                StatusMessage.Text = $"No Windows executable found for: {quest.GameName}";
+                return;
+            }
+
+            StatusMessage.Text = $"Creating fake process for quest: {exeName}...";
+            var path = _faker.CreateFakeGame(exeName);
+
+            if (path != null && _faker.LaunchExecutable(path, game.Name))
+            {
+                StatusMessage.Text = $"Quest spoof active: {quest.GameName}";
+            }
+            else
+            {
+                StatusMessage.Text = $"Failed to launch spoof for: {quest.GameName}";
+            }
         }
     }
 
-    private void GitHubProfile_Click(object sender, MouseButtonEventArgs e)
-    {
-        try
-        {
-            using var process = Process.Start(new ProcessStartInfo
-            {
-                FileName = Config.RepoUrl,
-                UseShellExecute = true,
-            });
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Text = $"Could not open link: {ex.Message}";
-        }
-    }
+    private void Kofi_Click(object sender, RoutedEventArgs e) => OpenUrl(Config.KofiUrl);
+    private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => OpenUrl(Config.KofiUrl);
 
-    private void Strykey_Click(object sender, MouseButtonEventArgs e)
-    {
-        try
-        {
-            using var process = Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://github.com/Strykey",
-                UseShellExecute = true,
-            });
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Text = $"Could not open link: {ex.Message}";
-        }
-    }
+    private void GitHubSponsor_Click(object sender, RoutedEventArgs e) => OpenUrl(Config.GitHubSponsorUrl);
 
-    private void Orbshacker_Click(object sender, MouseButtonEventArgs e)
+    private void GitHubProfile_Click(object sender, MouseButtonEventArgs e) => OpenUrl(Config.RepoUrl);
+
+    private void Strykey_Click(object sender, MouseButtonEventArgs e) => OpenUrl("https://github.com/Strykey");
+
+    private void Orbshacker_Click(object sender, MouseButtonEventArgs e) => OpenUrl("https://github.com/strykey/orbshacker");
+
+    private void OpenUrl(string url)
     {
         try
         {
             using var process = Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/strykey/orbshacker",
+                FileName = url,
                 UseShellExecute = true,
             });
         }
@@ -207,21 +301,29 @@ public partial class MainWindow : Window
 
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
-        PerformDatabaseSearch(animate: true);
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
     }
 
     private void BtnSearch_Click(object sender, RoutedEventArgs e) => PerformDatabaseSearch(animate: true);
 
     private void PerformDatabaseSearch(bool animate = false)
     {
+        _imageResolutionCts?.Cancel();
+        _imageResolutionCts?.Dispose();
+        _imageResolutionCts = new CancellationTokenSource();
+        var ct = _imageResolutionCts.Token;
         var query = SearchBox.Text.Trim();
 
         if (string.IsNullOrEmpty(query))
         {
             ResultsList.ItemsSource = null;
-            NoResultsText.Text = "Search for a game to get started";
+            NoResultsText.Text = "Type the game name and click ▶ to spoof";
             NoResultsText.Visibility = Visibility.Visible;
-            StatusMessage.Text = $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
+            ResetStatusColor();
+            StatusMessage.Text = _db.CacheAgeDays.HasValue
+                ? $"Database: Local Cache ({_db.Games.Count:N0} games, {_db.CacheAgeDays.Value}d old)"
+                : $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
             return;
         }
 
@@ -254,24 +356,54 @@ public partial class MainWindow : Window
 
             if (animate)
                 DispatchAnimation(() => AnimateListBoxItemsAsync(ResultsList));
+
+            _ = ResolveGameImagesAsync(items, ct);
         }
     }
 
-    private async Task AnimateListBoxItemsAsync(ListBox listBox, int delayMs = 40)
+    private async Task ResolveGameImagesAsync(List<GameDisplayItem> items, CancellationToken ct)
     {
-        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+        await Parallel.ForEachAsync(items, new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = ct }, async (item, token) =>
+        {
+            var url = await GameImageService.GetImageUrlAsync(item.Game);
+            if (url != null && !token.IsCancellationRequested)
+                item.ImageUrl = url;
+        });
+    }
 
+    private static void HideAllListBoxItems(ListBox listBox)
+    {
         for (int i = 0; i < listBox.Items.Count; i++)
         {
             if (listBox.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem item)
             {
                 item.Opacity = 0;
-                item.RenderTransform = new TranslateTransform(0, 12);
+                item.RenderTransform = new TranslateTransform(0, 16);
+            }
+        }
+    }
 
+    private async Task AnimateListBoxItemsAsync(ListBox listBox, int delayMs = 60)
+    {
+        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+        var duration = TimeSpan.FromSeconds(0.35);
+
+        // Ensure everything is hidden before starting staggered animation
+        HideAllListBoxItems(listBox);
+
+        await Task.Delay(15);
+
+        for (int i = 0; i < listBox.Items.Count; i++)
+        {
+            if (listBox.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem item)
+            {
                 item.BeginAnimation(UIElement.OpacityProperty,
-                    new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.25)) { EasingFunction = ease });
-                ((TranslateTransform)item.RenderTransform).BeginAnimation(TranslateTransform.YProperty,
-                    new DoubleAnimation(12, 0, TimeSpan.FromSeconds(0.25)) { EasingFunction = ease });
+                    new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
+
+                var translate = new TranslateTransform(0, 16);
+                item.RenderTransform = translate;
+                translate.BeginAnimation(TranslateTransform.YProperty,
+                    new DoubleAnimation(16, 0, duration) { EasingFunction = ease });
             }
 
             await Task.Delay(delayMs);
@@ -383,7 +515,7 @@ public partial class MainWindow : Window
         StatusMessage.Text = $"Creating fake process: {exeName}...";
         var path = _faker.CreateFakeGame(exeName);
 
-        if (path != null && _faker.LaunchExecutable(path))
+        if (path != null && _faker.LaunchExecutable(path, exeName))
         {
             StatusMessage.Text = $"Running: {exeName} — Discord should detect the game";
         }
@@ -407,7 +539,7 @@ public partial class MainWindow : Window
         StatusMessage.Text = $"Creating fake process: {exeName}...";
         var path = _faker.CreateFakeGame(exeName);
 
-        if (path != null && _faker.LaunchExecutable(path))
+        if (path != null && _faker.LaunchExecutable(path, exeName))
         {
             StatusMessage.Text = $"Running: {exeName}";
             ManualResultPanel.Visibility = Visibility.Visible;
@@ -430,7 +562,8 @@ public partial class MainWindow : Window
 
     private async void SteamSearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
-        await PerformSteamSearch();
+        _steamSearchDebounceTimer.Stop();
+        _steamSearchDebounceTimer.Start();
     }
 
     private async void BtnSteamSearch_Click(object sender, RoutedEventArgs e) => await PerformSteamSearch();
@@ -438,7 +571,12 @@ public partial class MainWindow : Window
     private async Task PerformSteamSearch()
     {
         var query = SteamSearchBox.Text.Trim();
-        if (string.IsNullOrEmpty(query)) return;
+        if (string.IsNullOrEmpty(query))
+        {
+            SteamResultsList.ItemsSource = null;
+            SteamNoResultsText.Visibility = Visibility.Visible;
+            return;
+        }
 
         StatusMessage.Text = $"Searching Steam for '{query}'...";
         try
@@ -512,7 +650,7 @@ public partial class MainWindow : Window
             StatusMessage.Text = "Creating fake executable...";
             var path = _faker.CreateSteamFakeGame(exePath);
 
-            if (path != null && _faker.LaunchExecutable(path))
+            if (path != null && _faker.LaunchExecutable(path, info.Name))
             {
                 StatusMessage.Text = $"Steam spoof active: {info.Name}";
             }

@@ -68,11 +68,56 @@ public static class SteamService
                     });
                 }
             }
+
+            SaveSearchCache(query, results);
             return results;
         }
         catch (NetworkError)
         {
-            return [];
+            return LoadSearchCache(query) ?? [];
+        }
+    }
+
+    private static string GetSearchCachePath(string query)
+    {
+        var safeName = string.Concat(query.Where(c => char.IsLetterOrDigit(c) || c == ' ')).Trim();
+        safeName = safeName.Replace(' ', '_');
+        return Path.Combine(Config.AppDataPath, Config.SteamSearchCacheDir, $"{safeName}.json");
+    }
+
+    private static void SaveSearchCache(string query, List<SteamSearchResult> results)
+    {
+        try
+        {
+            var dir = Path.Combine(Config.AppDataPath, Config.SteamSearchCacheDir);
+            Directory.CreateDirectory(dir);
+            var path = GetSearchCachePath(query);
+            File.WriteAllText(path, JsonSerializer.Serialize(results));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to save Steam search cache: {ex.Message}");
+        }
+    }
+
+    private static List<SteamSearchResult>? LoadSearchCache(string query)
+    {
+        try
+        {
+            var path = GetSearchCachePath(query);
+            if (!File.Exists(path)) return null;
+
+            var fileInfo = new FileInfo(path);
+            var ageDays = (DateTime.Now - fileInfo.LastWriteTime).Days;
+            if (ageDays > Config.MaxCacheAgeDays) return null;
+
+            var json = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<SteamSearchResult>>(json);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to load Steam search cache: {ex.Message}");
+            return null;
         }
     }
 
@@ -142,14 +187,23 @@ public static class SteamService
 
         foreach (var entry in entries)
         {
-            var config = entry.Value.TryGetProperty("config", out var c) ? c : default;
-            var oslist = config.TryGetProperty("oslist", out var os) ? os.GetString() ?? "windows" : "windows";
+            if (!entry.Value.TryGetProperty("config", out var config) ||
+                config.ValueKind != JsonValueKind.Object)
+                continue;
+
+            var oslist = config.TryGetProperty("oslist", out var os)
+                ? os.GetString() ?? "windows"
+                : "windows";
 
             if (oslist.Contains("windows") || string.IsNullOrEmpty(oslist))
             {
-                var exe = entry.Value.TryGetProperty("executable", out var e) ? e.GetString() ?? "" : "";
-                if (exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-                    return exe.Replace('\\', '/');
+                if (entry.Value.TryGetProperty("executable", out var e) &&
+                    e.ValueKind == JsonValueKind.String)
+                {
+                    var exe = e.GetString() ?? "";
+                    if (exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                        return exe.Replace('\\', '/');
+                }
             }
         }
         return "";

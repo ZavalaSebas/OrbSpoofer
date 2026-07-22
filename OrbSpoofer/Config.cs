@@ -20,6 +20,8 @@ public static class Config
     public const string GitHubBackupUrl =
         "https://gist.githubusercontent.com/Cynosphere/"
         + "c1e77f77f0e565ddaac2822977961e76/raw/gameslist.json";
+    public const string QuestApiUrl = "https://api.discordquest.com/api/quests";
+    public const string DiscordCdnBase = "https://cdn.discordapp.com/";
 
     // Steam
     public const string SteamCmdApiUrl = "https://api.steamcmd.net/v1/info";
@@ -37,6 +39,10 @@ public static class Config
     public static readonly string AppDataPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OrbSpoofer");
     public const string WelcomeSentinelFile = "welcome.flag";
+    public const string DbCacheFile = "db_cache.json";
+    public const string SteamIdCacheFile = "steam_ids.json";
+    public const string SteamSearchCacheDir = "steam_search";
+    public const int MaxCacheAgeDays = 30;
 
     // HTTP
     public const int RequestTimeout = 10;
