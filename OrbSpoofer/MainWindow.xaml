@@ -57,6 +57,11 @@
                                Foreground="{StaticResource TextMutedBrush}" Margin="8,0,0,12"
                                FontFamily="{StaticResource BodyFont}"/>
 
+                    <Button x:Name="BtnQuests" Content="🏆  Active Quests"
+                            Style="{StaticResource GhostButton}"
+                            HorizontalContentAlignment="Left" Margin="0,0,0,6"
+                            Click="BtnQuests_Click"/>
+
                     <Button x:Name="BtnDatabase" Content="🔍  Discord Database"
                             Style="{StaticResource GhostButton}"
                             HorizontalContentAlignment="Left" Margin="0,0,0,6"
@@ -146,37 +151,53 @@
                              MouseDoubleClick="ResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource CardBrush}" CornerRadius="10"
-                                        Padding="16,14" Margin="0,0,0,6">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
-                                                       Margin="0,4,0,0">
-                                                <Run Text="ID: "/>
-                                                <Run Text="{Binding Id, Mode=OneWay}" Foreground="{StaticResource TextMutedBrush}"/>
-                                            </TextBlock>
-                                            <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                                                       Margin="0,2,0,0" Text="{Binding AliasDisplay}"/>
-                                        </StackPanel>
-                                        <Button Grid.Column="1" Content="Spoof"
-                                                Style="{StaticResource PrimaryButton}"
-                                                Padding="16,8" FontSize="13"
-                                                Tag="{Binding}"
-                                                Click="SpoofGame_Click"/>
-                                    </Grid>
-                                </Border>
+                                 <Border Background="{StaticResource CardBrush}" CornerRadius="10"
+                                         Padding="16" Margin="0,0,0,6"
+                                         ToolTip="Double-click to spoof">
+                                     <Grid>
+                                         <Grid.ColumnDefinitions>
+                                             <ColumnDefinition Width="Auto"/>
+                                             <ColumnDefinition Width="*"/>
+                                             <ColumnDefinition Width="Auto"/>
+                                         </Grid.ColumnDefinitions>
+                                         <Border Grid.Column="0" Width="92" Height="48" CornerRadius="8"
+                                                 Background="{StaticResource SurfaceBrush}"
+                                                 Margin="0,0,14,0">
+                                             <Grid>
+                                                 <TextBlock Text="🎮" FontSize="20"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"/>
+                                                 <Image Source="{Binding ImageUrl}" Width="92" Height="48"
+                                                        Stretch="Uniform"
+                                                        RenderOptions.BitmapScalingMode="HighQuality"/>
+                                             </Grid>
+                                         </Border>
+                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                             <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                                                        Foreground="{StaticResource TextPrimaryBrush}"/>
+                                             <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"
+                                                        Margin="0,4,0,0">
+                                                 <Run Text="ID: "/>
+                                                 <Run Text="{Binding Id, Mode=OneWay}" Foreground="{StaticResource TextMutedBrush}"/>
+                                             </TextBlock>
+                                             <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                                                        Margin="0,2,0,0" Text="{Binding AliasDisplay}"/>
+                                         </StackPanel>
+                                         <Button Grid.Column="2" Content="▶"
+                                                 Style="{StaticResource PrimaryButton}"
+                                                 Padding="8" Width="60" Height="60"
+                                                 FontSize="24"
+                                                 Tag="{Binding}"
+                                                 ToolTip="Spoof"
+                                                 Click="SpoofGame_Click"/>
+                                     </Grid>
+                                 </Border>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
                     <TextBlock x:Name="NoResultsText" Grid.Row="2"
-                               Text="Search for a game to get started"
+                               Text="Type the game name and click ▶ to spoof"
                                FontSize="15" Foreground="{StaticResource TextMutedBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Visibility="Visible"/>
@@ -221,9 +242,12 @@
                                  Style="{StaticResource SearchBox}"
                                  
                                  VerticalContentAlignment="Center"/>
-                        <Button x:Name="BtnManualSpoof" Grid.Column="1" Content="Spoof"
-                                Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"
-                                Click="BtnManualSpoof_Click"/>
+                         <Button x:Name="BtnManualSpoof" Grid.Column="1" Content="▶"
+                                 Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"
+                                 Padding="8" Width="60" Height="60" FontSize="24"
+                                 ToolTip="Spoof"
+                                 IsEnabled="False"
+                                 Click="BtnManualSpoof_Click"/>
                     </Grid>
 
                     <Border x:Name="ManualResultPanel" Grid.Row="3" Visibility="Collapsed"
@@ -291,37 +315,130 @@
                              MouseDoubleClick="SteamResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource CardBrush}" CornerRadius="10"
-                                        Padding="16,14" Margin="0,0,0,6">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                                            <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                                                       Margin="0,4,0,0">
-                                                <Run Text="AppID: "/>
-                                                <Run Text="{Binding Id, Mode=OneWay}"/>
-                                            </TextBlock>
-                                        </StackPanel>
-                                        <Button Grid.Column="1" Content="Spoof"
-                                                Style="{StaticResource PrimaryButton}"
-                                                Padding="16,8" FontSize="13"
-                                                Tag="{Binding}"
-                                                Click="SteamSpoof_Click"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
+                                 <Border Background="{StaticResource CardBrush}" CornerRadius="10"
+                                         Padding="16" Margin="0,0,0,6"
+                                         ToolTip="Double-click to spoof">
+                                     <Grid>
+                                         <Grid.ColumnDefinitions>
+                                             <ColumnDefinition Width="Auto"/>
+                                             <ColumnDefinition Width="*"/>
+                                             <ColumnDefinition Width="Auto"/>
+                                         </Grid.ColumnDefinitions>
+                                         <Border Grid.Column="0" Width="92" Height="48" CornerRadius="8"
+                                                 Background="{StaticResource SurfaceBrush}"
+                                                 Margin="0,0,14,0">
+                                             <Image Source="{Binding ImageUrl}" Width="92" Height="48"
+                                                    Stretch="Uniform"
+                                                    RenderOptions.BitmapScalingMode="HighQuality"/>
+                                         </Border>
+                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                             <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                                                        Foreground="{StaticResource TextPrimaryBrush}"/>
+                                             <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                                                        Margin="0,4,0,0">
+                                                 <Run Text="AppID: "/>
+                                                 <Run Text="{Binding Id, Mode=OneWay}"/>
+                                             </TextBlock>
+                                         </StackPanel>
+                                           <Button Grid.Column="2" Content="▶"
+                                                   Style="{StaticResource PrimaryButton}"
+                                                   Padding="8" Width="60" Height="60"
+                                                   FontSize="24"
+                                                   Tag="{Binding}"
+                                                   ToolTip="Spoof"
+                                                   Click="SteamSpoof_Click"/>
+                                      </Grid>
+                                  </Border>
+                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
                     <TextBlock x:Name="SteamNoResultsText" Grid.Row="3"
-                               Text="Search for a Steam game to get started"
+                               Text="Search a Steam game and click ▶ to spoof"
                                FontSize="15" Foreground="{StaticResource TextMutedBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Quests View -->
+                <Grid x:Name="QuestsView" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Active Quests" FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
+                    <TextBlock Grid.Row="1" TextWrapping="Wrap" FontSize="12"
+                               Foreground="{StaticResource OrangeBrush}" Margin="0,0,0,16">
+                        <Run Text="Quests vary by region and availability. "/>
+                        <Run Text="If there's nothing here, switch to Database mode and type the game name."/>
+                    </TextBlock>
+
+                    <TextBlock x:Name="QuestsLoadingText" Grid.Row="2" Text="Loading quests..."
+                               FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="QuestsEmptyText" Grid.Row="2"
+                               FontSize="14" Foreground="{StaticResource TextMutedBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Visibility="Collapsed"/>
+                    <ListBox x:Name="QuestsList" Grid.Row="2"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Background="Transparent" BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                 <Border Background="{StaticResource CardBrush}" CornerRadius="12"
+                                         Padding="16" Margin="0,0,0,10"
+                                         ToolTip="Double-click to spoof">
+                                         <Grid>
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="Auto"/>
+                                                 <ColumnDefinition Width="*"/>
+                                                 <ColumnDefinition Width="Auto"/>
+                                             </Grid.ColumnDefinitions>
+
+                                             <Border Grid.Column="0" Width="64" Height="64" CornerRadius="8"
+                                                     Background="{StaticResource SurfaceBrush}"
+                                                     Margin="0,0,14,0">
+                                                 <Image Source="{Binding ImageUrl}" Width="64" Height="64"
+                                                        Stretch="UniformToFill"
+                                                        RenderOptions.BitmapScalingMode="HighQuality"/>
+                                             </Border>
+
+                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                 <TextBlock Text="{Binding GameName}" FontSize="15" FontWeight="SemiBold"
+                                                            Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                 <TextBlock Text="{Binding QuestName}" FontSize="12"
+                                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                                 <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                     <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}">
+                                                         <Run Text="{Binding Reward, Mode=OneWay}"/>
+                                                     </TextBlock>
+                                                     <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                                                                Margin="12,0,0,0">
+                                                         <Run Text="{Binding TaskMinutes, Mode=OneWay}"/>
+                                                         <Run Text=" min"/>
+                                                     </TextBlock>
+                                                     <TextBlock FontSize="11" Foreground="{StaticResource WarningBrush}"
+                                                                Margin="12,0,0,0">
+                                                         <Run Text="Ends "/>
+                                                         <Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/>
+                                                     </TextBlock>
+                                                 </StackPanel>
+                                             </StackPanel>
+
+                                              <Button Grid.Column="2" Content="▶"
+                                                      Style="{StaticResource PrimaryButton}"
+                                                       Padding="8" Width="60" Height="60"
+                                                       FontSize="24"
+                                                       Tag="{Binding}"
+                                                       ToolTip="Spoof"
+                                                      Click="QuestsSpoof_Click"/>
+                                         </Grid>
+                                     </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                 </Grid>
 
                 <!-- Credits View -->
@@ -352,12 +469,19 @@
                                                Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,10"/>
                                     <TextBlock TextWrapping="Wrap" FontSize="13"
                                                Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22">
-                                        1. Connects to Discord's official API to get the latest game list
-{"\n"}2. Finds the exact process name Discord expects for each game
-{"\n"}3. Copies the app executable and renames it to match
-{"\n"}4. Launches the fake process in background
-{"\n"}5. Discord scans running processes and detects the fake process
-{"\n"}6. Discord thinks you're playing the game
+                                        <Run>1. Your active Discord quests appear automatically on launch</Run>
+                                        <LineBreak/>
+                                        <Run>2. Double-click a quest or press ▶ to start spoofing</Run>
+                                        <LineBreak/>
+                                        <Run>3. OrbSpoofer finds the exact process name Discord expects</Run>
+                                        <LineBreak/>
+                                        <Run>4. Copies the app executable and renames it to match</Run>
+                                        <LineBreak/>
+                                        <Run>5. Launches the fake process in background</Run>
+                                        <LineBreak/>
+                                        <Run>6. Discord scans running processes and detects the fake process</Run>
+                                        <LineBreak/>
+                                        <Run>7. Discord thinks you're playing the game</Run>
                                     </TextBlock>
                                 </StackPanel>
                             </Border>

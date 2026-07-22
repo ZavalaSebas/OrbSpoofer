@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 using OrbSpoofer.Exceptions;
 using OrbSpoofer.Models;
@@ -8,51 +10,99 @@ public class DiscordDatabase
 {
     public List<DiscordGame> Games { get; } = [];
     public string? Source { get; private set; }
+    public int? CacheAgeDays { get; private set; }
 
     private static readonly string[] SkipExePatterns =
         ["_be.exe", "_eac.exe", "launcher", "unins", "crash", "report", "update", "setup", "install"];
 
+    private static readonly string CachePath =
+        Path.Combine(Config.AppDataPath, Config.DbCacheFile);
+
     public async Task LoadAsync(Action<string>? statusCallback = null)
     {
+        Games.Clear();
+        CacheAgeDays = null;
+
         statusCallback?.Invoke("Connecting to Discord API...");
-        if (await LoadFromDiscordApiAsync(statusCallback))
+        var json = await FetchJsonFromUrlAsync(Config.DiscordApiUrl, Config.DiscordHeaders, statusCallback);
+        if (json != null)
+        {
+            ParseGames(json.Value);
+            Source = "Discord Official API";
+            SaveCache(json.Value);
+            statusCallback?.Invoke($"Loaded {Games.Count} games from Discord API");
             return;
+        }
 
         statusCallback?.Invoke("Discord API unavailable, using GitHub backup...");
-        if (await LoadFromGithubAsync(statusCallback))
+        json = await FetchJsonFromUrlAsync(Config.GitHubBackupUrl, null, statusCallback);
+        if (json != null)
+        {
+            ParseGames(json.Value);
+            Source = "GitHub Backup";
+            SaveCache(json.Value);
+            statusCallback?.Invoke($"Loaded {Games.Count} games from GitHub");
+            return;
+        }
+
+        statusCallback?.Invoke(" APIs unavailable, trying local cache...");
+        if (LoadFromCache())
             return;
 
         throw new DatabaseLoadError("Could not load games database from any source.");
     }
 
-    private async Task<bool> LoadFromDiscordApiAsync(Action<string>? statusCallback)
+    private static async Task<JsonElement?> FetchJsonFromUrlAsync(
+        string url, Dictionary<string, string>? headers, Action<string>? statusCallback)
     {
         try
         {
-            var json = await NetworkHelper.FetchJsonAsync(Config.DiscordApiUrl, headers: Config.DiscordHeaders);
-            ParseGames(json);
-            Source = "Discord Official API";
-            statusCallback?.Invoke($"Loaded {Games.Count} games from Discord API");
-            return true;
+            return await NetworkHelper.FetchJsonAsync(url, headers: headers);
         }
         catch (NetworkError)
         {
-            return false;
+            statusCallback?.Invoke($"Failed to fetch from {url}");
+            return null;
         }
     }
 
-    private async Task<bool> LoadFromGithubAsync(Action<string>? statusCallback)
+    private void SaveCache(JsonElement json)
     {
         try
         {
-            var json = await NetworkHelper.FetchJsonAsync(Config.GitHubBackupUrl);
+            Directory.CreateDirectory(Config.AppDataPath);
+            File.WriteAllText(CachePath, json.GetRawText());
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to save DB cache: {ex.Message}");
+        }
+    }
+
+    private bool LoadFromCache()
+    {
+        try
+        {
+            if (!File.Exists(CachePath)) return false;
+
+            var fileInfo = new FileInfo(CachePath);
+            var ageDays = (DateTime.Now - fileInfo.LastWriteTime).Days;
+            if (ageDays > Config.MaxCacheAgeDays)
+            {
+                Debug.WriteLine($"DB cache is {ageDays} days old (max {Config.MaxCacheAgeDays}), ignoring");
+                return false;
+            }
+
+            var rawJson = File.ReadAllText(CachePath);
+            var json = JsonSerializer.Deserialize<JsonElement>(rawJson);
             ParseGames(json);
-            Source = "GitHub Backup";
-            statusCallback?.Invoke($"Loaded {Games.Count} games from GitHub");
+            Source = "Local Cache";
+            CacheAgeDays = ageDays;
             return true;
         }
-        catch (NetworkError)
+        catch (Exception ex)
         {
+            Debug.WriteLine($"Failed to load DB cache: {ex.Message}");
             return false;
         }
     }
@@ -68,6 +118,7 @@ public class DiscordDatabase
             {
                 Id = item.TryGetProperty("id", out var id) ? id.GetString() ?? "" : "",
                 Name = item.TryGetProperty("name", out var name) ? name.GetString() ?? "" : "",
+                IconHash = item.TryGetProperty("icon", out var icon) ? icon.GetString() : null,
             };
 
             if (item.TryGetProperty("aliases", out var aliases) && aliases.ValueKind == JsonValueKind.Array)
@@ -100,8 +151,8 @@ public class DiscordDatabase
 
         foreach (var game in Games)
         {
-            var nameLower = game.Name.ToLowerInvariant();
-            var aliasLower = game.Aliases.Select(a => a.ToLowerInvariant()).ToList();
+            var nameLower = game.NameLower;
+            var aliasLower = game.AliasesLower;
 
             if (queryLower == nameLower || aliasLower.Contains(queryLower))
                 exact.TryAdd(game.Id, game);

@@ -109,7 +109,9 @@ public partial class WelcomeWindow : Window
         try
         {
             var flagPath = Path.Combine(Config.AppDataPath, Config.WelcomeSentinelFile);
-            return !File.Exists(flagPath);
+            if (!File.Exists(flagPath)) return true;
+            var content = File.ReadAllText(flagPath);
+            return content != Config.AssemblyVersion;
         }
         catch (Exception ex)
         {

@@ -1,2 +1,6 @@
-Timer grace period to ensure Discord detects the game
-Initial release quality-of-life improvements
+Active Quests panel — spoof live Discord quests directly from the app
+Game images in search results — icons and header art for every game
+Welcome reappears after each update — never miss what's new
+Smoother animations — no flash, just fade
+Quests is now the default view with auto-fallback to Database
+Promotional quests are filtered out automatically

@@ -3,6 +3,8 @@ name: build & release
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +26,7 @@ jobs:
           dotnet-version: 10.x
 
       - id: check
+        if: github.event_name == 'push'
         shell: pwsh
         run: |
           try {
@@ -49,7 +52,7 @@ jobs:
       - run: dotnet test OrbSpoofer.slnx -c Release --no-build
 
   release:
-    if: needs.build.outputs.version_changed == 'true'
+    if: github.event_name == 'push' && needs.build.outputs.version_changed == 'true'
     needs: build
     runs-on: windows-latest
     steps:

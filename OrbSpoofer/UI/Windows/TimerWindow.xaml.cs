@@ -18,7 +18,7 @@ public partial class TimerWindow : Window
     private static readonly SolidColorBrush CompleteBrush =
         new((Color)ColorConverter.ConvertFromString(Config.TimerCompleteColor));
 
-    public TimerWindow(int durationMinutes, string? exePathToCleanup = null)
+    public TimerWindow(int durationMinutes, string? exePathToCleanup = null, string? gameName = null)
     {
         InitializeComponent();
 
@@ -26,18 +26,22 @@ public partial class TimerWindow : Window
         _remaining = _totalSeconds;
         _exePathToCleanup = exePathToCleanup;
 
-        PositionToTopRight();
+        GameNameText.Text = gameName ?? "Unknown";
+        GameNameText.ToolTip = gameName ?? "Unknown";
+
+        CenterOnScreen();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += Timer_Tick;
         _timer.Start();
     }
 
-    private void PositionToTopRight()
+    private void CenterOnScreen()
     {
         var screenWidth = SystemParameters.PrimaryScreenWidth;
-        Left = screenWidth - Width - 16;
-        Top = 16;
+        var screenHeight = SystemParameters.PrimaryScreenHeight;
+        Left = (screenWidth - Width) / 2;
+        Top = (screenHeight - Height) / 2;
     }
 
     private void Cleanup()

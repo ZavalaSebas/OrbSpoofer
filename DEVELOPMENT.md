@@ -43,12 +43,17 @@ OrbSpoofer/
 │   │   ├── NetworkHelper.cs       # HTTP client (User-Agent set here), FetchJson, DownloadFile
 │   │   ├── DiscordDatabase.cs     # Discord game database + GitHub backup
 │   │   ├── SteamService.cs        # Steam manifest generation
-│   │   └── GameFaker.cs           # Fake game process spawning
+│   │   ├── GameFaker.cs           # Fake game process spawning
+│   │   ├── QuestService.cs        # Active quests from api.discordquest.com
+│   │   └── GameImageService.cs    # Resolves game images (Discord CDN / Steam store)
 │   ├── Models/
-│   │   └── GameDisplayItem.cs     # Display models for game list
+│   │   ├── GameDisplayItem.cs     # Display model for DB search results (INotifyPropertyChanged)
+│   │   ├── SteamGameDisplayItem.cs# Display model for Steam search + CDN image URL
+│   │   ├── QuestItem.cs           # Display model for active quests
+│   │   └── DiscordGame.cs         # Discord detectable game entry (+ optional IconHash)
 │   └── UI/Windows/
 │       ├── UpdateWindow.xaml.cs   # Download progress UI
-│       └── WelcomeWindow.xaml.cs  # First-launch welcome + What's New
+│       └── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
 ├── OrbSpoofer.Tests/              # xUnit test project (21 tests)
 │   ├── DiscordDatabaseTests.cs    # Search, filtering, exe matching
 │   ├── SteamServiceTests.cs       # Manifest generation, depots
@@ -63,7 +68,7 @@ OrbSpoofer/
 **Single source of truth**: `<Version>` in `OrbSpoofer/OrbSpoofer.csproj:11`
 
 ```xml
-<Version>1.1.0</Version>
+<Version>1.2.0</Version>
 <AssemblyVersion>$(Version).0</AssemblyVersion>
 ```
 
@@ -140,11 +145,128 @@ Run with: `dotnet test OrbSpoofer.slnx -c Release`
 - `AssemblyVersion_IsValidSemVer` — verifies format matches `x.y.z`
 - `AssemblyVersion_MatchesCsprojVersion` — reads csproj and compares at build time
 
+## Quest System
+
+Quests are fetched from `api.discordquest.com/api/quests` (public, no auth required). Images are served from `cdn.discordapp.com`.
+
+### Flow
+1. `MainWindow_Loaded` calls `LoadQuestsAsync()` which invokes `QuestService.GetActivePlayQuestsAsync()`
+2. Response is filtered to `PLAY_ON_DESKTOP` type only; expired quests are excluded
+3. Duplicates are removed by `GameName|QuestName` key
+4. Each quest is cross-referenced against `DiscordDatabase.Games` by `application.id` — only spoofable games (those with a win32 executable) are kept
+5. Promotional quests (`game_publisher = "Discord"`) are filtered out
+
+### UI
+- QuestsView is the **default startup view** since v1.2.0
+- If the quest API fails on first launch, the app silently falls back to Discord Database view
+- If the user manually clicks Active Quests later and it fails, a "no quests found" message is shown
+- Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, and a Spoof button
+- Quest spoofing builds a `HashSet<string>` of spoofable game IDs for O(1) lookup instead of O(n*m)
+
+### Config keys
+- `QuestApiUrl` — `https://api.discordquest.com/api/quests`
+- `DiscordCdnBase` — `https://cdn.discordapp.com/`
+
+## Game Image Resolution
+
+`GameImageService` resolves game images for the Discord Database search results. It uses two sources in order:
+
+1. **Discord CDN** — if the detectable games API returns an `icon` hash, constructs `cdn.discordapp.com/app-icons/{id}/{hash}.png`
+2. **Steam Store fallback** — searches the Steam store API by game name, finds a matching app ID, and uses `steamcdn-a.akamaihd.net/steam/apps/{appid}/header.jpg`
+
+Results are cached in a `ConcurrentDictionary` (memory-only, per session). Steam search results use their own `SteamGameDisplayItem.ImageUrl` pointing directly to Steam's CDN (`header.jpg` in a 92×48 container).
+
+### Search debounce
+
+Both Database and Steam search use a 150ms `DispatcherTimer` debounce. `SearchBox_TextChanged` and `SteamSearchBox_TextChanged` restart the timer on each keystroke. The actual search fires only after 150ms of inactivity, reducing per-keystroke allocations (list creation, LINQ queries, image resolution).
+
+### CancellationToken for image resolution
+
+Each call to `PerformDatabaseSearch` creates a new `CancellationTokenSource`. The previous one is cancelled and disposed before the new search starts. `ResolveGameImagesAsync` passes the token to `ParallelForEachAsync` via `ParallelOptions.CancellationToken`, so stale image resolution tasks stop immediately when a new search begins.
+
+## Local Cache System
+
+When both APIs (Discord and GitHub) are unavailable, OrbSpoofer falls back to locally cached data. This ensures the Database and Steam modes work offline.
+
+### Cache files
+
+All cache files are stored in `%LOCALAPPDATA%\OrbSpoofer/`:
+
+| File | Source | Max size | TTL |
+|------|--------|----------|-----|
+| `db_cache.json` | Discord API / GitHub Gist | ~1-2MB | 30 days |
+| `steam_ids.json` | GameImageService Steam lookups | ~5KB | 30 days |
+| `steam_search/{query}.json` | Steam Store search results | ~2-5KB each | 30 days |
+
+### Database cache flow
+
+```
+LoadAsync():
+  1. Try Discord API → if OK, save JSON to db_cache.json
+  2. Try GitHub Gist → if OK, save JSON to db_cache.json
+  3. Read db_cache.json → if exists and < 30 days old, use it
+  4. No cache → throw DatabaseLoadError
+```
+
+The cached JSON is the raw API response, re-parsed by `ParseGames()` on load. Cache age is checked via `FileInfo.LastWriteTime`.
+
+### Steam search cache flow
+
+```
+SearchGamesAsync(query):
+  1. Try Steam Store API → if OK, save results to steam_search/{query}.json
+  2. On NetworkError → try reading steam_search/{query}.json
+  3. No cache or expired → return empty list
+```
+
+Query names are sanitized (only letters, digits, spaces → underscores) for safe filenames.
+
+### Steam AppID cache
+
+`GameImageService` resolves Steam AppIDs for games without Discord icon hashes. This requires a Steam Store API call per game. The `SteamIdCache` (`ConcurrentDictionary<string, int?>`) persists to `steam_ids.json`:
+
+- Loaded once via static constructor
+- Protected by `lock (_steamIdLock)` for thread safety during parallel resolution
+- Dirty flag (`_steamIdCacheDirty`) tracks unsaved changes
+- Debounced save via `DispatcherTimer` (2s) — batches multiple rapid resolutions into a single disk write
+- Flushes on app exit via `Application.Current.Exit` event to prevent data loss
+- Avoids repeated API calls for the same game across sessions
+
+### Config keys
+
+```csharp
+Config.DbCacheFile          // "db_cache.json"
+Config.SteamIdCacheFile     // "steam_ids.json"
+Config.SteamSearchCacheDir  // "steam_search"
+Config.MaxCacheAgeDays      // 30
+```
+
+### UI behavior
+
+When using cache, the status bar shows a warning-colored message:
+```
+Database: Local Cache (30,412 games, 5d old)
+```
+When loaded from API, normal status:
+```
+Ready — 30,412 games loaded from Discord Official API
+```
+
+### What is NOT cached
+
+- **Quest API** (`api.discordquest.com`) — quests are time-sensitive and change frequently, caching would show stale data
+- **Image URLs** — Discord CDN URLs are deterministic (constructed from icon hash), no benefit from caching
+- **Game images themselves** — only the URL strings are cached (in SteamIdCache), not the actual image files
+
+## Welcome Sentinel
+
+The welcome window respects a per-version flag. The sentinel file (`welcome.flag` in `%LOCALAPPDATA%\OrbSpoofer`) stores the app version that last dismissed it. `ShouldShow()` reads the file and compares against `Config.AssemblyVersion` — if the version differs, the welcome re-appears.
+
 ## GitHub Pages
 
 The project website lives at `docs/index.html` and is deployed automatically by GitHub Pages on push to `main`. Configured in repo Settings > Pages > Source: "GitHub Actions". The site shows version, download link, and release info.
 
-When bumping the version, update `docs/index.html` with the new version number and release URL.
+The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.0`) is used if the API is unavailable. No manual version updates needed in the HTML.
 
 ## Known Issues & Resolutions
 
@@ -186,7 +308,7 @@ bump v1.2.0
 | File | Purpose |
 |------|---------|
 | `OrbSpoofer/OrbSpoofer.csproj` | Version, target framework, assembly info |
-| `OrbSpoofer/Config.cs` | All constants: URLs, paths, timeouts |
+| `OrbSpoofer/Config.cs` | All constants: URLs, paths, timeouts, cache settings |
 | `OrbSpoofer/Services/Updater.cs` | Update check, download, swap, cleanup |
 | `OrbSpoofer/Services/NetworkHelper.cs` | HTTP client with User-Agent, JSON fetching, file download |
 | `.github/workflows/release.yml` | CI/CD: build → test → release on version bump |
