@@ -98,11 +98,11 @@ dotnet publish -c Release -r win-x64 \
 <table>
 <tr>
 <td align="center">
-<img width="979" height="689" alt="image" src="https://github.com/user-attachments/assets/46a0adda-4713-420a-9907-3df9abace9aa" />
-<br/><sub><i>Database Mode — search & spoof</i></sub>
+<img width="976" height="689" alt="Captura de pantalla 2026-07-21 205710" src="https://github.com/user-attachments/assets/81c24ee6-7c45-458a-933a-6c34c8fb15b6" />
+<br/><sub><i>Active Quest</i></sub>
 </td>
 <td align="center">
-<img width="978" height="700" alt="image" src="https://github.com/user-attachments/assets/44d517a9-b860-4bd6-92c0-901b162af2bc" />
+<img width="983" height="690" alt="Captura de pantalla 2026-07-21 205725" src="https://github.com/user-attachments/assets/00021d28-bb2b-49f0-a7b5-5f2d25c77875" />
 <br/><sub><i>Let 15 Mins pass</i></sub>
 </td>
 </tr>
