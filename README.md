@@ -99,7 +99,7 @@ dotnet publish -c Release -r win-x64 \
 <tr>
 <td align="center">
 <img width="976" height="689" alt="Captura de pantalla 2026-07-21 205710" src="https://github.com/user-attachments/assets/81c24ee6-7c45-458a-933a-6c34c8fb15b6" />
-<br/><sub><i>Database Mode — search & spoof</i></sub>
+<br/><sub><i>Active Quest</i></sub>
 </td>
 <td align="center">
 <img width="983" height="690" alt="Captura de pantalla 2026-07-21 205725" src="https://github.com/user-attachments/assets/00021d28-bb2b-49f0-a7b5-5f2d25c77875" />
