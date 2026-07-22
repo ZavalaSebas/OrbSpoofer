@@ -43,7 +43,7 @@ OrbSpoofer/
 │   │   ├── NetworkHelper.cs       # HTTP client (User-Agent set here), FetchJson, DownloadFile
 │   │   ├── DiscordDatabase.cs     # Discord game database + GitHub backup
 │   │   ├── SteamService.cs        # Steam manifest generation
-│   │   ├── GameFaker.cs           # Fake game process spawning
+│   │   ├── GameFaker.cs           # Fake game process spawning (--timer-mode, --quest-id)
 │   │   ├── QuestService.cs        # Active quests from api.discordquest.com
 │   │   └── GameImageService.cs    # Resolves game images (Discord CDN / Steam store)
 │   ├── Models/
@@ -52,6 +52,7 @@ OrbSpoofer/
 │   │   ├── QuestItem.cs           # Display model for active quests
 │   │   └── DiscordGame.cs         # Discord detectable game entry (+ optional IconHash)
 │   └── UI/Windows/
+│       ├── TimerWindow.xaml.cs   # Countdown timer, auto-saves quest completion on finish
 │       ├── UpdateWindow.xaml.cs   # Download progress UI
 │       └── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
 ├── OrbSpoofer.Tests/              # xUnit test project (21 tests)
@@ -68,7 +69,7 @@ OrbSpoofer/
 **Single source of truth**: `<Version>` in `OrbSpoofer/OrbSpoofer.csproj:11`
 
 ```xml
-<Version>1.2.0</Version>
+<Version>1.2.1</Version>
 <AssemblyVersion>$(Version).0</AssemblyVersion>
 ```
 
@@ -150,22 +151,33 @@ Run with: `dotnet test OrbSpoofer.slnx -c Release`
 Quests are fetched from `api.discordquest.com/api/quests` (public, no auth required). Images are served from `cdn.discordapp.com`.
 
 ### Flow
-1. `MainWindow_Loaded` calls `LoadQuestsAsync()` which invokes `QuestService.GetActivePlayQuestsAsync()`
+1. `BtnQuests_Click` calls `LoadQuestsAsync()` which invokes `QuestService.GetActivePlayQuestsAsync()`
 2. Response is filtered to `PLAY_ON_DESKTOP` type only; expired quests are excluded
 3. Duplicates are removed by `GameName|QuestName` key
 4. Each quest is cross-referenced against `DiscordDatabase.Games` by `application.id` — only spoofable games (those with a win32 executable) are kept
 5. Promotional quests (`game_publisher = "Discord"`) are filtered out
+6. Completed quest IDs are loaded from `completed_quests.json` and matched against loaded quests
+7. Quests are sorted: active first (by expiry), completed last
+
+### Completed Quests
+- Toggle via circular button (32×32, `CornerRadius="16"`) next to the spoof button
+- State persisted to `%LOCALAPPDATA%\OrbSpoofer/completed_quests.json` as a `HashSet<string>` of quest IDs
+- Auto-completed when the quest timer finishes — `--quest-id` is passed through command-line args to the timer process, which saves the ID before shutdown
+- Each tab click re-fetches from the API (quests are time-sensitive), re-applies completed state, and re-sorts
 
 ### UI
 - QuestsView is the **default startup view** since v1.2.0
 - If the quest API fails on first launch, the app silently falls back to Discord Database view
 - If the user manually clicks Active Quests later and it fails, a "no quests found" message is shown
-- Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, and a Spoof button
-- Quest spoofing builds a `HashSet<string>` of spoofable game IDs for O(1) lookup instead of O(n*m)
+- Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, spoof button, and completion toggle
+- Completed quests: card opacity 0.45, strikethrough on game/quest names, green filled circle with ✓
+- Toggle animation: fade out → re-sort → staggered fade in
+- `ListBoxItem` style for quests list overrides default selection/hover colors (no blue highlight)
 
 ### Config keys
 - `QuestApiUrl` — `https://api.discordquest.com/api/quests`
 - `DiscordCdnBase` — `https://cdn.discordapp.com/`
+- `CompletedQuestsFile` — `"completed_quests.json"` (in `AppDataPath`)
 
 ## Game Image Resolution
 
@@ -197,6 +209,7 @@ All cache files are stored in `%LOCALAPPDATA%\OrbSpoofer/`:
 | `db_cache.json` | Discord API / GitHub Gist | ~1-2MB | 30 days |
 | `steam_ids.json` | GameImageService Steam lookups | ~5KB | 30 days |
 | `steam_search/{query}.json` | Steam Store search results | ~2-5KB each | 30 days |
+| `completed_quests.json` | User quest completion toggle | ~1KB | Never expires |
 
 ### Database cache flow
 
@@ -238,6 +251,7 @@ Query names are sanitized (only letters, digits, spaces → underscores) for saf
 Config.DbCacheFile          // "db_cache.json"
 Config.SteamIdCacheFile     // "steam_ids.json"
 Config.SteamSearchCacheDir  // "steam_search"
+Config.CompletedQuestsFile  // "completed_quests.json"
 Config.MaxCacheAgeDays      // 30
 ```
 
@@ -257,6 +271,7 @@ Ready — 30,412 games loaded from Discord Official API
 - **Quest API** (`api.discordquest.com`) — quests are time-sensitive and change frequently, caching would show stale data
 - **Image URLs** — Discord CDN URLs are deterministic (constructed from icon hash), no benefit from caching
 - **Game images themselves** — only the URL strings are cached (in SteamIdCache), not the actual image files
+- **Completed quests** — persisted permanently (never expires), not subject to cache TTL
 
 ## Welcome Sentinel
 
@@ -266,7 +281,7 @@ The welcome window respects a per-version flag. The sentinel file (`welcome.flag
 
 The project website lives at `docs/index.html` and is deployed automatically by GitHub Pages on push to `main`. Configured in repo Settings > Pages > Source: "GitHub Actions". The site shows version, download link, and release info.
 
-The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.0`) is used if the API is unavailable. No manual version updates needed in the HTML.
+The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.1`) is used if the API is unavailable. No manual version updates needed in the HTML.
 
 ## Known Issues & Resolutions
 

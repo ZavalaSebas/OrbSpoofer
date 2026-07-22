@@ -12,19 +12,21 @@ public partial class TimerWindow : Window
     private readonly DispatcherTimer _timer;
     private readonly int _totalSeconds;
     private readonly string? _exePathToCleanup;
+    private readonly string? _questId;
     private int _remaining;
     private bool _cleanedUp;
 
     private static readonly SolidColorBrush CompleteBrush =
         new((Color)ColorConverter.ConvertFromString(Config.TimerCompleteColor));
 
-    public TimerWindow(int durationMinutes, string? exePathToCleanup = null, string? gameName = null)
+    public TimerWindow(int durationMinutes, string? exePathToCleanup = null, string? gameName = null, string? questId = null)
     {
         InitializeComponent();
 
         _totalSeconds = durationMinutes * 60 + Config.TimerExtraSeconds;
         _remaining = _totalSeconds;
         _exePathToCleanup = exePathToCleanup;
+        _questId = questId;
 
         GameNameText.Text = gameName ?? "Unknown";
         GameNameText.ToolTip = gameName ?? "Unknown";
@@ -86,6 +88,12 @@ public partial class TimerWindow : Window
 
             Dispatcher.BeginInvoke(() =>
             {
+                if (!string.IsNullOrEmpty(_questId))
+                {
+                    var completedIds = Config.LoadCompletedQuestIds();
+                    completedIds.Add(_questId);
+                    Config.SaveCompletedQuestIds(completedIds);
+                }
                 Cleanup();
                 Application.Current.Shutdown();
             });

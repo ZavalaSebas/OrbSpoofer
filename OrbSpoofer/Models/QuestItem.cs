@@ -10,4 +10,5 @@ public class QuestItem
     public DateTime ExpiresAt { get; set; }
     public string? ImageUrl { get; set; }
     public string? ApplicationId { get; set; }
+    public bool IsCompleted { get; set; }
 }

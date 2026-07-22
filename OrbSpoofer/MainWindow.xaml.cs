@@ -19,7 +19,6 @@ public partial class MainWindow : Window
     private readonly GameFaker _faker = new();
     private string? _pendingUpdateTag;
     private string? _pendingUpdateUrl;
-    private bool _questsLoadedOnce;
     private readonly DispatcherTimer _searchDebounceTimer;
     private readonly DispatcherTimer _steamSearchDebounceTimer;
     private CancellationTokenSource? _imageResolutionCts;
@@ -163,26 +162,11 @@ public partial class MainWindow : Window
     private async void BtnQuests_Click(object sender, RoutedEventArgs e)
     {
         ShowView(QuestsView);
-        if (_questsLoadedOnce)
-        {
-            if (QuestsList.ItemsSource != null)
-            {
-                _ = Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-                {
-                    HideAllListBoxItems(QuestsList);
-                    DispatchAnimation(() => AnimateListBoxItemsAsync(QuestsList));
-                }));
-            }
-            else if (QuestsEmptyText.Visibility != Visibility.Visible)
-                QuestsEmptyText.Visibility = Visibility.Visible;
-            return;
-        }
         await LoadQuestsAsync();
     }
 
     private async Task<bool> LoadQuestsAsync()
     {
-        _questsLoadedOnce = true;
         try
         {
             QuestsLoadingText.Visibility = Visibility.Visible;
@@ -194,7 +178,14 @@ public partial class MainWindow : Window
             var spoofableIds = new HashSet<string>(
                 _db.Games.Where(g => DiscordDatabase.GetWin32Executable(g) != null).Select(g => g.Id));
 
+            var completedIds = Config.LoadCompletedQuestIds();
+
             var quests = allQuests.Where(q => spoofableIds.Contains(q.ApplicationId ?? "")).ToList();
+
+            foreach (var q in quests)
+                q.IsCompleted = completedIds.Contains(q.Id);
+
+            quests = quests.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
 
             if (quests.Count == 0)
             {
@@ -254,7 +245,7 @@ public partial class MainWindow : Window
             StatusMessage.Text = $"Creating fake process for quest: {exeName}...";
             var path = _faker.CreateFakeGame(exeName);
 
-            if (path != null && _faker.LaunchExecutable(path, game.Name))
+            if (path != null && _faker.LaunchExecutable(path, game.Name, quest.Id))
             {
                 StatusMessage.Text = $"Quest spoof active: {quest.GameName}";
             }
@@ -262,6 +253,55 @@ public partial class MainWindow : Window
             {
                 StatusMessage.Text = $"Failed to launch spoof for: {quest.GameName}";
             }
+        }
+    }
+
+    private async void QuestCompleteToggle_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is Border { Tag: QuestItem quest })
+        {
+            quest.IsCompleted = !quest.IsCompleted;
+
+            var completedIds = Config.LoadCompletedQuestIds();
+            if (quest.IsCompleted)
+                completedIds.Add(quest.Id);
+            else
+                completedIds.Remove(quest.Id);
+            Config.SaveCompletedQuestIds(completedIds);
+
+            var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+            var fadeDuration = TimeSpan.FromSeconds(0.2);
+
+            ListBoxItem? clickedItem = null;
+            if (sender is UIElement element)
+            {
+                var parent = VisualTreeHelper.GetParent(element) as UIElement;
+                while (parent != null && parent is not ListBoxItem)
+                    parent = VisualTreeHelper.GetParent(parent) as UIElement;
+                clickedItem = parent as ListBoxItem;
+            }
+
+            if (clickedItem != null)
+            {
+                clickedItem.BeginAnimation(UIElement.OpacityProperty,
+                    new DoubleAnimation(1, 0, fadeDuration) { EasingFunction = ease });
+                await Task.Delay(fadeDuration);
+            }
+
+            var quests = ((List<QuestItem>)QuestsList.ItemsSource)
+                .OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
+            QuestsList.ItemsSource = quests;
+
+            if (clickedItem != null)
+            {
+                await Task.Delay(20);
+                clickedItem.BeginAnimation(UIElement.OpacityProperty,
+                    new DoubleAnimation(0, 1, fadeDuration) { EasingFunction = ease });
+            }
+
+            StatusMessage.Text = quest.IsCompleted
+                ? $"Marked \"{quest.GameName}\" as completed"
+                : $"Marked \"{quest.GameName}\" as not completed";
         }
     }
 

@@ -385,60 +385,147 @@
                     <ListBox x:Name="QuestsList" Grid.Row="2"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              Background="Transparent" BorderThickness="0">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="border" Background="Transparent" Padding="0">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                  <Border Background="{StaticResource CardBrush}" CornerRadius="12"
                                          Padding="16" Margin="0,0,0,10"
                                          ToolTip="Double-click to spoof">
-                                         <Grid>
-                                             <Grid.ColumnDefinitions>
-                                                 <ColumnDefinition Width="Auto"/>
-                                                 <ColumnDefinition Width="*"/>
-                                                 <ColumnDefinition Width="Auto"/>
-                                             </Grid.ColumnDefinitions>
+                                     <Border.Style>
+                                         <Style TargetType="Border">
+                                             <Style.Triggers>
+                                                 <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                     <Setter Property="Opacity" Value="0.45"/>
+                                                 </DataTrigger>
+                                             </Style.Triggers>
+                                         </Style>
+                                     </Border.Style>
+                                     <Grid>
+                                         <Grid.ColumnDefinitions>
+                                             <ColumnDefinition Width="Auto"/>
+                                             <ColumnDefinition Width="*"/>
+                                             <ColumnDefinition Width="Auto"/>
+                                             <ColumnDefinition Width="Auto"/>
+                                         </Grid.ColumnDefinitions>
 
-                                             <Border Grid.Column="0" Width="64" Height="64" CornerRadius="8"
-                                                     Background="{StaticResource SurfaceBrush}"
-                                                     Margin="0,0,14,0">
-                                                 <Image Source="{Binding ImageUrl}" Width="64" Height="64"
-                                                        Stretch="UniformToFill"
-                                                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                                             </Border>
+                                         <Border Grid.Column="0" Width="64" Height="64" CornerRadius="8"
+                                                 Background="{StaticResource SurfaceBrush}"
+                                                 Margin="0,0,14,0">
+                                             <Image Source="{Binding ImageUrl}" Width="64" Height="64"
+                                                    Stretch="UniformToFill"
+                                                    RenderOptions.BitmapScalingMode="HighQuality"/>
+                                         </Border>
 
-                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                 <TextBlock Text="{Binding GameName}" FontSize="15" FontWeight="SemiBold"
-                                                            Foreground="{StaticResource TextPrimaryBrush}"/>
-                                                 <TextBlock Text="{Binding QuestName}" FontSize="12"
-                                                            Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0"/>
-                                                 <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                                     <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}">
-                                                         <Run Text="{Binding Reward, Mode=OneWay}"/>
-                                                     </TextBlock>
-                                                     <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                                                                Margin="12,0,0,0">
-                                                         <Run Text="{Binding TaskMinutes, Mode=OneWay}"/>
-                                                         <Run Text=" min"/>
-                                                     </TextBlock>
-                                                     <TextBlock FontSize="11" Foreground="{StaticResource WarningBrush}"
-                                                                Margin="12,0,0,0">
-                                                         <Run Text="Ends "/>
-                                                         <Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/>
-                                                     </TextBlock>
-                                                 </StackPanel>
+                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                             <TextBlock Text="{Binding GameName}" FontSize="15" FontWeight="SemiBold"
+                                                        Foreground="{StaticResource TextPrimaryBrush}">
+                                                 <TextBlock.Style>
+                                                     <Style TargetType="TextBlock">
+                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                 <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                             </DataTrigger>
+                                                         </Style.Triggers>
+                                                     </Style>
+                                                 </TextBlock.Style>
+                                             </TextBlock>
+                                             <TextBlock Text="{Binding QuestName}" FontSize="12"
+                                                        Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0">
+                                                 <TextBlock.Style>
+                                                     <Style TargetType="TextBlock">
+                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                 <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                             </DataTrigger>
+                                                         </Style.Triggers>
+                                                     </Style>
+                                                 </TextBlock.Style>
+                                             </TextBlock>
+                                             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                 <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}">
+                                                     <Run Text="{Binding Reward, Mode=OneWay}"/>
+                                                 </TextBlock>
+                                                 <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                                                            Margin="12,0,0,0">
+                                                     <Run Text="{Binding TaskMinutes, Mode=OneWay}"/>
+                                                     <Run Text=" min"/>
+                                                 </TextBlock>
+                                                 <TextBlock FontSize="11" Foreground="{StaticResource WarningBrush}"
+                                                            Margin="12,0,0,0">
+                                                     <Run Text="Ends "/>
+                                                     <Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/>
+                                                 </TextBlock>
                                              </StackPanel>
+                                         </StackPanel>
 
-                                              <Button Grid.Column="2" Content="▶"
-                                                      Style="{StaticResource PrimaryButton}"
-                                                       Padding="8" Width="60" Height="60"
-                                                       FontSize="24"
-                                                       Tag="{Binding}"
-                                                       ToolTip="Spoof"
-                                                      Click="QuestsSpoof_Click"/>
-                                         </Grid>
-                                     </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                         <Border Grid.Column="2" Width="32" Height="32"
+                                                 CornerRadius="16" Cursor="Hand" Tag="{Binding}"
+                                                 ToolTip="Toggle completed"
+                                                 BorderThickness="1.5"
+                                                 Background="{StaticResource SurfaceBrush}"
+                                                 BorderBrush="{StaticResource TextMutedBrush}"
+                                                 VerticalAlignment="Center" Margin="0,0,10,0"
+                                                 PreviewMouseLeftButtonDown="QuestCompleteToggle_Click">
+                                             <Border.Style>
+                                                 <Style TargetType="Border">
+                                                     <Style.Triggers>
+                                                         <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                             <Setter Property="Background" Value="#4CAF50"/>
+                                                             <Setter Property="BorderBrush" Value="#4CAF50"/>
+                                                         </DataTrigger>
+                                                     </Style.Triggers>
+                                                 </Style>
+                                             </Border.Style>
+                                             <TextBlock Text="✓" FontSize="14" FontWeight="Bold"
+                                                        Foreground="White" HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                 <TextBlock.Style>
+                                                     <Style TargetType="TextBlock">
+                                                         <Setter Property="Visibility" Value="Hidden"/>
+                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                 <Setter Property="Visibility" Value="Visible"/>
+                                                             </DataTrigger>
+                                                         </Style.Triggers>
+                                                     </Style>
+                                                 </TextBlock.Style>
+                                             </TextBlock>
+                                         </Border>
+
+                                         <Button Grid.Column="3" Content="▶"
+                                                 Style="{StaticResource PrimaryButton}"
+                                                  Padding="8" Width="60" Height="60"
+                                                  FontSize="24"
+                                                  Tag="{Binding}"
+                                                  ToolTip="Spoof"
+                                                 Click="QuestsSpoof_Click"/>
+                                     </Grid>
+                                 </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Grid>
 
                 <!-- Credits View -->

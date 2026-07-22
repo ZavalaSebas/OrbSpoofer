@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.Json;
 
 namespace OrbSpoofer;
 
@@ -42,6 +43,7 @@ public static class Config
     public const string DbCacheFile = "db_cache.json";
     public const string SteamIdCacheFile = "steam_ids.json";
     public const string SteamSearchCacheDir = "steam_search";
+    public const string CompletedQuestsFile = "completed_quests.json";
     public const int MaxCacheAgeDays = 30;
 
     // HTTP
@@ -66,4 +68,28 @@ public static class Config
         ["Referer"] = "https://discord.com/",
         ["Origin"] = "https://discord.com",
     };
+
+    public static HashSet<string> LoadCompletedQuestIds()
+    {
+        var path = Path.Combine(AppDataPath, CompletedQuestsFile);
+        if (!File.Exists(path)) return new HashSet<string>();
+        try
+        {
+            var json = File.ReadAllText(path);
+            var arr = JsonSerializer.Deserialize<List<string>>(json);
+            return arr != null ? new HashSet<string>(arr) : new HashSet<string>();
+        }
+        catch
+        {
+            return new HashSet<string>();
+        }
+    }
+
+    public static void SaveCompletedQuestIds(HashSet<string> ids)
+    {
+        Directory.CreateDirectory(AppDataPath);
+        var path = Path.Combine(AppDataPath, CompletedQuestsFile);
+        var json = JsonSerializer.Serialize(ids.ToList());
+        File.WriteAllText(path, json);
+    }
 }

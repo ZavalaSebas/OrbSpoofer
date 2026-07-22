@@ -147,14 +147,18 @@ public class GameFaker
         }
     }
 
-    public bool LaunchExecutable(string exePath, string? gameName = null)
+    public bool LaunchExecutable(string exePath, string? gameName = null, string? questId = null)
     {
         try
         {
+            var args = $"--timer-mode --exe-path \"{exePath}\" --game-name \"{gameName ?? Path.GetFileNameWithoutExtension(exePath)}\"";
+            if (!string.IsNullOrEmpty(questId))
+                args += $" --quest-id \"{questId}\"";
+
             var psi = new ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = $"--timer-mode --exe-path \"{exePath}\" --game-name \"{gameName ?? Path.GetFileNameWithoutExtension(exePath)}\"",
+                Arguments = args,
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };

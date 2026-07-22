@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] — 2026-07-22
+
+### Added
+
+- Mark quests as completed — circular toggle next to each quest card, persisted to `completed_quests.json`
+- Completed quests sort to the bottom of the list automatically
+- Auto-complete: when the quest timer finishes, the quest is automatically marked as completed
+- Fade animation when toggling completion (fade out → re-sort → staggered fade in)
+- Quests re-fetch from API on every tab click (no more stale data)
+
+### Changed
+
+- Quest list now sorts by completion status (active first, completed last) then by expiry
+- `GameFaker.LaunchExecutable` now accepts optional `questId` parameter
+- Timer process receives `--quest-id` argument for auto-completion on finish
+- `ListBoxItem` style for quests list overrides default selection/hover colors (no blue highlight)
+
+### Fixed
+
+- ListBoxItem hover/selection showing blue highlight on quest cards
+- Toggle click event not firing — switched to `PreviewMouseLeftButtonDown`
+
 ## [1.2.0] — 2026-07-21
 
 ### Added
