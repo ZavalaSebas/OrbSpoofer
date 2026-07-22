@@ -68,7 +68,15 @@ jobs:
         id: body
         shell: pwsh
         run: |
+          $parents = (git rev-list --parents HEAD -n1).Trim().Split(' ').Count
           $msg = git show -s --format=%B HEAD
+          if ($parents -ge 3) {
+            $lines = $msg -split "`n"
+            $bodyStart = ($lines | Select-String -Pattern '^\s*$' | Select-Object -First 1).LineNumber + 1
+            if ($bodyStart -gt 1) {
+              $msg = ($lines[$bodyStart..($lines.Length - 1)] -join "`n").Trim()
+            }
+          }
           $msg | Out-File -FilePath $env:RUNNER_TEMP/release_body.md -Encoding utf8NoBOM
 
       - uses: softprops/action-gh-release@v2
