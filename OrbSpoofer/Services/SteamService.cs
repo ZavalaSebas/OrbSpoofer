@@ -216,15 +216,17 @@ public static class SteamService
         var launcher = Path.Combine(steamPath, "steam.exe").Replace("/", "\\");
 
         var staged = "";
+        var installed = "";
         if (!string.IsNullOrEmpty(depotId))
         {
-            staged =
+            installed =
                 $"\t\t\"{depotId}\"\n" +
                 "\t\t{\n" +
                 "\t\t\t\"manifest\"\t\t\"0\"\n" +
                 $"\t\t\t\"size\"\t\t\"{Config.ManifestOneGiB}\"\n" +
                 "\t\t\t\"dlcappid\"\t\t\"0\"\n" +
                 "\t\t}";
+            staged = installed;
         }
 
         var sb = new System.Text.StringBuilder();
@@ -254,6 +256,8 @@ public static class SteamService
         sb.AppendLine("\t\"ScheduledAutoUpdate\"\t\t\"0\"");
         sb.AppendLine("\t\"InstalledDepots\"");
         sb.AppendLine("\t{");
+        if (!string.IsNullOrEmpty(installed))
+            sb.AppendLine(installed);
         sb.AppendLine("\t}");
         sb.AppendLine("\t\"StagedDepots\"");
         sb.AppendLine("\t{");

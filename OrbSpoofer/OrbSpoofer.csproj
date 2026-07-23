@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>OrbSpoofer</AssemblyName>
     <RootNamespace>OrbSpoofer</RootNamespace>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <AssemblyVersion>$(Version).0</AssemblyVersion>
     <Authors>OrbSpoofer</Authors>
     <Description>Discord Orb Quest Game Spoofer - WPF Edition</Description>

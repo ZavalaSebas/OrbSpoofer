@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] — 2026-07-22
+
+### Added
+
+- Quest filtering by game name — quests now match via name when Discord app ID isn't in the database
+- `NeedsSteamMode` indicator on quest cards — warns when a quest requires Steam Quest mode
+- `InfoDialog` — custom themed dialog shown when a game has no executable in Discord's database
+- Manual mode placeholder text and button enable/disable via `TextChanged` event
+
+### Changed
+
+- Steam Quest mode status message now warns about inconsistency and suggests DB mode as fallback
+
+### Fixed
+
+- `InstalledDepots` section in appmanifest now correctly populated (was always empty)
+- Steam Quest mode null-check for missing executable before proceeding
+
 ## [1.2.1] — 2026-07-22
 
 ### Added

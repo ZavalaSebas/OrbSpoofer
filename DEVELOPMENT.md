@@ -51,10 +51,12 @@ OrbSpoofer/
 │   │   ├── SteamGameDisplayItem.cs# Display model for Steam search + CDN image URL
 │   │   ├── QuestItem.cs           # Display model for active quests
 │   │   └── DiscordGame.cs         # Discord detectable game entry (+ optional IconHash)
-│   └── UI/Windows/
-│       ├── TimerWindow.xaml.cs   # Countdown timer, auto-saves quest completion on finish
-│       ├── UpdateWindow.xaml.cs   # Download progress UI
-│       └── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
+│   ├── UI/
+│   │   └── Windows/
+│   │       ├── TimerWindow.xaml.cs   # Countdown timer, auto-saves quest completion on finish
+│   │       ├── UpdateWindow.xaml.cs   # Download progress UI
+│   │       ├── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
+│   │       └── InfoDialog.xaml.cs     # Themed dialog for warnings (no executable, etc.)
 ├── OrbSpoofer.Tests/              # xUnit test project (21 tests)
 │   ├── DiscordDatabaseTests.cs    # Search, filtering, exe matching
 │   ├── SteamServiceTests.cs       # Manifest generation, depots
@@ -69,7 +71,7 @@ OrbSpoofer/
 **Single source of truth**: `<Version>` in `OrbSpoofer/OrbSpoofer.csproj:11`
 
 ```xml
-<Version>1.2.1</Version>
+<Version>1.2.2</Version>
 <AssemblyVersion>$(Version).0</AssemblyVersion>
 ```
 
@@ -146,6 +148,23 @@ Run with: `dotnet test OrbSpoofer.slnx -c Release`
 - `AssemblyVersion_IsValidSemVer` — verifies format matches `x.y.z`
 - `AssemblyVersion_MatchesCsprojVersion` — reads csproj and compares at build time
 
+## Steam Quest Mode
+
+Steam Quest mode creates an appmanifest + fake executable to make Discord detect a game via Steam's integration.
+
+### Flow
+1. User searches by game name → `SteamService.SearchGamesAsync()` queries the Steam Store API
+2. User selects a game → `SteamService.FetchAppInfoAsync()` gets executable name, installdir, depot ID from SteamCMD API
+3. `SteamService.WriteAppManifest()` generates the `.acf` file in `steamapps/common/`
+4. `GameFaker.CreateSteamFakeGame()` copies the OrbSpoofer exe with the game's executable name into the installdir
+5. The fake process is launched
+
+### InstalledDepots fix
+The appmanifest's `InstalledDepots` section was always empty. Fixed by populating it with the depot ID (same data as `StagedDepots`) so Steam recognizes the game as partially installed.
+
+### Known limitation
+Steam mode is inconsistent — Discord detects the spoofed process for some games but not others. The appmanifest combined with Discord's Steam integration appears to cause stricter validation for certain titles. The status message warns: *"Steam mode may not work for all games, use DB mode if it doesn't detect"*
+
 ## Quest System
 
 Quests are fetched from `api.discordquest.com/api/quests` (public, no auth required). Images are served from `cdn.discordapp.com`.
@@ -154,10 +173,11 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 1. `BtnQuests_Click` calls `LoadQuestsAsync()` which invokes `QuestService.GetActivePlayQuestsAsync()`
 2. Response is filtered to `PLAY_ON_DESKTOP` type only; expired quests are excluded
 3. Duplicates are removed by `GameName|QuestName` key
-4. Each quest is cross-referenced against `DiscordDatabase.Games` by `application.id` — only spoofable games (those with a win32 executable) are kept
+4. Each quest is cross-referenced against `DiscordDatabase.Games` by `application.id` or by fuzzy name match (game name contains quest name or vice versa) — only spoofable games (those with a win32 executable) are kept
 5. Promotional quests (`game_publisher = "Discord"`) are filtered out
 6. Completed quest IDs are loaded from `completed_quests.json` and matched against loaded quests
 7. Quests are sorted: active first (by expiry), completed last
+8. Quests whose matching game has no win32 executable in the Discord DB are flagged with `NeedsSteamMode = true`
 
 ### Completed Quests
 - Toggle via circular button (32×32, `CornerRadius="16"`) next to the spoof button
@@ -169,7 +189,7 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 - QuestsView is the **default startup view** since v1.2.0
 - If the quest API fails on first launch, the app silently falls back to Discord Database view
 - If the user manually clicks Active Quests later and it fails, a "no quests found" message is shown
-- Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, spoof button, and completion toggle
+- Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, spoof button, completion toggle, and **"⚠ Steam required"** label (when `NeedsSteamMode` is true)
 - Completed quests: card opacity 0.45, strikethrough on game/quest names, green filled circle with ✓
 - Toggle animation: fade out → re-sort → staggered fade in
 - `ListBoxItem` style for quests list overrides default selection/hover colors (no blue highlight)
@@ -178,6 +198,18 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 - `QuestApiUrl` — `https://api.discordquest.com/api/quests`
 - `DiscordCdnBase` — `https://cdn.discordapp.com/`
 - `CompletedQuestsFile` — `"completed_quests.json"` (in `AppDataPath`)
+
+## UI Components
+
+### InfoDialog (`UI/Windows/InfoDialog.xaml`)
+Custom themed WPF dialog window for non-critical warnings. Used when a game has no executable in Discord's database — tells the user process spoofing won't work and suggests Steam Quest or Manual mode. Shown as a modal (`ShowDialog()`). Styled with the same dark theme (`BackgroundBrush`, `TextPrimaryBrush`, `PrimaryBrush` accent).
+
+### ManualInputBox style (`Themes/DarkTheme.xaml`)
+Custom `TextBox` style for the Manual mode input. Features:
+- Placeholder text ("e.g. TslGame.exe") visible when empty via `Visibility` trigger
+- Border highlight on focus (`PrimaryBrush`)
+- `CornerRadius="8"` for rounded corners
+- `BtnManualSpoof` is disabled until text is entered (`ManualExeBox_TextChanged` handler)
 
 ## Game Image Resolution
 
@@ -293,6 +325,7 @@ The CTA download button auto-updates its version text from the GitHub Releases A
 | GitHub API returns 403 on update check | Set `User-Agent` header on `HttpClient` |
 | AssemblyVersion returns 1.0.0.0 | Add `<AssemblyVersion>$(Version).0</AssemblyVersion>` to csproj |
 | Release body has no newlines or weird chars | Use `Out-String` or pipe directly to `Out-File` without byte conversion; avoid em dashes in commit message (use hyphen `-`) |
+| Steam mode doesn't detect for some games | Discord validates process name/location differently per game; DB mode is more reliable |
 
 ## Workflow Rules
 

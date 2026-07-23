@@ -239,8 +239,8 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="ManualExeBox" Grid.Column="0"
-                                 Style="{StaticResource SearchBox}"
-                                 
+                                 Style="{StaticResource ManualInputBox}"
+                                 TextChanged="ManualExeBox_TextChanged"
                                  VerticalContentAlignment="Center"/>
                          <Button x:Name="BtnManualSpoof" Grid.Column="1" Content="▶"
                                  Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"
@@ -476,6 +476,20 @@
                                                             Margin="12,0,0,0">
                                                      <Run Text="Ends "/>
                                                      <Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/>
+                                                 </TextBlock>
+                                                 <TextBlock FontSize="11" Foreground="{StaticResource WarningBrush}"
+                                                            Margin="12,0,0,0">
+                                                     <TextBlock.Style>
+                                                         <Style TargetType="TextBlock">
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding NeedsSteamMode}" Value="True">
+                                                                     <Setter Property="Visibility" Value="Visible"/>
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                             <Setter Property="Visibility" Value="Collapsed"/>
+                                                         </Style>
+                                                     </TextBlock.Style>
+                                                     <Run Text="⚠ Steam required"/>
                                                  </TextBlock>
                                              </StackPanel>
                                          </StackPanel>

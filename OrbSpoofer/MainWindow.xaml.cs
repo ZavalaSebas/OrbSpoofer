@@ -175,15 +175,30 @@ public partial class MainWindow : Window
 
             var allQuests = await QuestService.GetActivePlayQuestsAsync();
 
-            var spoofableIds = new HashSet<string>(
-                _db.Games.Where(g => DiscordDatabase.GetWin32Executable(g) != null).Select(g => g.Id));
+            var spoofableGames = _db.Games.Where(g => DiscordDatabase.GetWin32Executable(g) != null).ToList();
+            var spoofableIds = new HashSet<string>(spoofableGames.Select(g => g.Id));
 
             var completedIds = Config.LoadCompletedQuestIds();
 
-            var quests = allQuests.Where(q => spoofableIds.Contains(q.ApplicationId ?? "")).ToList();
+            var quests = allQuests.Where(q =>
+            {
+                if (spoofableIds.Contains(q.ApplicationId ?? ""))
+                    return true;
+
+                return _db.Games.Any(g =>
+                    g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) ||
+                    q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
+            }).ToList();
 
             foreach (var q in quests)
+            {
                 q.IsCompleted = completedIds.Contains(q.Id);
+                var matchingGame = _db.Games.FirstOrDefault(g =>
+                    g.Id == q.ApplicationId ||
+                    g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) ||
+                    q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
+                q.NeedsSteamMode = matchingGame != null && DiscordDatabase.GetWin32Executable(matchingGame) == null;
+            }
 
             quests = quests.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
 
@@ -238,7 +253,11 @@ public partial class MainWindow : Window
             var exeName = DiscordDatabase.GetWin32Executable(game);
             if (exeName == null)
             {
-                StatusMessage.Text = $"No Windows executable found for: {quest.GameName}";
+                new UI.Windows.InfoDialog(
+                    "No executable found",
+                    $"{quest.GameName} has no executable registered in Discord's database, so process spoofing won't work.",
+                    "Use Steam Quest mode or Manual mode to spoof this game.").ShowDialog();
+                StatusMessage.Text = $"{quest.GameName} has no executable in Discord's database";
                 return;
             }
 
@@ -548,7 +567,11 @@ public partial class MainWindow : Window
         var exeName = DiscordDatabase.GetWin32Executable(item.Game);
         if (exeName == null)
         {
-            StatusMessage.Text = "No Windows executable found for this game";
+            new UI.Windows.InfoDialog(
+                "No executable found",
+                $"{item.Name} has no executable registered in Discord's database, so process spoofing won't work.",
+                "Use Steam Quest mode or Manual mode to spoof this game.").ShowDialog();
+            StatusMessage.Text = $"{item.Name} has no executable in Discord's database";
             return;
         }
 
@@ -566,6 +589,11 @@ public partial class MainWindow : Window
     }
 
     // Manual Mode
+    private void ManualExeBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    {
+        BtnManualSpoof.IsEnabled = !string.IsNullOrWhiteSpace(ManualExeBox.Text);
+    }
+
     private void BtnManualSpoof_Click(object sender, RoutedEventArgs e)
     {
         var exeName = ManualExeBox.Text.Trim();
@@ -675,7 +703,11 @@ public partial class MainWindow : Window
                 return;
             }
 
-            var exePath = Path.Combine(steamPath, "steamapps", "common", info.InstallDir, info.Executable);
+            if (string.IsNullOrEmpty(info.Executable))
+            {
+                StatusMessage.Text = "No executable found for this game";
+                return;
+            }
 
             StatusMessage.Text = "Generating appmanifest...";
             var acfCreated = SteamService.WriteAppManifest(
@@ -687,12 +719,13 @@ public partial class MainWindow : Window
                 return;
             }
 
+            var exePath = Path.Combine(steamPath, "steamapps", "common", info.InstallDir, info.Executable);
             StatusMessage.Text = "Creating fake executable...";
             var path = _faker.CreateSteamFakeGame(exePath);
 
             if (path != null && _faker.LaunchExecutable(path, info.Name))
             {
-                StatusMessage.Text = $"Steam spoof active: {info.Name}";
+                StatusMessage.Text = $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
             }
             else
             {
