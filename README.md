@@ -12,8 +12,7 @@
 
 <br/>
 
-Earn Discord orb quests without installing games.  
-EZ :P
+Automate Discord orb quests without downloading games :)
 
 [Get Started](#-get-started) · [How It Works](#how-it-works) · [Usage](#usage) · [Active Quests](#active-quests) · [Features](#features) · [Steam Quest](#steam-quest-mode)
 
@@ -23,21 +22,21 @@ EZ :P
 
 ## What is OrbSpoofer?
 
-A Windows desktop app built in **C# / .NET 10** that earns Discord orb quests by creating fake game processes — no installs, no modifications, no drama.
+A Windows desktop app built in **C# / .NET 10** that automates Discord orb quests by creating lightweight background processes — no game downloads, no modifications, no manual setup.
 
 It pulls Discord's own detectable games list from their public API, copies a base executable, renames it to the exact process name Discord expects, and launches it in the background. Discord sees the name, checks the box, you get your orbs.
 
-**Zero code injection. Zero client modification. Zero suspicious traffic.** Just a renamed process sitting in your task list — which is literally all Discord ever checks.
+**No code injection. No client modification. No network spoofing.** Just a renamed process sitting in your task list — which is the public mechanism Discord uses to detect what you're playing.
 
 Born from the idea behind [orbshacker](https://github.com/strykey/orbshacker) by [Strykey](https://github.com/strykey), rebuilt from scratch in .NET with a native WPF interface.
 
-> **Educational purposes only.** You are responsible for following Discord's ToS. Use at your own risk.
+> **Discord automation tool, built for educational purposes.** You are solely responsible for complying with Discord's Terms of Service. Use at your own risk.
 
 <br/>
 
 ## How It Works
 
-The way Discord detects what you're playing is by reading your Windows process list. Lets say `roblox.exe` running? Must be Roblox!. There's no deeper verification — no hash check, no memory scan, nothing. The name is all it checks.
+The way Discord detects what you're playing is by reading your Windows process list. Lets say `roblox.exe` running? Must be Roblox!. There's no deeper verification — no hash check, no memory scan, nothing. The name is all it checks. OrbSpoofer automates this process end-to-end.
 
 1. Launch OrbSpoofer
 2. **Active Quests** appear automatically — fetched live from Discord's quest API
@@ -46,7 +45,7 @@ The way Discord detects what you're playing is by reading your Windows process l
 
 No active quests? Switch to **Database** or **Steam** mode and search manually. Same result.
 
-The fake process runs until you close it. Discord keeps detecting it the entire time. No kernel-level anti-cheat is involved in orb quests, so there's nothing watching for renamed executables.
+The fake process runs until you close it. Discord keeps detecting it the entire time. Since orb quests don't involve kernel-level anti-cheat, there's nothing watching for renamed executables.
 
 <br/>
 
@@ -236,9 +235,9 @@ No MVVM frameworks, no NuGet dependencies — pure .NET base class library.
 
 ## Legal
 
-**Educational purposes only. No commercial use.**
+**Discord automation tool, built for educational purposes.**
 
-This tool exists to study how Discord's game detection works and to explore process manipulation techniques. Commercial use, redistribution, or sale is strictly prohibited.
+This tool automates a manual process using Discord's public API and process detection mechanism. It is intended for educational and personal use. Commercial use, redistribution, or sale is strictly prohibited.
 
 You are solely responsible for complying with Discord's Terms of Service and all applicable laws. No warranties. No guarantees. Use at your own risk.
 

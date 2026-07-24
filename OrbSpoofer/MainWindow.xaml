@@ -608,9 +608,10 @@
                                                Foreground="{StaticResource WarningBrush}" Margin="0,0,0,10"/>
                                     <TextBlock TextWrapping="Wrap" FontSize="13"
                                                Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22">
-                                        EDUCATIONAL PURPOSES ONLY. Users are solely responsible for
-                                        compliance with Discord's Terms of Service. The developers are
-                                        NOT responsible for any consequences. Use at your own risk.
+                                        OrbSpoofer is a Discord automation tool built for educational
+                                        purposes. It automates a manual process using Discord's public
+                                        API and process detection. You are solely responsible for
+                                        complying with Discord's Terms of Service. Use at your own risk.
                                     </TextBlock>
                                 </StackPanel>
                             </Border>
