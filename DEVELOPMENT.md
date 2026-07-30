@@ -1,36 +1,6 @@
 # OrbSpoofer — Project Guide
 
-This document serves both as a guide to this specific project AND as a reusable template structure for future .NET projects. The architecture, workflow, versioning, testing, and release patterns documented here can be replicated in any new project.
-
-## Architecture Overview (Reusable Template)
-
-```
-solution.slnx                    # Solution file (.slnx format)
-src/ProjectName/                  # Main application
-├── ProjectName.csproj            # <Version> + <AssemblyVersion> single source of truth
-├── Config.cs                     # Constants: URLs, paths, timeouts
-├── Services/                     # Business logic (Updater, NetworkHelper, etc.)
-├── Models/                       # Display/DTO models
-└── UI/                           # UI layer (Windows, Controls, etc.)
-tests/ProjectName.Tests/          # xUnit test project mirroring src structure
-├── ProjectName.Tests.csproj
-├── ServiceATests.cs
-└── ConfigTests.cs                # AssemblyVersion validation against csproj
-.github/workflows/release.yml     # CI/CD: build → test → release on version bump
-docs/index.html                   # GitHub Pages landing page
-README.md
-DEVELOPMENT.md                    # This file
-```
-
-Key patterns in this template:
-- **Single-file publish** (self-contained, compressed)
-- **xUnit tests with build-time csproj validation**
-- **CI/CD workflow that only releases on version change**
-- **Auto-update via GitHub Releases API**
-- **Commit body = Release notes** (categorized with ### Added/Fixed/Changed)
-- **GitHub Pages** for project website
-
-## Project Structure (OrbSpoofer)
+## Project Structure
 
 ```
 OrbSpoofer/
@@ -204,6 +174,9 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 ### InfoDialog (`UI/Windows/InfoDialog.xaml`)
 Custom themed WPF dialog window for non-critical warnings. Used when a game has no executable in Discord's database — tells the user process spoofing won't work and suggests Steam Quest or Manual mode. Shown as a modal (`ShowDialog()`). Styled with the same dark theme (`BackgroundBrush`, `TextPrimaryBrush`, `PrimaryBrush` accent).
 
+### Status bar sponsor heart
+The status bar displays a ❤ icon (bottom-right) linked to the Ko-fi donation page (`Config.KofiUrl`). Defined in `MainWindow.xaml:691-694`, click handled by `Kofi_HeartClick`.
+
 ### ManualInputBox style (`Themes/DarkTheme.xaml`)
 Custom `TextBox` style for the Manual mode input. Features:
 - Placeholder text ("e.g. TslGame.exe") visible when empty via `Visibility` trigger
@@ -313,7 +286,7 @@ The welcome window respects a per-version flag. The sentinel file (`welcome.flag
 
 The project website lives at `docs/index.html` and is deployed automatically by GitHub Pages on push to `main`. Configured in repo Settings > Pages > Source: "GitHub Actions". The site shows version, download link, and release info.
 
-The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.1`) is used if the API is unavailable. No manual version updates needed in the HTML.
+The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.2`) is used if the API is unavailable. No manual version updates needed in the HTML.
 
 ## Known Issues & Resolutions
 
@@ -332,10 +305,34 @@ The CTA download button auto-updates its version text from the GitHub Releases A
 These are strict rules that must always be followed:
 
 1. **Never commit without asking first** — always confirm with the user before staging or committing any change.
-2. **Never push without asking first** — pushing to remote requires explicit permission.
+2. **Verify locally before pushing** — run `dotnet build` and `dotnet test`, confirm both pass, then ask for permission. Pushing to remote requires explicit approval.
 3. **Multiple commits are fine for progress**, but group them meaningfully when pushing. Don't push 100 tiny commits. Squash related work into logical commits with clear descriptions.
 4. **Commit messages matter** — subject line ≤72 chars, body should describe exactly what was done and why. For version bumps, the body becomes the release notes, so write it with `### Added / Fixed / Changed` sections.
 5. **Force push only for cleanup** — when squashing test commits or fixing history. Never force push over someone else's work. Always ask first.
+
+## Code Conventions
+
+These conventions are followed throughout the codebase and should be maintained:
+
+| Scope | Convention | Example |
+|-------|-----------|---------|
+| Private instance fields | `_camelCase` with underscore prefix | `_db`, `_faker`, `_searchDebounceTimer` |
+| Private static fields | `_camelCase` with underscore prefix | `_steamIdLock`, `_steamIdCacheDirty` |
+| Constants (`const`) | PascalCase | `GitHubRepoOwner`, `DiscordApiUrl` |
+| `static readonly` fields | PascalCase (no underscore) | `SkipExePatterns`, `CachePath` |
+| Properties | PascalCase | `SourceExePath`, `IsSelfContained` |
+| Methods (public/private) | PascalCase | `CreateFakeGame`, `LoadQuestsAsync` |
+| Local variables | camelCase | `exeName`, `path`, `results` |
+| Method parameters | camelCase | `exePath`, `questId`, `gameName` |
+| Async methods | `Async` suffix | `CheckForUpdateAsync`, `PerformSteamSearch` |
+| Event handlers | Verb_Event suffix | `BtnQuests_Click`, `SearchBox_TextChanged` |
+
+Additional conventions:
+- **File-scoped namespaces** (`namespace OrbSpoofer.Services;`)
+- **`using` order**: System.* first, then third-party, then project namespaces
+- **No silent catch blocks** — every `catch` must at minimum log via `Debug.WriteLine()`
+- **`async void` only for WPF event handlers** — all other async methods return `Task` or `Task<T>`
+- **No MVVM frameworks, no dependency injection** — pure .NET, services are `static class` by convention (except where instance state is needed, like `DiscordDatabase` and `GameFaker`)
 
 Good commit structure:
 ```

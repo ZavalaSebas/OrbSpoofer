@@ -53,12 +53,25 @@ public partial class TimerWindow : Window
 
         try
         {
-            if (File.Exists(_exePathToCleanup))
-                File.Delete(_exePathToCleanup);
+            var exeDir = Path.GetDirectoryName(_exePathToCleanup);
+            var batPath = Path.Combine(
+                Path.GetTempPath(),
+                $"OrbSpoofer_cleanup_{Guid.NewGuid()}.bat");
 
-            var dir = Path.GetDirectoryName(_exePathToCleanup);
-            if (dir != null && Directory.Exists(dir) && !Directory.EnumerateFileSystemEntries(dir).Any())
-                Directory.Delete(dir);
+            var batContent = $"""
+@ping 127.0.0.1 -n 3 > nul
+@del /f /q "{_exePathToCleanup}"
+@if exist "{exeDir}" @rmdir "{exeDir}" 2>nul
+@del "%~f0"
+""";
+            File.WriteAllText(batPath, batContent);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = batPath,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            });
         }
         catch (Exception ex)
         {
@@ -86,17 +99,14 @@ public partial class TimerWindow : Window
             Activate();
             Topmost = true;
 
-            Dispatcher.BeginInvoke(() =>
+            if (!string.IsNullOrEmpty(_questId))
             {
-                if (!string.IsNullOrEmpty(_questId))
-                {
-                    var completedIds = Config.LoadCompletedQuestIds();
-                    completedIds.Add(_questId);
-                    Config.SaveCompletedQuestIds(completedIds);
-                }
-                Cleanup();
-                Application.Current.Shutdown();
-            });
+                var completedIds = Config.LoadCompletedQuestIds();
+                completedIds.Add(_questId);
+                Config.SaveCompletedQuestIds(completedIds);
+            }
+            Cleanup();
+            Application.Current.Shutdown();
             return;
         }
 

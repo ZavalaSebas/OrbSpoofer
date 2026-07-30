@@ -22,6 +22,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _searchDebounceTimer;
     private readonly DispatcherTimer _steamSearchDebounceTimer;
     private CancellationTokenSource? _imageResolutionCts;
+    private FileSystemWatcher? _completedQuestsWatcher;
     private Brush _textSecondaryBrush = System.Windows.Media.Brushes.Gray;
 
     public MainWindow()
@@ -40,6 +41,7 @@ public partial class MainWindow : Window
             _ = PerformSteamSearch();
         };
         Loaded += MainWindow_Loaded;
+        Closed += (_, _) => _completedQuestsWatcher?.Dispose();
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -95,12 +97,45 @@ public partial class MainWindow : Window
                 welcome.ShowDialog();
             }
 
+            try
+            {
+                Directory.CreateDirectory(Config.AppDataPath);
+                _completedQuestsWatcher = new FileSystemWatcher
+                {
+                    Path = Config.AppDataPath,
+                    Filter = Config.CompletedQuestsFile,
+                    NotifyFilter = NotifyFilters.LastWrite,
+                    EnableRaisingEvents = true,
+                };
+                _completedQuestsWatcher.Changed += OnCompletedQuestsChanged;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to set up completed quests watcher: {ex.Message}");
+            }
+
             _ = CheckForUpdateAsync();
         }
         catch (Exception ex)
         {
             LoadingText.Text = $"Failed to load: {ex.Message}";
             StatusMessage.Text = "Error during initialization";
+        }
+    }
+
+    private void OnCompletedQuestsChanged(object sender, FileSystemEventArgs e)
+    {
+        try
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (QuestsView.Visibility == Visibility.Visible)
+                    _ = LoadQuestsAsync();
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to refresh quests: {ex.Message}");
         }
     }
 

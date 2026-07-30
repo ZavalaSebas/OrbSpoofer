@@ -1,6 +1,20 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented in this file.
+
+## [1.2.3] — 2026-07-30
+
+### Fixed
+
+- Quest auto-complete on timer expiry — save was deferred via `Dispatcher.BeginInvoke` causing the quest to not be marked as completed
+- Fake executable cleanup on timer close — process cannot delete itself while running; now uses a helper batch file that waits for the process to exit before deleting
+- Quest list not reflecting completed state after timer closes — main app now watches `completed_quests.json` for changes via `FileSystemWatcher` and refreshes automatically
+
+### Changed
+
+- README: unified Ko-fi URL to match project config
+- DEVELOPMENT.md: removed reusable template section, documented code conventions, added status bar sponsor heart, updated push rule to include local verification
+- CHANGELOG.md: fixed future-tense boilerplate
 
 ## [1.2.2] — 2026-07-22
 
