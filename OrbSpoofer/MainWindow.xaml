@@ -62,18 +62,32 @@
                             HorizontalContentAlignment="Left" Margin="0,0,0,6"
                             Click="BtnQuests_Click"/>
 
-                    <Button x:Name="BtnDatabase" Content="🔍  Discord Database"
+                    <Button x:Name="BtnUnifiedSearch" Content="🔍  Search"
                             Style="{StaticResource GhostButton}"
                             HorizontalContentAlignment="Left" Margin="0,0,0,6"
-                            Click="BtnDatabase_Click"/>
-                    <Button x:Name="BtnManual" Content="✏️  Manual Mode"
-                            Style="{StaticResource GhostButton}"
-                            HorizontalContentAlignment="Left" Margin="0,0,0,6"
-                            Click="BtnManual_Click"/>
-                    <Button x:Name="BtnSteam" Content="🎮  Steam Quest"
-                            Style="{StaticResource GhostButton}"
-                            HorizontalContentAlignment="Left" Margin="0,0,0,6"
-                            Click="BtnSteam_Click"/>
+                            Click="BtnUnifiedSearch_Click"/>
+
+                    <TextBlock x:Name="AdvancedToggle" Text="▸  Advanced"
+                               FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                               Margin="8,10,0,8" Cursor="Hand"
+                               MouseLeftButtonDown="AdvancedToggle_Click"/>
+                    <StackPanel x:Name="AdvancedPanel" Visibility="Collapsed" Margin="8,0,0,0">
+                        <Button x:Name="BtnDatabase" Content="Discord Database"
+                                Style="{StaticResource GhostButton}"
+                                HorizontalContentAlignment="Left" Margin="0,0,0,6"
+                                FontSize="13"
+                                Click="BtnDatabase_Click"/>
+                        <Button x:Name="BtnSteam" Content="Steam Quest"
+                                Style="{StaticResource GhostButton}"
+                                HorizontalContentAlignment="Left" Margin="0,0,0,6"
+                                FontSize="13"
+                                Click="BtnSteam_Click"/>
+                        <Button x:Name="BtnManual" Content="Manual Mode"
+                                Style="{StaticResource GhostButton}"
+                                HorizontalContentAlignment="Left" Margin="0,0,0,6"
+                                FontSize="13"
+                                Click="BtnManual_Click"/>
+                    </StackPanel>
 
                     <Separator Background="{StaticResource BorderBrush}" Margin="0,12,0,12"/>
 
@@ -112,6 +126,113 @@
                                  Background="{StaticResource BorderBrush}"
                                  IsIndeterminate="True" BorderThickness="0"/>
                 </StackPanel>
+
+                <!-- Unified Search View -->
+                <Grid x:Name="UnifiedSearchView" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Search" FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
+                    <TextBlock Grid.Row="0" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                               VerticalAlignment="Bottom" Margin="0,28,0,0"
+                               Text="One result per game. Badge shows Discord, Steam, or Both. Use Advanced to pick a source."/>
+
+                    <Grid Grid.Row="1" Margin="0,16,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="UnifiedSearchBox" Grid.Column="0"
+                                 Style="{StaticResource SearchBox}"
+                                 KeyDown="UnifiedSearchBox_KeyDown"
+                                 TextChanged="UnifiedSearchBox_TextChanged"
+                                 VerticalContentAlignment="Center"/>
+                        <Button x:Name="BtnUnifiedSearchGo" Grid.Column="1" Content="Search"
+                                Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"
+                                Click="BtnUnifiedSearchGo_Click"/>
+                    </Grid>
+
+                    <ListBox x:Name="UnifiedResultsList" Grid.Row="2"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             MouseDoubleClick="UnifiedResultsList_MouseDoubleClick">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource CardBrush}" CornerRadius="10"
+                                        Padding="16" Margin="0,0,0,6"
+                                        ToolTip="Double-click to spoof">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Width="92" Height="48" CornerRadius="8"
+                                                Background="{StaticResource SurfaceBrush}"
+                                                Margin="0,0,14,0">
+                                            <Grid>
+                                                <TextBlock Text="🎮" FontSize="20"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <Image Source="{Binding ImageUrl}" Width="92" Height="48"
+                                                       Stretch="Uniform"
+                                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                           MaxWidth="360"/>
+                                                <Border Margin="10,0,0,0" CornerRadius="4" Padding="8,2"
+                                                        VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#2a2a2a"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Badge}" Value="Discord">
+                                                                    <Setter Property="Background" Value="#5865F2"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Badge}" Value="Steam">
+                                                                    <Setter Property="Background" Value="#1b2838"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Badge}" Value="Both">
+                                                                    <Setter Property="Background" Value="#1a5c3a"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding Badge}" FontSize="10" FontWeight="SemiBold"
+                                                               Foreground="#ffffff"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                                                       Margin="0,4,0,0" Text="{Binding Subtitle}"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="▶"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Padding="8" Width="60" Height="60"
+                                                FontSize="24"
+                                                Tag="{Binding}"
+                                                ToolTip="Spoof"
+                                                Click="UnifiedSpoof_Click"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock x:Name="UnifiedNoResultsText" Grid.Row="2"
+                               Text="Type a game name or process.exe and press Search"
+                               FontSize="15" Foreground="{StaticResource TextMutedBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Visibility="Visible"/>
+                </Grid>
 
                 <!-- Database Search View -->
                 <Grid x:Name="DatabaseView" Visibility="Collapsed">
@@ -372,7 +493,7 @@
                     <TextBlock Grid.Row="1" TextWrapping="Wrap" FontSize="12"
                                Foreground="{StaticResource OrangeBrush}" Margin="0,0,0,16">
                         <Run Text="Quests vary by region and availability. "/>
-                        <Run Text="If there's nothing here, switch to Database mode and type the game name."/>
+                        <Run Text="If there's nothing here, open Search and type the game name."/>
                     </TextBlock>
 
                     <TextBlock x:Name="QuestsLoadingText" Grid.Row="2" Text="Loading quests..."

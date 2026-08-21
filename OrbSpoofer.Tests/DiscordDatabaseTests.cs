@@ -155,4 +155,42 @@ public class DiscordDatabaseTests
         var result = DiscordDatabase.GetWin32Executable(game);
         Assert.Null(result);
     }
+
+    [Fact]
+    public void FindBySteamAppId_ReturnsMatchingGame()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame { Id = "1428207854153633852", Name = "Tokon", SteamAppId = 3787240 });
+        var found = db.FindBySteamAppId(3787240);
+        Assert.NotNull(found);
+        Assert.Equal("1428207854153633852", found!.Id);
+        Assert.Null(db.FindBySteamAppId(1));
+    }
+
+    [Fact]
+    public void NeedsSteamSpoof_NoWin32ButSteamSku_ReturnsTrue()
+    {
+        var game = new DiscordGame { Id = "tokon", SteamAppId = 3787240 };
+        Assert.True(DiscordDatabase.NeedsSteamSpoof(game, out var steamId));
+        Assert.Equal(3787240, steamId);
+    }
+
+    [Fact]
+    public void NeedsSteamSpoof_HasWin32Exe_ReturnsFalse()
+    {
+        var game = new DiscordGame
+        {
+            SteamAppId = 730,
+            Executables = { new DiscordExecutable { Os = "win32", Name = "cs2.exe" } }
+        };
+        Assert.False(DiscordDatabase.NeedsSteamSpoof(game, out _));
+    }
+
+    [Fact]
+    public void NeedsSteamSpoof_NoExeNoSteamSku_ReturnsFalse()
+    {
+        var game = new DiscordGame { Id = "unknown" };
+        Assert.False(DiscordDatabase.NeedsSteamSpoof(game, out var steamId));
+        Assert.Equal(0, steamId);
+    }
 }

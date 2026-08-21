@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using OrbSpoofer.Services;
 
 namespace OrbSpoofer;
 
@@ -7,6 +8,8 @@ namespace OrbSpoofer;
         public static string? ExePathToCleanup { get; private set; }
         public static string? GameName { get; private set; }
         public static string? QuestId { get; private set; }
+
+        private DiscordIpc? _discordIpc;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -17,6 +20,7 @@ namespace OrbSpoofer;
                 ExePathToCleanup = null;
                 GameName = null;
                 QuestId = null;
+                string? discordAppId = null;
 
                 for (int i = 0; i < e.Args.Length - 1; i++)
                 {
@@ -26,7 +30,14 @@ namespace OrbSpoofer;
                         GameName = e.Args[i + 1];
                     if (e.Args[i] == "--quest-id")
                         QuestId = e.Args[i + 1];
+                    if (e.Args[i] == "--discord-app-id")
+                        discordAppId = e.Args[i + 1];
                 }
+
+                if (!string.IsNullOrEmpty(discordAppId))
+                    _discordIpc = DiscordIpc.TryConnect(discordAppId, GameName);
+
+                Exit += (_, _) => _discordIpc?.Dispose();
 
                 var timer = new UI.Windows.TimerWindow(Config.TimerDurationMinutes, ExePathToCleanup, GameName, QuestId);
                 timer.Show();

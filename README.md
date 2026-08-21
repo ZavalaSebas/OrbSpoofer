@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2.2-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-1.2.4-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -43,7 +43,7 @@ The way Discord detects what you're playing is by reading your Windows process l
 3. Double-click a quest (or hit the ▶ button) to start spoofing
 4. Done — Discord thinks you're playing
 
-No active quests? Switch to **Database** or **Steam** mode and search manually. Same result.
+No active quests? Switch to **Search** — it checks Discord's database first, then Steam, and shows one result per game. Need a specific source? Open **Advanced**.
 
 The fake process runs until you close it. Discord keeps detecting it the entire time. Since orb quests don't involve kernel-level anti-cheat, there's nothing watching for renamed executables.
 
@@ -108,21 +108,24 @@ dotnet publish -c Release -r win-x64 \
 </table>
 </div>
 
-### Database Mode (recommended)
+### Search (recommended)
 
 1. Open `OrbSpoofer.exe`
-2. Wait for the Discord game database to load
-3. Use the search bar to find a game — works with full names, abbreviations, whatever
-4. Hit **Spoof** next to the game you want
-5. A timer window opens — keep it running until the quest is done
-6. Discord detects the fake process and shows "Playing [Game]"
+2. If you have active quests, spoof from there. Otherwise go to **Search**
+3. Type a game name — results come from Discord's database first, then Steam
+4. Each game appears once. The badge shows **Discord**, **Steam**, or **Both**
+5. Hit ▶ — Discord-database games spoof as a process name; Steam-only games use Steam Quest mode automatically
+6. A timer window opens — keep it running until the quest is done
 
-### Manual Mode
+### Advanced
 
-1. Go to the **Manual** tab in the sidebar
-2. Type the exact executable name (e.g. `TslGame.exe`)
-3. Click **Spoof**
-4. The process launches in the background
+Database, Steam Quest, and Manual are under **▸ Advanced** in the sidebar if you want to force a specific source.
+
+**Database** — search Discord's detectable games list only.
+
+**Manual** — type the exact executable name (e.g. `TslGame.exe`) and spoof that process.
+
+**Steam Quest** — search Steam and write a fake appmanifest (see [Steam Quest Mode](#steam-quest-mode)).
 
 ### Completing Multiple Quests
 
@@ -145,23 +148,23 @@ When OrbSpoofer launches, it automatically fetches your active Discord quests fr
 - Only games in Discord's detectable games list are shown
 - Promotional quests (published by Discord) are filtered out
 
-**If Active Quests don't load** (API down, no internet, etc.), the app automatically falls back to **Database** mode. You can also switch modes manually from the sidebar at any time.
+**If Active Quests don't load** (API down, no internet, etc.), the app automatically falls back to **Search**. You can also switch modes manually from the sidebar at any time.
 
 <br/>
 
 ## Features
 
-**Active Quests** — Fetches your live Discord quests on launch. Double-click or press ▶ to start spoofing. Falls back to Database mode if the API is unavailable.
+**Active Quests** — Fetches your live Discord quests on launch. Double-click or press ▶ to start spoofing. Steam-only quests switch to Steam mode automatically. Falls back to Search if the API is unavailable.
 
 **Dark Native UI** — Built entirely in WPF with a dark theme, sidebar navigation, styled cards, and smooth interactions. No terminal, no ugly text.
 
 **Discord Game Database** — Pulls the official detectable games list live from Discord's API, with a GitHub-hosted backup if the API is down.
 
-**Smart Search** — Find games by name, abbreviation, or alias. Results are filtered and deduplicated.
+**Unified Search** — One search bar for Discord and Steam. One row per game, with a badge showing Discord, Steam, or Both.
 
 **Game Images** — Results show game images resolved from Discord's CDN or Steam's store automatically.
 
-**Manual Mode** — Spoof any executable name directly for games not in the database.
+**Advanced modes** — Database-only, Steam Quest, and Manual process-name spoofing are still available under Advanced.
 
 **Process Counter** — See how many fake processes are currently active in the status bar.
 
@@ -173,7 +176,7 @@ When OrbSpoofer launches, it automatically fetches your active Discord quests fr
 
 Some games need more than a process name. Discord also checks that Steam shows the game as downloading. Standard spoofing won't cut it — Steam Quest Mode handles it.
 
-1. Go to the **Steam** tab
+1. Open **▸ Advanced** → **Steam**
 2. Search for the game by name
 3. Click **Spoof**
 4. OrbSpoofer fetches game metadata from SteamCMD's API, reads your Steam ID from the registry, generates a fake `appmanifest_<appid>.acf`, and places the executable in the correct Steam directory
@@ -192,18 +195,20 @@ OrbSpoofer/
 │   ├── OrbSpoofer.csproj            .NET 10 WPF project config
 │   ├── App.xaml / .cs              Entry point, theme merge, dual-mode launch
 │   ├── Config.cs                    Constants & centralized configuration
-│   ├── MainWindow.xaml / .cs        Main UI with 4 navigable views
+│   ├── MainWindow.xaml / .cs        Main UI: Quests, Search, Advanced
 │   ├── AssemblyInfo.cs              Assembly metadata
 │   ├── Models/
 │   │   ├── DiscordGame.cs           Discord game data models
 │   │   ├── QuestItem.cs             Active quest display model
-│   │   └── SteamGameInfo.cs         Steam data models
+│   │   ├── SteamGameInfo.cs         Steam data models
+│   │   └── UnifiedSearchItem.cs     Merged Discord + Steam search row
 │   ├── Services/
 │   │   ├── DiscordDatabase.cs       Fetch & search Discord's game list
 │   │   ├── GameFaker.cs             Create & launch fake processes
 │   │   ├── GameImageService.cs      Resolve game images (Discord CDN / Steam)
 │   │   ├── QuestService.cs          Fetch & filter live Discord quests
 │   │   ├── SteamService.cs          Steam detection, API, appmanifest generation
+│   │   ├── UnifiedSearch.cs         Merge Discord + Steam results (one row per game)
 │   │   ├── NetworkHelper.cs         Centralized HTTP client
 │   │   └── Updater.cs               GitHub-based update checker
 │   ├── Exceptions/

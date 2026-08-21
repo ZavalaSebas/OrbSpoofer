@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.4] — 2026-08-21
+
+### Added
+
+- Unified Search — one search bar merges Discord Database and Steam Store results
+- Source badges on each result: Discord, Steam, or Both (one row per game, never duplicated)
+- Advanced sidebar — Database, Steam Quest, and Manual modes are still available when you need a specific source
+- Automatic Steam spoof for quests that have a Steam SKU but no Discord executable
+- Steam AppID parsed from Discord `third_party_skus` for routing and matching
+
+### Changed
+
+- Search is now the primary fallback when Active Quests are empty (was Discord Database)
+- Clicking ▶ on a Steam-only quest goes straight to Steam mode instead of showing a dead-end dialog
+- Steam metadata parsing: missing `config` blocks no longer fail, nested install paths are joined correctly, anti-cheat launchers and redistributable depots are skipped
+
+### Fixed
+
+- Steam-only games such as MARVEL Tokon now use the real shipping executable and game depot instead of Easy Anti-Cheat or a redistributable
+
 ## [1.2.3] — 2026-07-30
 
 ### Fixed

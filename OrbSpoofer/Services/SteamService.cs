@@ -121,56 +121,20 @@ public static class SteamService
         }
     }
 
+    // Discord quests sometimes look for the real game binary (Unreal Shipping, etc.),
+    // not SteamCMD's launcher entry. Tokon: Binaries/Win64/MTFSSteam-Win64-Shipping.exe
+    private static readonly Dictionary<int, string> DiscordVerifiedExes = new()
+    {
+        [3787240] = "Binaries/Win64/MTFSSteam-Win64-Shipping.exe",
+    };
+
     public static async Task<SteamAppInfo?> FetchAppInfoAsync(int appId)
     {
         try
         {
             var url = $"{Config.SteamCmdApiUrl}/{appId}";
             var json = await NetworkHelper.FetchJsonAsync(url);
-
-            if (!json.TryGetProperty("data", out var data) ||
-                !data.TryGetProperty(appId.ToString(), out var appData))
-                return null;
-
-            var name = appData.TryGetProperty("common", out var common) &&
-                       common.TryGetProperty("name", out var nameProp)
-                ? nameProp.GetString() ?? $"App {appId}"
-                : $"App {appId}";
-
-            var installDir = appData.TryGetProperty("config", out var config) &&
-                             config.TryGetProperty("installdir", out var dirProp)
-                ? dirProp.GetString() ?? name
-                : name;
-
-            var executable = "";
-            if (config.TryGetProperty("launch", out var launch) && launch.ValueKind == JsonValueKind.Object)
-            {
-                executable = PickWindowsExe(launch);
-            }
-
-            if (string.IsNullOrEmpty(executable))
-                executable = installDir.Split('/').LastOrDefault() + ".exe";
-
-            string? depotId = null;
-            if (appData.TryGetProperty("depots", out var depots) && depots.ValueKind == JsonValueKind.Object)
-            {
-                foreach (var prop in depots.EnumerateObject())
-                {
-                    if (int.TryParse(prop.Name, out _) && prop.Value.ValueKind == JsonValueKind.Object)
-                    {
-                        depotId = prop.Name;
-                        break;
-                    }
-                }
-            }
-
-            return new SteamAppInfo
-            {
-                Name = name,
-                InstallDir = installDir,
-                Executable = executable,
-                DepotId = depotId
-            };
+            return ParseAppInfo(json, appId);
         }
         catch (NetworkError)
         {
@@ -178,33 +142,98 @@ public static class SteamService
         }
     }
 
+    // Matches orbshacker steam.py: missing config is {} (not a crash), and launch
+    // entries without a config block default oslist to "windows".
+    public static SteamAppInfo? ParseAppInfo(JsonElement json, int appId)
+    {
+        if (json.ValueKind != JsonValueKind.Object ||
+            !json.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Object ||
+            !data.TryGetProperty(appId.ToString(), out var appData) || appData.ValueKind != JsonValueKind.Object)
+            return null;
+
+        var name = $"App {appId}";
+        if (appData.TryGetProperty("common", out var common) && common.ValueKind == JsonValueKind.Object &&
+            common.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String)
+            name = nameProp.GetString() ?? name;
+
+        var hasConfig = appData.TryGetProperty("config", out var config) && config.ValueKind == JsonValueKind.Object;
+        var installDir = name;
+        if (hasConfig && config.TryGetProperty("installdir", out var dirProp) && dirProp.ValueKind == JsonValueKind.String)
+            installDir = dirProp.GetString() ?? installDir;
+
+        var executable = "";
+        if (DiscordVerifiedExes.TryGetValue(appId, out var verifiedExe))
+            executable = verifiedExe;
+        else if (hasConfig && config.TryGetProperty("launch", out var launch) && launch.ValueKind == JsonValueKind.Object)
+            executable = PickWindowsExe(launch);
+
+        if (string.IsNullOrEmpty(executable))
+            executable = installDir.Split('/').LastOrDefault() + ".exe";
+
+        string? depotId = null;
+        if (appData.TryGetProperty("depots", out var depots) && depots.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var prop in depots.EnumerateObject())
+            {
+                if (!int.TryParse(prop.Name, out _) || prop.Value.ValueKind != JsonValueKind.Object)
+                    continue;
+                // Skip Steamworks redistributables (VC++, DirectX, etc.)
+                if (prop.Value.TryGetProperty("depotfromapp", out _) ||
+                    prop.Value.TryGetProperty("sharedinstall", out _))
+                    continue;
+                depotId = prop.Name;
+                break;
+            }
+        }
+
+        return new SteamAppInfo
+        {
+            Name = name,
+            InstallDir = installDir,
+            Executable = executable,
+            DepotId = depotId
+        };
+    }
+
+    public static string GetInstallExePath(string steamPath, string installDir, string executable)
+    {
+        var relative = Path.Combine(
+            installDir,
+            executable.Replace('/', Path.DirectorySeparatorChar));
+        return Path.Combine(steamPath, "steamapps", "common", relative);
+    }
+
     private static string PickWindowsExe(JsonElement launch)
     {
         var entries = launch.EnumerateObject()
             .Where(p => p.Value.ValueKind == JsonValueKind.Object)
-            .OrderBy(p => p.Name)
-            .ToList();
+            .OrderBy(p => p.Name);
 
         foreach (var entry in entries)
         {
-            if (!entry.Value.TryGetProperty("config", out var config) ||
-                config.ValueKind != JsonValueKind.Object)
+            var oslist = "windows";
+            if (entry.Value.TryGetProperty("config", out var cfg) && cfg.ValueKind == JsonValueKind.Object &&
+                cfg.TryGetProperty("oslist", out var os) && os.ValueKind == JsonValueKind.String)
+                oslist = os.GetString() ?? "windows";
+
+            if (!oslist.Contains("windows") && oslist.Length > 0)
                 continue;
 
-            var oslist = config.TryGetProperty("oslist", out var os)
-                ? os.GetString() ?? "windows"
-                : "windows";
+            if (!entry.Value.TryGetProperty("executable", out var e) || e.ValueKind != JsonValueKind.String)
+                continue;
 
-            if (oslist.Contains("windows") || string.IsNullOrEmpty(oslist))
-            {
-                if (entry.Value.TryGetProperty("executable", out var e) &&
-                    e.ValueKind == JsonValueKind.String)
-                {
-                    var exe = e.GetString() ?? "";
-                    if (exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-                        return exe.Replace('\\', '/');
-                }
-            }
+            var exe = (e.GetString() ?? "").Replace('\\', '/');
+            if (!exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // Easy Anti-Cheat's launcher kills non-EAC binaries named start_protected_game.exe
+            var file = Path.GetFileName(exe);
+            if (file.Equals("start_protected_game.exe", StringComparison.OrdinalIgnoreCase) ||
+                file.Contains("easyanticheat", StringComparison.OrdinalIgnoreCase) ||
+                file.Contains("battleye", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            return exe;
         }
         return "";
     }

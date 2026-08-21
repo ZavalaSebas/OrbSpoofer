@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private string? _pendingUpdateUrl;
     private readonly DispatcherTimer _searchDebounceTimer;
     private readonly DispatcherTimer _steamSearchDebounceTimer;
+    private readonly DispatcherTimer _unifiedSearchDebounceTimer;
     private CancellationTokenSource? _imageResolutionCts;
     private FileSystemWatcher? _completedQuestsWatcher;
     private Brush _textSecondaryBrush = System.Windows.Media.Brushes.Gray;
@@ -39,6 +40,12 @@ public partial class MainWindow : Window
         {
             _steamSearchDebounceTimer.Stop();
             _ = PerformSteamSearch();
+        };
+        _unifiedSearchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _unifiedSearchDebounceTimer.Tick += (_, _) =>
+        {
+            _unifiedSearchDebounceTimer.Stop();
+            _ = PerformUnifiedSearch();
         };
         Loaded += MainWindow_Loaded;
         Closed += (_, _) => _completedQuestsWatcher?.Dispose();
@@ -86,7 +93,7 @@ public partial class MainWindow : Window
             SteamPathText.Text = steamPath ?? "Steam not found";
 
             var questsOk = await LoadQuestsAsync();
-            ShowView(questsOk ? QuestsView : DatabaseView);
+            ShowView(questsOk ? QuestsView : UnifiedSearchView);
 
             if (UI.Windows.WelcomeWindow.ShouldShow())
             {
@@ -142,6 +149,7 @@ public partial class MainWindow : Window
     private void ShowView(FrameworkElement view)
     {
         LoadingPanel.Visibility = Visibility.Collapsed;
+        UnifiedSearchView.Visibility = Visibility.Collapsed;
         DatabaseView.Visibility = Visibility.Collapsed;
         ManualView.Visibility = Visibility.Collapsed;
         SteamView.Visibility = Visibility.Collapsed;
@@ -152,6 +160,7 @@ public partial class MainWindow : Window
         ResetButtonStyles();
         var btn = view switch
         {
+            _ when view == UnifiedSearchView => BtnUnifiedSearch,
             _ when view == DatabaseView => BtnDatabase,
             _ when view == ManualView => BtnManual,
             _ when view == SteamView => BtnSteam,
@@ -161,12 +170,16 @@ public partial class MainWindow : Window
         };
         if (btn != null)
             btn.Background = (System.Windows.Media.Brush)FindResource("CardBrush");
+
+        if (view == DatabaseView || view == ManualView || view == SteamView)
+            SetAdvancedExpanded(true);
     }
 
     private void ResetButtonStyles()
     {
         var transparent = System.Windows.Media.Brushes.Transparent;
         BtnQuests.Background = transparent;
+        BtnUnifiedSearch.Background = transparent;
         BtnDatabase.Background = transparent;
         BtnManual.Background = transparent;
         BtnSteam.Background = transparent;
@@ -178,7 +191,16 @@ public partial class MainWindow : Window
         StatusMessage.Foreground = _textSecondaryBrush;
     }
 
-    // Navigation
+    private void AdvancedToggle_Click(object sender, MouseButtonEventArgs e) =>
+        SetAdvancedExpanded(AdvancedPanel.Visibility != Visibility.Visible);
+
+    private void SetAdvancedExpanded(bool expanded)
+    {
+        AdvancedPanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        AdvancedToggle.Text = expanded ? "▾  Advanced" : "▸  Advanced";
+    }
+
+    private void BtnUnifiedSearch_Click(object sender, RoutedEventArgs e) => ShowView(UnifiedSearchView);
     private void BtnDatabase_Click(object sender, RoutedEventArgs e) => ShowView(DatabaseView);
     private void BtnManual_Click(object sender, RoutedEventArgs e) => ShowView(ManualView);
     private void BtnSteam_Click(object sender, RoutedEventArgs e) => ShowView(SteamView);
@@ -239,7 +261,7 @@ public partial class MainWindow : Window
 
             if (quests.Count == 0)
             {
-                QuestsEmptyText.Text = "No active quests found. Try Discord Database mode to spoof manually.";
+                QuestsEmptyText.Text = "No active quests found. Try Search to spoof a game manually.";
                 QuestsEmptyText.Visibility = Visibility.Visible;
                 return false;
             }
@@ -256,7 +278,7 @@ public partial class MainWindow : Window
         }
         catch (Exception)
         {
-            QuestsEmptyText.Text = "No active quests found. The API may be unavailable — use Discord Database mode to spoof manually.";
+            QuestsEmptyText.Text = "No active quests found. The API may be unavailable — use Search to spoof a game.";
             QuestsEmptyText.Visibility = Visibility.Visible;
             return false;
         }
@@ -285,6 +307,13 @@ public partial class MainWindow : Window
             }
 
             var game = matches[0];
+            if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
+            {
+                StatusMessage.Text = $"{quest.GameName} has no Discord executable — using Steam mode...";
+                await SteamSpoof(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
+                return;
+            }
+
             var exeName = DiscordDatabase.GetWin32Executable(game);
             if (exeName == null)
             {
@@ -400,6 +429,109 @@ public partial class MainWindow : Window
     }
 
     private void BtnSearch_Click(object sender, RoutedEventArgs e) => PerformDatabaseSearch(animate: true);
+
+    private void UnifiedSearchBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+            _ = PerformUnifiedSearch();
+    }
+
+    private void UnifiedSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _unifiedSearchDebounceTimer.Stop();
+        _unifiedSearchDebounceTimer.Start();
+    }
+
+    private void BtnUnifiedSearchGo_Click(object sender, RoutedEventArgs e) => _ = PerformUnifiedSearch();
+
+    private async Task PerformUnifiedSearch()
+    {
+        var query = UnifiedSearchBox.Text.Trim();
+        if (string.IsNullOrEmpty(query))
+        {
+            UnifiedResultsList.ItemsSource = null;
+            UnifiedNoResultsText.Text = "Type a game name or process.exe and press Search";
+            UnifiedNoResultsText.Visibility = Visibility.Visible;
+            return;
+        }
+
+        StatusMessage.Text = $"Searching '{query}'...";
+        List<SteamSearchResult> steamHits = [];
+        try
+        {
+            steamHits = await SteamService.SearchGamesAsync(query);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Steam search failed: {ex.Message}");
+        }
+
+        var discordHits = _db.SearchGames(query);
+        var items = UnifiedSearch.Merge(query, discordHits, steamHits);
+
+        foreach (var item in items.Where(i => i.DiscordGame != null && string.IsNullOrEmpty(i.ImageUrl)))
+        {
+            var game = item.DiscordGame!;
+            _ = GameImageService.GetImageUrlAsync(game).ContinueWith(t =>
+            {
+                if (t.IsCompletedSuccessfully && t.Result != null)
+                    Dispatcher.BeginInvoke(() => item.ImageUrl = t.Result);
+            });
+        }
+
+        UnifiedResultsList.ItemsSource = items;
+        UnifiedNoResultsText.Visibility = items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        StatusMessage.Text = items.Count > 0
+            ? $"Found {items.Count} result(s) for '{query}'"
+            : $"No results for '{query}'";
+
+        if (items.Count > 0)
+            DispatchAnimation(() => AnimateListBoxItemsAsync(UnifiedResultsList));
+    }
+
+    private async void UnifiedSpoof_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: UnifiedSearchItem item })
+            await SpoofUnified(item);
+    }
+
+    private async void UnifiedResultsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (UnifiedResultsList.SelectedItem is UnifiedSearchItem item)
+            await SpoofUnified(item);
+    }
+
+    private async Task SpoofUnified(UnifiedSearchItem item)
+    {
+        if (!string.IsNullOrEmpty(item.ManualExe))
+        {
+            var exeName = item.ManualExe;
+            StatusMessage.Text = $"Creating fake process: {exeName}...";
+            var path = _faker.CreateFakeGame(exeName);
+            StatusMessage.Text = path != null && _faker.LaunchExecutable(path, exeName)
+                ? $"Running: {exeName}"
+                : $"Failed to launch: {exeName}";
+            return;
+        }
+
+        if (item.DiscordGame != null && DiscordDatabase.GetWin32Executable(item.DiscordGame) is { } exe)
+        {
+            SpoofGame(new GameDisplayItem { Name = item.Name, Game = item.DiscordGame });
+            return;
+        }
+
+        if (item.SteamAppId is int steamId and > 0)
+        {
+            await SteamSpoof(new SteamGameDisplayItem { Id = steamId, Name = item.Name });
+            return;
+        }
+
+        new UI.Windows.InfoDialog(
+            "No executable found",
+            $"{item.Name} has no Discord executable or Steam AppID.",
+            "Try Advanced → Manual Mode with the exact process name.").ShowDialog();
+        StatusMessage.Text = $"{item.Name} cannot be spoofed automatically";
+    }
 
     private void PerformDatabaseSearch(bool animate = false)
     {
@@ -719,7 +851,7 @@ public partial class MainWindow : Window
             await SteamSpoof(item);
     }
 
-    private async Task SteamSpoof(SteamGameDisplayItem item)
+    private async Task SteamSpoof(SteamGameDisplayItem item, string? questId = null)
     {
         try
         {
@@ -754,13 +886,16 @@ public partial class MainWindow : Window
                 return;
             }
 
-            var exePath = Path.Combine(steamPath, "steamapps", "common", info.InstallDir, info.Executable);
+            var exePath = SteamService.GetInstallExePath(steamPath, info.InstallDir, info.Executable);
             StatusMessage.Text = "Creating fake executable...";
             var path = _faker.CreateSteamFakeGame(exePath);
+            var discordAppId = _db.FindBySteamAppId(item.Id)?.Id;
 
-            if (path != null && _faker.LaunchExecutable(path, info.Name))
+            if (path != null && _faker.LaunchExecutable(path, info.Name, questId, discordAppId))
             {
-                StatusMessage.Text = $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
+                StatusMessage.Text = questId != null
+                    ? $"Quest spoof active (Steam): {info.Name}"
+                    : $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
             }
             else
             {

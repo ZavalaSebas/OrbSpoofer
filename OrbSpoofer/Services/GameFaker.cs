@@ -147,13 +147,15 @@ public class GameFaker
         }
     }
 
-    public bool LaunchExecutable(string exePath, string? gameName = null, string? questId = null)
+    public bool LaunchExecutable(string exePath, string? gameName = null, string? questId = null, string? discordAppId = null)
     {
         try
         {
             var args = $"--timer-mode --exe-path \"{exePath}\" --game-name \"{gameName ?? Path.GetFileNameWithoutExtension(exePath)}\"";
             if (!string.IsNullOrEmpty(questId))
                 args += $" --quest-id \"{questId}\"";
+            if (!string.IsNullOrEmpty(discordAppId))
+                args += $" --discord-app-id \"{discordAppId}\"";
 
             var psi = new ProcessStartInfo
             {

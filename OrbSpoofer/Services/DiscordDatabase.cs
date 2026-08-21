@@ -139,6 +139,22 @@ public class DiscordDatabase
                 }
             }
 
+            if (item.TryGetProperty("third_party_skus", out var skus) && skus.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var sku in skus.EnumerateArray())
+                {
+                    var dist = sku.TryGetProperty("distributor", out var d) ? d.GetString() : null;
+                    if (!string.Equals(dist, "steam", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (sku.TryGetProperty("id", out var steamId) &&
+                        int.TryParse(steamId.GetString(), out var parsed))
+                    {
+                        game.SteamAppId = parsed;
+                        break;
+                    }
+                }
+            }
+
             Games.Add(game);
         }
     }
@@ -192,5 +208,14 @@ public class DiscordDatabase
     {
         var candidates = FilterWin32Exes(game, skipPatterns: true);
         return candidates.Count > 0 ? candidates[0] : null;
+    }
+
+    public DiscordGame? FindBySteamAppId(int steamAppId) =>
+        Games.FirstOrDefault(g => g.SteamAppId == steamAppId);
+
+    public static bool NeedsSteamSpoof(DiscordGame game, out int steamAppId)
+    {
+        steamAppId = game.SteamAppId ?? 0;
+        return GetWin32Executable(game) == null && steamAppId > 0;
     }
 }

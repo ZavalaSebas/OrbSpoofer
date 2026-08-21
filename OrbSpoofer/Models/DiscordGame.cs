@@ -7,6 +7,7 @@ public class DiscordGame
     public List<string> Aliases { get; set; } = [];
     public List<DiscordExecutable> Executables { get; set; } = [];
     public string? IconHash { get; set; }
+    public int? SteamAppId { get; set; }
 
     public string NameLower => _nameLower ??= Name.ToLowerInvariant();
     public List<string> AliasesLower => _aliasesLower ??= Aliases.Select(a => a.ToLowerInvariant()).ToList();

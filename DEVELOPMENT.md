@@ -13,6 +13,8 @@ OrbSpoofer/
 │   │   ├── NetworkHelper.cs       # HTTP client (User-Agent set here), FetchJson, DownloadFile
 │   │   ├── DiscordDatabase.cs     # Discord game database + GitHub backup
 │   │   ├── SteamService.cs        # Steam manifest generation
+│   │   ├── UnifiedSearch.cs       # Merge Discord + Steam search (one row per game)
+│   │   ├── DiscordIpc.cs          # Timer-process Discord activity (Steam spoofs)
 │   │   ├── GameFaker.cs           # Fake game process spawning (--timer-mode, --quest-id)
 │   │   ├── QuestService.cs        # Active quests from api.discordquest.com
 │   │   └── GameImageService.cs    # Resolves game images (Discord CDN / Steam store)
@@ -20,16 +22,18 @@ OrbSpoofer/
 │   │   ├── GameDisplayItem.cs     # Display model for DB search results (INotifyPropertyChanged)
 │   │   ├── SteamGameDisplayItem.cs# Display model for Steam search + CDN image URL
 │   │   ├── QuestItem.cs           # Display model for active quests
-│   │   └── DiscordGame.cs         # Discord detectable game entry (+ optional IconHash)
+│   │   ├── UnifiedSearchItem.cs   # Merged Discord + Steam search row
+│   │   └── DiscordGame.cs         # Discord detectable game entry (+ SteamAppId, IconHash)
 │   ├── UI/
 │   │   └── Windows/
 │   │       ├── TimerWindow.xaml.cs   # Countdown timer, auto-saves quest completion on finish
 │   │       ├── UpdateWindow.xaml.cs   # Download progress UI
 │   │       ├── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
 │   │       └── InfoDialog.xaml.cs     # Themed dialog for warnings (no executable, etc.)
-├── OrbSpoofer.Tests/              # xUnit test project (21 tests)
-│   ├── DiscordDatabaseTests.cs    # Search, filtering, exe matching
-│   ├── SteamServiceTests.cs       # Manifest generation, depots
+├── OrbSpoofer.Tests/              # xUnit test project (38 tests)
+│   ├── DiscordDatabaseTests.cs    # Search, filtering, exe matching, Steam SKU helpers
+│   ├── SteamServiceTests.cs       # Manifest generation, depots, ParseAppInfo, install paths
+│   ├── UnifiedSearchTests.cs      # Merge, badges, de-duplication, manual fallback
 │   └── ConfigTests.cs             # AssemblyVersion format & consistency
 ├── .github/workflows/release.yml  # CI/CD pipeline
 ├── OrbSpoofer.slnx                # Solution file linking app + tests
@@ -41,7 +45,7 @@ OrbSpoofer/
 **Single source of truth**: `<Version>` in `OrbSpoofer/OrbSpoofer.csproj:11`
 
 ```xml
-<Version>1.2.2</Version>
+<Version>1.2.4</Version>
 <AssemblyVersion>$(Version).0</AssemblyVersion>
 ```
 
@@ -97,26 +101,26 @@ Benefits: human-readable, merge-friendly, no VS-generated garbage.
 - The HTTP client timeout is `Config.RequestTimeout` (10 seconds)
 - Assembly version must match csproj `<Version>` or the update check will compare wrong values
 
-## Tests (21 xUnit tests)
+## Tests (38 xUnit tests)
 
 Run with: `dotnet test OrbSpoofer.slnx -c Release`
 
 ### DiscordDatabaseTests
-- `SearchGames_EmptyQuery_ReturnsAllGames`
-- `SearchGames_ValidQuery_ReturnsMatchingGames`
-- `SearchGames_NoMatch_ReturnsEmptyList`
-- `FilterWin32Exes_ExcludesKnownNonGameExes`
-- Various edge cases for executable filtering
+- Search by name/alias, filtering, exe matching
+- `FindBySteamAppId` / `NeedsSteamSpoof` for Steam SKU routing
 
 ### SteamServiceTests
-- `GenerateAppManifest_HasRequiredFields`
-- `GenerateAppManifest_DepotsNotEmpty`
-- `GenerateAppManifest_NoInvalidDepots`
-- Manifests contain all expected keys (AppName, AppVersion, etc.)
+- Manifest generation (required fields, depots, last owner)
+- `ParseAppInfo` with missing `config` and Tokon shipping exe
+- Nested `GetInstallExePath`
+
+### UnifiedSearchTests
+- Discord-only, Steam-only, and Both badges
+- One row per game (Steam duplicates dropped)
+- Manual fallback for `.exe` queries and empty results
 
 ### ConfigTests
-- `AssemblyVersion_IsValidSemVer` — verifies format matches `x.y.z`
-- `AssemblyVersion_MatchesCsprojVersion` — reads csproj and compares at build time
+- `AssemblyVersion` is non-empty and matches `x.y.z`
 
 ## Steam Quest Mode
 
@@ -124,16 +128,22 @@ Steam Quest mode creates an appmanifest + fake executable to make Discord detect
 
 ### Flow
 1. User searches by game name → `SteamService.SearchGamesAsync()` queries the Steam Store API
-2. User selects a game → `SteamService.FetchAppInfoAsync()` gets executable name, installdir, depot ID from SteamCMD API
-3. `SteamService.WriteAppManifest()` generates the `.acf` file in `steamapps/common/`
-4. `GameFaker.CreateSteamFakeGame()` copies the OrbSpoofer exe with the game's executable name into the installdir
-5. The fake process is launched
+2. User selects a game → `SteamService.FetchAppInfoAsync()` → `ParseAppInfo()` gets executable, installdir, depot ID from SteamCMD API
+3. `SteamService.WriteAppManifest()` generates the `.acf` file in `steamapps/`
+4. `GameFaker.CreateSteamFakeGame()` copies the OrbSpoofer exe to `GetInstallExePath(steamPath, installDir, executable)` (supports nested paths like `Binaries/Win64/...`)
+5. The fake process is launched (`LaunchExecutable` may pass `--discord-app-id` when the Discord DB has a matching Steam SKU)
 
-### InstalledDepots fix
-The appmanifest's `InstalledDepots` section was always empty. Fixed by populating it with the depot ID (same data as `StagedDepots`) so Steam recognizes the game as partially installed.
+### ParseAppInfo / PickWindowsExe
+- Missing `config` does not throw; launch entries without `oslist` default to Windows
+- Skips Easy Anti-Cheat / BattlEye launcher names (`start_protected_game.exe`, etc.)
+- Redistributable depots (`depotfromapp`, `sharedinstall`) are skipped so the real game depot is used
+- `DiscordVerifiedExes` maps known Steam AppIDs to the Discord-verified shipping binary (e.g. Tokon `3787240`)
+
+### InstalledDepots
+The appmanifest's `InstalledDepots` section must be populated with the depot ID (same data as `StagedDepots`) so Steam recognizes the game as partially installed.
 
 ### Known limitation
-Steam mode is inconsistent — Discord detects the spoofed process for some games but not others. The appmanifest combined with Discord's Steam integration appears to cause stricter validation for certain titles. The status message warns: *"Steam mode may not work for all games, use DB mode if it doesn't detect"*
+Steam mode is inconsistent — Discord detects the spoofed process for some games but not others. Unified Search prefers Discord Database when a win32 exe exists. The Advanced Steam status message still warns that DB mode is more reliable when both are available.
 
 ## Quest System
 
@@ -148,6 +158,7 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 6. Completed quest IDs are loaded from `completed_quests.json` and matched against loaded quests
 7. Quests are sorted: active first (by expiry), completed last
 8. Quests whose matching game has no win32 executable in the Discord DB are flagged with `NeedsSteamMode = true`
+9. `QuestsSpoof_Click` calls `DiscordDatabase.NeedsSteamSpoof()` — if the game has a Steam SKU and no win32 exe, it auto-routes to `SteamSpoof` instead of showing `InfoDialog`. The dialog is only shown when neither path exists.
 
 ### Completed Quests
 - Toggle via circular button (32×32, `CornerRadius="16"`) next to the spoof button
@@ -157,8 +168,9 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 
 ### UI
 - QuestsView is the **default startup view** since v1.2.0
-- If the quest API fails on first launch, the app silently falls back to Discord Database view
+- If the quest API fails on first launch, the app silently falls back to **Unified Search** (since v1.2.4)
 - If the user manually clicks Active Quests later and it fails, a "no quests found" message is shown
+- Sidebar: **Active Quests** + **Search** at the top; Database / Steam / Manual live under a collapsed **▸ Advanced** panel
 - Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, spoof button, completion toggle, and **"⚠ Steam required"** label (when `NeedsSteamMode` is true)
 - Completed quests: card opacity 0.45, strikethrough on game/quest names, green filled circle with ✓
 - Toggle animation: fade out → re-sort → staggered fade in
@@ -169,10 +181,23 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 - `DiscordCdnBase` — `https://cdn.discordapp.com/`
 - `CompletedQuestsFile` — `"completed_quests.json"` (in `AppDataPath`)
 
+## Unified Search
+
+Primary search path since v1.2.4. `PerformUnifiedSearch()` queries Discord DB and Steam Store in parallel, then `UnifiedSearch.Merge()` produces one `UnifiedSearchItem` per game.
+
+### Merge rules
+- Discord hit with a win32 exe, no Steam match → badge **Discord**
+- Discord hit and Steam match (id or name) → one row, badge **Both** (never two rows)
+- Discord hit with no win32 exe but a Steam SKU/AppID → badge **Steam** or **Both**
+- Steam hits not already covered → badge **Steam**
+- `.exe` query or zero hits → append a **Manual** row
+
+`SpoofUnified()` still prefers Discord exe when present; Steam is the fallback. Database / Steam / Manual remain under Advanced for forcing a source.
+
 ## UI Components
 
 ### InfoDialog (`UI/Windows/InfoDialog.xaml`)
-Custom themed WPF dialog window for non-critical warnings. Used when a game has no executable in Discord's database — tells the user process spoofing won't work and suggests Steam Quest or Manual mode. Shown as a modal (`ShowDialog()`). Styled with the same dark theme (`BackgroundBrush`, `TextPrimaryBrush`, `PrimaryBrush` accent).
+Custom themed WPF dialog window for non-critical warnings. Used when a game has no Discord executable **and** no Steam SKU — tells the user process spoofing won't work and suggests Advanced → Steam Quest or Manual. Shown as a modal (`ShowDialog()`). Styled with the same dark theme (`BackgroundBrush`, `TextPrimaryBrush`, `PrimaryBrush` accent).
 
 ### Status bar sponsor heart
 The status bar displays a ❤ icon (bottom-right) linked to the Ko-fi donation page (`Config.KofiUrl`). Defined in `MainWindow.xaml:691-694`, click handled by `Kofi_HeartClick`.
@@ -195,7 +220,7 @@ Results are cached in a `ConcurrentDictionary` (memory-only, per session). Steam
 
 ### Search debounce
 
-Both Database and Steam search use a 150ms `DispatcherTimer` debounce. `SearchBox_TextChanged` and `SteamSearchBox_TextChanged` restart the timer on each keystroke. The actual search fires only after 150ms of inactivity, reducing per-keystroke allocations (list creation, LINQ queries, image resolution).
+Both Database, Steam, and Unified Search use a 150ms `DispatcherTimer` debounce. `SearchBox_TextChanged`, `SteamSearchBox_TextChanged`, and `UnifiedSearchBox_TextChanged` restart the timer on each keystroke. The actual search fires only after 150ms of inactivity, reducing per-keystroke allocations (list creation, LINQ queries, image resolution).
 
 ### CancellationToken for image resolution
 
@@ -286,7 +311,7 @@ The welcome window respects a per-version flag. The sentinel file (`welcome.flag
 
 The project website lives at `docs/index.html` and is deployed automatically by GitHub Pages on push to `main`. Configured in repo Settings > Pages > Source: "GitHub Actions". The site shows version, download link, and release info.
 
-The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.2`) is used if the API is unavailable. No manual version updates needed in the HTML.
+The CTA download button auto-updates its version text from the GitHub Releases API on page load. A hardcoded fallback (`v1.2.4`) is used if the API is unavailable. No manual version updates needed in the HTML after a release exists; keep the fallback in sync when bumping.
 
 ## Known Issues & Resolutions
 
@@ -357,4 +382,4 @@ bump v1.2.0
 | `OrbSpoofer/Services/Updater.cs` | Update check, download, swap, cleanup |
 | `OrbSpoofer/Services/NetworkHelper.cs` | HTTP client with User-Agent, JSON fetching, file download |
 | `.github/workflows/release.yml` | CI/CD: build → test → release on version bump |
-| `OrbSpoofer.Tests/` | 21 xUnit tests |
+| `OrbSpoofer.Tests/` | 38 xUnit tests |
