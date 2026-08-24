@@ -200,6 +200,24 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         AdvancedToggle.Text = expanded ? "▾  Advanced" : "▸  Advanced";
     }
 
+    private bool _sidebarCollapsed = false;
+    private void BtnToggleSidebar_Click(object sender, RoutedEventArgs e)
+    {
+        _sidebarCollapsed = !_sidebarCollapsed;
+        SidebarBorder.Width = _sidebarCollapsed ? 48 : 220;
+        var buttons = new[] { BtnQuests, BtnUnifiedSearch, BtnDatabase, BtnSteam, BtnManual, BtnCredits, BtnUpdateReminder };
+        foreach (var btn in buttons)
+        {
+            if (btn.Content is StackPanel sp && sp.Children.Count == 2 && sp.Children[1] is System.Windows.Controls.TextBlock tb)
+            {
+                tb.Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+                if (_sidebarCollapsed) btn.ToolTip = tb.Text; else btn.ToolTip = null;
+            }
+        }
+        AdvancedToggle.Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+        AdvancedPanel.Visibility = _sidebarCollapsed ? Visibility.Collapsed : (AdvancedToggle.Text.StartsWith("▾") ? Visibility.Visible : Visibility.Collapsed);
+    }
+
     private void BtnUnifiedSearch_Click(object sender, RoutedEventArgs e) => ShowView(UnifiedSearchView);
     private void BtnDatabase_Click(object sender, RoutedEventArgs e) => ShowView(DatabaseView);
     private void BtnManual_Click(object sender, RoutedEventArgs e) => ShowView(ManualView);
