@@ -22,8 +22,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="..\OS.png" Link="OS.png"/>
-    <EmbeddedResource Include="Resources\WhatsNew.txt"/>
+    <Resource Include="..\OS.png" Link="OS.png" />
+    <EmbeddedResource Include="Resources\WhatsNew.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

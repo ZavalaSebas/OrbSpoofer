@@ -10,7 +10,7 @@ using System.Windows.Media.Animation;
 
 namespace OrbSpoofer.UI.Windows;
 
-public partial class WelcomeWindow : Window
+public partial class WelcomeWindow : Wpf.Ui.Controls.FluentWindow
 {
     public WelcomeWindow()
     {

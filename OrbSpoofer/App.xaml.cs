@@ -13,6 +13,8 @@ namespace OrbSpoofer;
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Fluent dark + accent before any window shows (mirrors Bridge/App.xaml.cs)
+            try { Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark); } catch { }
             base.OnStartup(e);
 
             if (e.Args.Contains("--timer-mode"))
@@ -41,13 +43,31 @@ namespace OrbSpoofer;
 
                 var timer = new UI.Windows.TimerWindow(Config.TimerDurationMinutes, ExePathToCleanup, GameName, QuestId);
                 timer.Show();
+                TryApplyMica(timer);
                 MainWindow = timer;
             }
             else
             {
                 var main = new MainWindow();
                 main.Show();
+                TryApplyMica(main);
                 MainWindow = main;
             }
+        }
+
+        private static void TryApplyMica(Window window)
+        {
+            try
+            {
+                // Mica on Win11, fallback to solid on Win10 (Bridge pattern)
+                Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
+                    Wpf.Ui.Appearance.ApplicationTheme.Dark,
+                    Wpf.Ui.Controls.WindowBackdropType.Mica,
+                    updateAccent: false);
+                // Also set per-window backdrop if API available
+                if (window is Wpf.Ui.Controls.FluentWindow fw)
+                    fw.WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType.Mica;
+            }
+            catch { }
         }
     }

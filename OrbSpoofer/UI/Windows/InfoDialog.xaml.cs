@@ -3,7 +3,7 @@ using System.Windows.Documents;
 
 namespace OrbSpoofer.UI.Windows;
 
-public partial class InfoDialog : Window
+public partial class InfoDialog : Wpf.Ui.Controls.FluentWindow
 {
     public InfoDialog(string title, params string[] lines)
     {

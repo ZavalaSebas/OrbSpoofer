@@ -1,22 +1,29 @@
-<Window x:Class="OrbSpoofer.UI.Windows.WelcomeWindow"
+<ui:FluentWindow x:Class="OrbSpoofer.UI.Windows.WelcomeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Thanks for downloading OrbSpoofer" Height="520" Width="500"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Thanks for downloading OrbSpoofer" Height="540" Width="520"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="{StaticResource BackgroundBrush}"
         Foreground="{StaticResource TextPrimaryBrush}"
-        Icon="/OrbSpoofer;component/OS.png">
+        Icon="/OrbSpoofer;component/OS.png"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <ui:TitleBar Grid.Row="0" Title="Welcome" Height="40"/>
+
         <!-- Header -->
-        <Border x:Name="HeaderBorder" Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+        <Border x:Name="HeaderBorder" Grid.Row="1" Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
                 Padding="28,16">
             <StackPanel Orientation="Horizontal">
@@ -33,7 +40,7 @@
         </Border>
 
         <!-- Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="24,16,24,0">
 
                 <Border x:Name="CardWhatsNew" Background="{StaticResource CardBrush}" CornerRadius="10"
@@ -93,7 +100,7 @@
         </ScrollViewer>
 
         <!-- Footer -->
-        <Border x:Name="FooterBorder" Grid.Row="2" Background="{StaticResource SurfaceBrush}"
+        <Border x:Name="FooterBorder" Grid.Row="3" Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                 Padding="20,12">
             <Grid>
@@ -116,4 +123,4 @@
             </Grid>
         </Border>
     </Grid>
-</Window>
+</ui:FluentWindow>

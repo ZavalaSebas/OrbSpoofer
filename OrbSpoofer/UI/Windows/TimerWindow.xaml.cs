@@ -7,7 +7,7 @@ using System.Windows.Threading;
 
 namespace OrbSpoofer.UI.Windows;
 
-public partial class TimerWindow : Window
+public partial class TimerWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly DispatcherTimer _timer;
     private readonly int _totalSeconds;

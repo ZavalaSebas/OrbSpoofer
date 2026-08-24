@@ -4,7 +4,7 @@ using OrbSpoofer.Services;
 
 namespace OrbSpoofer.UI.Windows;
 
-public partial class UpdateWindow : Window
+public partial class UpdateWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly string _tagName;
     private readonly string _downloadUrl;

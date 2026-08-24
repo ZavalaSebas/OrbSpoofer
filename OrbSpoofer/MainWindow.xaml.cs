@@ -13,7 +13,7 @@ using OrbSpoofer.Services;
 
 namespace OrbSpoofer;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
     private readonly DiscordDatabase _db = new();
     private readonly GameFaker _faker = new();
