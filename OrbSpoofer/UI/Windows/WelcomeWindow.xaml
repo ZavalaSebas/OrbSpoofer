@@ -20,7 +20,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="Welcome" Height="40"/>
+        <ui:TitleBar Grid.Row="0" Title="Welcome" Height="40" Background="{StaticResource SurfaceBrush}"/>
 
         <!-- Header -->
         <Border x:Name="HeaderBorder" Grid.Row="1" Background="{StaticResource SurfaceBrush}"
@@ -82,22 +82,20 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ui:Button Grid.Column="0" Appearance="Primary"
+                            <ui:Button Grid.Column="0" Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
                                     Click="Kofi_Click">
                                 <StackPanel Orientation="Horizontal">
-                                    <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Buy me a coffee" VerticalAlignment="Center"/>
+                                    <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="Buy me a coffee" VerticalAlignment="Center" Foreground="White"/>
                                 </StackPanel>
                             </ui:Button>
-                            <ui:Button Grid.Column="2" Appearance="Secondary"
+                            <ui:Button Grid.Column="2" Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
-                                    Foreground="{StaticResource ErrorBrush}"
-                                    BorderBrush="{StaticResource ErrorBrush}"
                                     Click="GitHubSponsor_Click">
                                 <StackPanel Orientation="Horizontal">
-                                    <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="GitHub Sponsor" VerticalAlignment="Center"/>
+                                    <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="GitHub Sponsor" VerticalAlignment="Center" Foreground="White"/>
                                 </StackPanel>
                             </ui:Button>
                         </Grid>
@@ -125,7 +123,7 @@
                           VerticalAlignment="Center"/>
 
                 <ui:Button x:Name="BtnGetStarted" Grid.Column="2" Content="Get Started"
-                        Appearance="Primary"
+                        Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                         Padding="20,8" FontSize="13"
                         Click="GetStarted_Click"/>
             </Grid>

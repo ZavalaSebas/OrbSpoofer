@@ -249,12 +249,12 @@
                                                        Margin="0,4,0,0" Text="{Binding Subtitle}"/>
                                         </StackPanel>
                                         <ui:Button Grid.Column="2" 
-                                                Appearance="Primary"
+                                                Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                                 Padding="8" Width="60" Height="60"
                                                 FontSize="24"
                                                 Tag="{Binding}"
                                                 ToolTip="Spoof"
-                                                Click="UnifiedSpoof_Click"><ui:SymbolIcon Symbol="Play24" FontSize="20"/></ui:Button>
+                                                Click="UnifiedSpoof_Click"><ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/></ui:Button>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -338,12 +338,12 @@
                                                         Margin="0,2,0,0" Text="{Binding AliasDisplay}"/>
                                          </StackPanel>
                                          <ui:Button Grid.Column="2" 
-                                                 Appearance="Primary"
+                                                 Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                                  Padding="8" Width="60" Height="60"
                                                  FontSize="24"
                                                  Tag="{Binding}"
                                                  ToolTip="Spoof"
-                                                 Click="SpoofGame_Click"><ui:SymbolIcon Symbol="Play24" FontSize="20"/></ui:Button>
+                                                 Click="SpoofGame_Click"><ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/></ui:Button>
                                      </Grid>
                                  </Border>
                             </DataTemplate>
@@ -396,11 +396,11 @@
                                  TextChanged="ManualExeBox_TextChanged"
                                  VerticalContentAlignment="Center"/>
                          <ui:Button x:Name="BtnManualSpoof" Grid.Column="1" 
-                                 Appearance="Primary" Margin="10,0,0,0"
+                                 Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2" Margin="10,0,0,0"
                                  Padding="8" Width="60" Height="60" FontSize="24"
                                  ToolTip="Spoof"
                                  IsEnabled="False"
-                                 Click="BtnManualSpoof_Click"><ui:SymbolIcon Symbol="Play24" FontSize="20"/></ui:Button>
+                                 Click="BtnManualSpoof_Click"><ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/></ui:Button>
                     </Grid>
 
                     <Border x:Name="ManualResultPanel" Grid.Row="3" Visibility="Collapsed"
@@ -492,12 +492,12 @@
                                              </TextBlock>
                                          </StackPanel>
                                            <ui:Button Grid.Column="2" 
-                                                   Appearance="Primary"
+                                                   Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                                    Padding="8" Width="60" Height="60"
                                                    FontSize="24"
                                                    Tag="{Binding}"
                                                    ToolTip="Spoof"
-                                                   Click="SteamSpoof_Click"><ui:SymbolIcon Symbol="Play24" FontSize="20"/></ui:Button>
+                                                   Click="SteamSpoof_Click"><ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/></ui:Button>
                                       </Grid>
                                   </Border>
                              </DataTemplate>
@@ -677,12 +677,12 @@
                                          </Border>
 
                                          <ui:Button Grid.Column="3" 
-                                                 Appearance="Primary"
+                                                 Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                                   Padding="8" Width="60" Height="60"
                                                   FontSize="24"
                                                   Tag="{Binding}"
                                                   ToolTip="Spoof"
-                                                 Click="QuestsSpoof_Click"><ui:SymbolIcon Symbol="Play24" FontSize="20"/></ui:Button>
+                                                 Click="QuestsSpoof_Click"><ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/></ui:Button>
                                      </Grid>
                                  </Border>
                             </DataTemplate>
@@ -782,20 +782,20 @@
                                             <ColumnDefinition Width="12"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <ui:Button Grid.Column="0" Appearance="Primary"
+                                        <ui:Button Grid.Column="0" Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                                 Padding="16,8" FontSize="13" Cursor="Hand"
                                                 Click="Kofi_Click">
                                             <StackPanel Orientation="Horizontal">
-                                                <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="Buy me a coffee" VerticalAlignment="Center"/>
+                                                <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                                <TextBlock Text="Buy me a coffee" VerticalAlignment="Center" Foreground="White"/>
                                             </StackPanel>
                                         </ui:Button>
-                                        <ui:Button Grid.Column="2" Appearance="Primary"
+                                        <ui:Button Grid.Column="2" Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
                                                 Padding="16,8" FontSize="13" Cursor="Hand"
                                                 Click="GitHubSponsor_Click">
                                             <StackPanel Orientation="Horizontal">
-                                                <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="GitHub Sponsor" VerticalAlignment="Center"/>
+                                                <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                                <TextBlock Text="GitHub Sponsor" VerticalAlignment="Center" Foreground="White"/>
                                             </StackPanel>
                                         </ui:Button>
                                         </Grid>
