@@ -197,7 +197,7 @@
                              MouseDoubleClick="UnifiedResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource Orb.Card}" Margin="0,0,0,6"
+                                <Border Style="{StaticResource Orb.Card}" Margin="0,8,0,6"
                                         ToolTip="Double-click to spoof">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -306,7 +306,7 @@
                              MouseDoubleClick="ResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                 <Border Style="{StaticResource Orb.Card}" Margin="0,0,0,6"
+                                 <Border Style="{StaticResource Orb.Card}" Margin="0,8,0,6"
                                          ToolTip="Double-click to spoof">
                                      <Grid>
                                          <Grid.ColumnDefinitions>
@@ -467,7 +467,7 @@
                              MouseDoubleClick="SteamResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                 <Border Style="{StaticResource Orb.Card}" Margin="0,0,0,6"
+                                 <Border Style="{StaticResource Orb.Card}" Margin="0,8,0,6"
                                          ToolTip="Double-click to spoof">
                                      <Grid>
                                          <Grid.ColumnDefinitions>
@@ -560,7 +560,7 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                  <Border Margin="0,0,0,10"
+                                  <Border Margin="0,8,0,10"
                                          ToolTip="Double-click to spoof">
                                       <Border.Style>
                                          <Style TargetType="Border" BasedOn="{StaticResource Orb.Card}">
@@ -661,15 +661,15 @@
                                                      </Style.Triggers>
                                                  </Style>
                                              </Border.Style>
-                                             <TextBlock Text="?" FontSize="14" FontWeight="Bold"
-                                                        Foreground="White" HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center">
-                                                 <TextBlock.Style>
-                                                     <Style TargetType="TextBlock">
-                                                         <Setter Property="Visibility" Value="Hidden"/>
-                                                         <Style.Triggers>
-                                                             <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                                 <Setter Property="Visibility" Value="Visible"/>
+                                              <TextBlock Text="✓" FontSize="14" FontWeight="Bold"
+                                                         Foreground="White" HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center">
+                                                  <TextBlock.Style>
+                                                      <Style TargetType="TextBlock">
+                                                          <Setter Property="Visibility" Value="Hidden"/>
+                                                          <Style.Triggers>
+                                                              <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                  <Setter Property="Visibility" Value="Visible"/>
                                                              </DataTrigger>
                                                          </Style.Triggers>
                                                      </Style>

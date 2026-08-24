@@ -13,7 +13,7 @@
         WindowBackdropType="Mica"
         WindowCornerPreference="Round">
 
-    <Grid Background="{StaticResource SurfaceBrush}">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -21,7 +21,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="Timer" Height="32" Background="{StaticResource SurfaceBrush}"/>
+        <Border Grid.RowSpan="4" Background="#99000000"/>
+        <ui:TitleBar Grid.Row="0" Title="Timer" Height="32" Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}"/>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock x:Name="GameNameText" Text="Unknown"
