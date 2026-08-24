@@ -5,7 +5,7 @@
         Title="OrbSpoofer Timer" Height="250" Width="400"
         WindowStartupLocation="Manual"
         ResizeMode="NoResize"
-        Background="{StaticResource SurfaceBrush}"
+        Background="Transparent"
         Foreground="{StaticResource TextPrimaryBrush}"
         ShowInTaskbar="True"
         Icon="/OrbSpoofer;component/OS.png"
@@ -13,7 +13,7 @@
         WindowBackdropType="Mica"
         WindowCornerPreference="Round">
 
-    <Grid>
+    <Grid Background="{StaticResource SurfaceBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

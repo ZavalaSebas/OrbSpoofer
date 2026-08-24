@@ -205,6 +205,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         _sidebarCollapsed = !_sidebarCollapsed;
         SidebarBorder.Width = _sidebarCollapsed ? 48 : 220;
+        SidebarColumn.Width = new GridLength(_sidebarCollapsed ? 48 : 220);
         var buttons = new[] { BtnQuests, BtnUnifiedSearch, BtnDatabase, BtnSteam, BtnManual, BtnCredits, BtnUpdateReminder };
         foreach (var btn in buttons)
         {

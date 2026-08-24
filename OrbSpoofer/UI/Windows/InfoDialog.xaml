@@ -5,14 +5,14 @@
         Title="OrbSpoofer" Width="420"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource BackgroundBrush}"
+        Background="Transparent"
         Foreground="{StaticResource TextPrimaryBrush}"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
         WindowCornerPreference="Round">
-    <Grid Margin="24">
+    <Grid Background="{StaticResource BackgroundBrush}" Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
