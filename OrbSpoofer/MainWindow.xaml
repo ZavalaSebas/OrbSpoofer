@@ -6,7 +6,7 @@
         Title="OrbSpoofer" Height="700" Width="1000"
         MinHeight="600" MinWidth="850"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}"
+        Background="Transparent"
         Foreground="{StaticResource TextPrimaryBrush}"
         Icon="OS.png"
         ExtendsContentIntoTitleBar="True"
