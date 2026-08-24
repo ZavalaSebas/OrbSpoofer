@@ -49,7 +49,14 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             _ = PerformUnifiedSearch();
         };
         Loaded += MainWindow_Loaded;
-        Closed += (_, _) => _completedQuestsWatcher?.Dispose();
+        Closed += (_, _) =>
+        {
+            _completedQuestsWatcher?.Dispose();
+            // Full cleanup on exit: fake exes (Desktop\OrbSpooferFake) and the
+            // fake appmanifest_*.acf we wrote into steamapps (tracked ids only).
+            CleanupLeftoverFakeExes();
+            SteamService.DeleteTrackedManifests();
+        };
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)

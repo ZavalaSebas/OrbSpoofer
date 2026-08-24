@@ -313,6 +313,7 @@ public static class SteamService
             var dir = Path.GetDirectoryName(acfPath)!;
             Directory.CreateDirectory(dir);
             File.WriteAllText(acfPath, content);
+            TrackCreatedManifest(appId);
             return true;
         }
         catch (Exception ex)
@@ -320,5 +321,58 @@ public static class SteamService
             Debug.WriteLine($"Failed to write app manifest: {ex.Message}");
             return false;
         }
+    }
+
+    // ==================== Created-manifests tracking ====================
+    // OrbSpoofer writes fake appmanifest_*.acf files into steamapps. Track the
+    // ids we created (AppData json) so app close can delete exactly ours and
+    // never touch the user's real manifests.
+    private static string ManifestsTrackPath => Path.Combine(Config.AppDataPath, "created-manifests.json");
+
+    private static void TrackCreatedManifest(int appId)
+    {
+        try
+        {
+            var ids = LoadTrackedManifests();
+            ids.Add(appId);
+            Directory.CreateDirectory(Config.AppDataPath);
+            File.WriteAllText(ManifestsTrackPath, JsonSerializer.Serialize(ids));
+        }
+        catch (Exception ex) { Debug.WriteLine($"TrackCreatedManifest failed: {ex.Message}"); }
+    }
+
+    private static HashSet<int> LoadTrackedManifests()
+    {
+        try
+        {
+            if (!File.Exists(ManifestsTrackPath)) return [];
+            return JsonSerializer.Deserialize<HashSet<int>>(File.ReadAllText(ManifestsTrackPath)) ?? [];
+        }
+        catch { return []; }
+    }
+
+    /// <summary>Deletes the fake appmanifest_*.acf files OrbSpoofer created.</summary>
+    public static void DeleteTrackedManifests()
+    {
+        var steamPath = GetSteamPath();
+        if (string.IsNullOrEmpty(steamPath)) return;
+
+        var ids = LoadTrackedManifests();
+        foreach (var id in ids)
+        {
+            try
+            {
+                var acfPath = Path.Combine(steamPath, "steamapps", $"appmanifest_{id}.acf");
+                if (File.Exists(acfPath))
+                    File.Delete(acfPath);
+            }
+            catch (Exception ex) { Debug.WriteLine($"Failed to delete manifest {id}: {ex.Message}"); }
+        }
+
+        try
+        {
+            if (File.Exists(ManifestsTrackPath)) File.Delete(ManifestsTrackPath);
+        }
+        catch { }
     }
 }
