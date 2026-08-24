@@ -518,8 +518,19 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Active Quests" FontSize="22" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
+                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                        <TextBlock Text="Active Quests" FontSize="22" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <ui:Button x:Name="BtnRunAllQuests" HorizontalAlignment="Right" Appearance="Primary"
+                                   Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
+                                   Padding="14,7" FontSize="13" Cursor="Hand"
+                                   Click="BtnRunAllQuests_Click" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon x:Name="RunAllIcon" Symbol="Play24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                <TextBlock x:Name="RunAllText" Text="Run all quests" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </ui:Button>
+                    </Grid>
                     <ui:InfoBar Grid.Row="1" Margin="0,0,0,16" IsOpen="True" IsClosable="False"
                                Severity="Informational" Title="Heads up"
                                Message="Quests vary by region and availability. If there's nothing here, open Search and type the game name."/>

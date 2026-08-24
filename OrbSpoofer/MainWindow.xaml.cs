@@ -242,6 +242,145 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         e.Handled = true;
     }
 
+    // ==================== Run All Quests (secuencia) ====================
+    // Ejecuta cada quest activa una por una: lanza el spoof, espera los 15
+    // minutos del timer (el proceso TimerWindow hijo se cierra solo al
+    // terminar), marca la quest como completa y sigue con la siguiente.
+    private CancellationTokenSource? _runAllCts;
+    private bool _isRunningAll;
+
+    private async void BtnRunAllQuests_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isRunningAll)
+        {
+            _runAllCts?.Cancel(); // stop request
+            StatusMessage.Text = "Stopping quest sequence after the current one...";
+            return;
+        }
+
+        if (QuestsList.ItemsSource is not List<QuestItem> quests || quests.Count == 0)
+            return;
+
+        var pending = quests.Where(q => !q.IsCompleted).ToList();
+        if (pending.Count == 0)
+        {
+            StatusMessage.Text = "All quests are already completed.";
+            return;
+        }
+
+        _isRunningAll = true;
+        _runAllCts = new CancellationTokenSource();
+        SetRunAllUi(running: true, pending.Count);
+
+        try
+        {
+            for (int i = 0; i < pending.Count; i++)
+            {
+                var quest = pending[i];
+                if (_runAllCts.Token.IsCancellationRequested) break;
+
+                StatusMessage.Text = $"[{i + 1}/{pending.Count}] Running quest: {quest.GameName} (15 min)...";
+                RunAllText.Text = $"Running {i + 1}/{pending.Count} — click to stop";
+
+                var ok = await RunSingleQuestAsync(quest);
+                if (!ok)
+                {
+                    StatusMessage.Text = $"[{i + 1}/{pending.Count}] Could not run: {quest.GameName} — skipping";
+                    continue;
+                }
+
+                // Wait for the 15-minute timer window process to exit (the
+                // timer app closes itself when done), or until cancel.
+                await WaitForCurrentSpoofToFinishAsync(_runAllCts.Token);
+
+                if (_runAllCts.Token.IsCancellationRequested) break;
+
+                MarkQuestCompleted(quest);
+                StatusMessage.Text = $"[{i + 1}/{pending.Count}] Completed: {quest.GameName}";
+            }
+        }
+        finally
+        {
+            _isRunningAll = false;
+            _runAllCts?.Dispose();
+            _runAllCts = null;
+            SetRunAllUi(running: false);
+            StatusMessage.Text = "Quest sequence finished.";
+            await LoadQuestsAsync();
+        }
+    }
+
+    private void SetRunAllUi(bool running, int? total = null)
+    {
+        BtnRunAllQuests.Visibility = Visibility.Visible;
+        RunAllText.Text = running ? $"Running 0/{total} — click to stop" : "Run all quests";
+        RunAllIcon.Symbol = running ? Wpf.Ui.Controls.SymbolRegular.Stop24 : Wpf.Ui.Controls.SymbolRegular.Play24;
+    }
+
+    // Lanza el spoof de una quest (misma lógica que QuestsSpoof_Click) y
+    // devuelve true si el proceso timer arrancó.
+    private async Task<bool> RunSingleQuestAsync(QuestItem quest)
+    {
+        try
+        {
+            var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
+            if (matches.Count == 0)
+                matches = _db.Games.Where(g =>
+                    g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) ||
+                    quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (matches.Count == 0) return false;
+
+            var game = matches[0];
+            if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
+            {
+                await SteamSpoof(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
+                return true;
+            }
+
+            var exeName = DiscordDatabase.GetWin32Executable(game);
+            if (exeName == null) return false;
+
+            var path = _faker.CreateFakeGame(exeName);
+            if (path == null) return false;
+
+            return _faker.LaunchExecutable(path, game.Name, quest.Id);
+        }
+        catch { return false; }
+    }
+
+    // Espera hasta que ya no haya procesos "OrbSpoofer --timer-mode" vivos
+    // (el timer cierra solo al terminar los 15 min) o hasta cancelación.
+    private async Task WaitForCurrentSpoofToFinishAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            try { await Task.Delay(5000, ct); } catch (TaskCanceledException) { break; }
+            if (ct.IsCancellationRequested) break;
+
+            var timerAlive = Process.GetProcessesByName("OrbSpoofer")
+                .Any(p =>
+                {
+                    try { return p.MainWindowTitle.Contains("Timer", StringComparison.OrdinalIgnoreCase); }
+                    catch { return false; }
+                });
+
+            if (!timerAlive) break;
+        }
+    }
+
+    private void MarkQuestCompleted(QuestItem quest)
+    {
+        try
+        {
+            var ids = Config.LoadCompletedQuestIds();
+            ids.Add(quest.Id);
+            Config.SaveCompletedQuestIds(ids);
+            quest.IsCompleted = true;
+        }
+        catch { }
+    }
+
     private async void BtnQuests_Click(object sender, RoutedEventArgs e)
     {
         ShowView(QuestsView);
@@ -289,7 +428,14 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             {
                 QuestsEmptyText.Text = "No active quests found. Try Search to spoof a game manually.";
                 QuestsEmptyText.Visibility = Visibility.Visible;
+                BtnRunAllQuests.Visibility = Visibility.Collapsed;
                 return false;
+            }
+
+            if (!_isRunningAll)
+            {
+                var pendingCount = quests.Count(q => !q.IsCompleted);
+                BtnRunAllQuests.Visibility = pendingCount > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
 
             QuestsList.ItemsSource = quests;
