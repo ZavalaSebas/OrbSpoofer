@@ -137,6 +137,20 @@ public class GameFaker
         {
             var dir = Path.GetDirectoryName(targetPath)!;
             Directory.CreateDirectory(dir);
+
+            // If a previous timer is still running, the old copy is locked and a
+            // plain overwrite fails — launching the stale exe would run an OLD
+            // build (pre-Fluent UI). Delete first, then copy fresh.
+            if (File.Exists(targetPath))
+            {
+                try { File.Delete(targetPath); }
+                catch (IOException)
+                {
+                    Debug.WriteLine($"CreateFakeGame: {targetPath} locked by a running timer — reusing existing copy");
+                    return targetPath; // locked = still running; reuse is correct here
+                }
+            }
+
             File.Copy(_sourceExe, targetPath, overwrite: true);
             return targetPath;
         }

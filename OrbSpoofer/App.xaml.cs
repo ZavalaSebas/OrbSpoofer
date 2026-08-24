@@ -43,16 +43,14 @@ namespace OrbSpoofer;
                 Exit += (_, _) => _discordIpc?.Dispose();
 
                 var timer = new UI.Windows.TimerWindow(Config.TimerDurationMinutes, ExePathToCleanup, GameName, QuestId);
-                timer.Show();
-                TryApplyMica(timer);
                 MainWindow = timer;
+                timer.Show();
             }
             else
             {
                 var main = new MainWindow();
-                main.Show();
-                TryApplyMica(main);
                 MainWindow = main;
+                main.Show();
             }
         }
 
