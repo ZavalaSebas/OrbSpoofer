@@ -20,10 +20,10 @@
     <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
     <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
 
-    <Color x:Key="Orb.Background.Primary.Color">#0F0F12</Color>
-    <Color x:Key="Orb.Background.Secondary.Color">#1A1A1E</Color>
-    <Color x:Key="Orb.Background.Tertiary.Color">#232326</Color>
-    <Color x:Key="Orb.Background.Quaternary.Color">#2C2C30</Color>
+    <Color x:Key="Orb.Background.Primary.Color">#0A0A0A</Color>
+    <Color x:Key="Orb.Background.Secondary.Color">#141414</Color>
+    <Color x:Key="Orb.Background.Tertiary.Color">#1E1E1E</Color>
+    <Color x:Key="Orb.Background.Quaternary.Color">#252525</Color>
     <Color x:Key="Orb.Text.Primary.Color">#E6E6E6</Color>
     <Color x:Key="Orb.Text.Secondary.Color">#9A9A9F</Color>
     <Color x:Key="Orb.Text.Muted.Color">#6B6B70</Color>
