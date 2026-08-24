@@ -520,11 +520,9 @@
 
                     <TextBlock Grid.Row="0" Text="Active Quests" FontSize="22" FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
-                    <TextBlock Grid.Row="1" TextWrapping="Wrap" FontSize="12"
-                               Foreground="{StaticResource OrangeBrush}" Margin="0,0,0,16">
-                        <Run Text="Quests vary by region and availability. "/>
-                        <Run Text="If there's nothing here, open Search and type the game name."/>
-                    </TextBlock>
+                    <ui:InfoBar Grid.Row="1" Margin="0,0,0,16" IsOpen="True" IsClosable="False"
+                               Severity="Informational" Title="Heads up"
+                               Message="Quests vary by region and availability. If there's nothing here, open Search and type the game name."/>
 
                     <TextBlock x:Name="QuestsLoadingText" Grid.Row="2" Text="Loading quests..."
                                FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
@@ -561,11 +559,10 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                 <Border Background="{StaticResource CardBrush}" CornerRadius="12"
-                                         Padding="16" Margin="0,0,0,10"
+                                  <Border Margin="0,0,0,10"
                                          ToolTip="Double-click to spoof">
-                                     <Border.Style>
-                                         <Style TargetType="Border">
+                                      <Border.Style>
+                                         <Style TargetType="Border" BasedOn="{StaticResource Orb.Card}">
                                              <Style.Triggers>
                                                  <DataTrigger Binding="{Binding IsCompleted}" Value="True">
                                                      <Setter Property="Opacity" Value="0.45"/>
