@@ -46,6 +46,31 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <!-- Free games bell (Bridge-style) -->
+                    <Grid Width="40" Height="40" Margin="0,0,8,0">
+                        <Button x:Name="BellButton" Width="40" Height="40" Padding="0" Background="Transparent"
+                                BorderThickness="0" Cursor="Hand" Click="BellButton_Click"
+                                ToolTip="Free games" AutomationProperties.Name="Free games">
+                            <ui:SymbolIcon x:Name="BellIcon" Symbol="Alert24" FontSize="20">
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasUnseenFreeGames, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                        </Button>
+                        <Border x:Name="BellBadge" Width="16" Height="16" CornerRadius="8" Background="#FF4444"
+                                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0"
+                                IsHitTestVisible="False" Visibility="Collapsed">
+                            <TextBlock x:Name="BellBadgeCount" Text="" FontSize="9" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,1"/>
+                        </Border>
+                    </Grid>
                     <ui:Button x:Name="BtnToggleSidebar" Appearance="Secondary" Padding="8,6" Margin="0,0,8,0"
                             ToolTip="Toggle sidebar" Click="BtnToggleSidebar_Click">
                         <ui:SymbolIcon Symbol="Navigation24" FontSize="16"/>
@@ -55,6 +80,103 @@
                 </StackPanel>
             </Grid>
         </Border>
+
+        <!-- Free games popup -->
+        <Popup x:Name="NotificationsPopup" AllowsTransparency="True" PopupAnimation="Fade"
+               Focusable="False" StaysOpen="True" Placement="Relative">
+            <Border CornerRadius="12" Background="#F0141414" BorderBrush="{StaticResource Orb.SeparatorBrush}"
+                    BorderThickness="1" Width="360" MaxHeight="480">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="14,12"
+                            CornerRadius="12,12,0,0">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="Alert24" FontSize="16" Foreground="White" Margin="0,0,8,0"/>
+                                <TextBlock Text="Free games" FontSize="14" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                <Border Background="#33FFFFFF" CornerRadius="8" Padding="6,2" Margin="10,0,0,0" x:Name="PopupBadgePill">
+                                    <TextBlock x:Name="PopupBadgeText" Text="" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                            </StackPanel>
+                            <Button x:Name="BtnMarkAllSeen" HorizontalAlignment="Right" Background="Transparent"
+                                    BorderThickness="0" Cursor="Hand" Click="BtnMarkAllSeen_Click"
+                                    ToolTip="Mark as seen">
+                                <ui:SymbolIcon Symbol="Checkmark24" FontSize="14" Foreground="White"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- List -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8,8,8,0">
+                        <StackPanel>
+                            <ItemsControl x:Name="FreeGamesList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource CardBrush}" CornerRadius="10"
+                                                Padding="10" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="56" Height="56" CornerRadius="8" Margin="0,0,10,0">
+                                                    <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"
+                                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                                               TextTrimming="CharacterEllipsis" MaxWidth="200"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                        <Border Background="{StaticResource PrimaryBrush}" CornerRadius="6" Padding="6,1">
+                                                            <TextBlock Text="{Binding PlatformLabel}" FontSize="10" Foreground="White"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Worth}" FontSize="11"
+                                                                   Foreground="{StaticResource SuccessBrush}" Margin="8,0,0,0"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <Button Grid.Column="2" Background="#5865F2" Foreground="White" BorderThickness="0"
+                                                        Padding="10,6" Cursor="Hand" VerticalAlignment="Center"
+                                                        Click="FreeGameClaim_Click" Tag="{Binding}"
+                                                        ToolTip="Open giveaway">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Claim" FontSize="11" VerticalAlignment="Center" Foreground="White"/>
+                                                        <ui:SymbolIcon Symbol="Open24" FontSize="12" Margin="4,0,0,0" Foreground="White"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="FreeGamesEmpty" Text="No free games right now. Check back soon!"
+                                       FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                       HorizontalAlignment="Center" Padding="0,20,0,16" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Footer -->
+                    <Border Grid.Row="2" Padding="8" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="0,1,0,0">
+                        <Button HorizontalAlignment="Center" Background="Transparent" BorderThickness="0"
+                                Foreground="{StaticResource TextSecondaryBrush}" Cursor="Hand"
+                                Click="BtnRefreshFreeGames_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Refresh" FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Border>
+                </Grid>
+            </Border>
+        </Popup>
 
         <!-- Main Content -->
         <Grid Grid.Row="2" Margin="0">

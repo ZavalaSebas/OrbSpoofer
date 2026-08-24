@@ -96,6 +96,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             var questsOk = await LoadQuestsAsync();
             ShowView(questsOk ? QuestsView : UnifiedSearchView);
 
+            // Free games bell (Bridge parity) — fire and forget
+            _ = RefreshFreeGamesAsync();
+
             if (UI.Windows.WelcomeWindow.ShouldShow())
             {
                 var welcome = new UI.Windows.WelcomeWindow
@@ -240,6 +243,97 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
         e.Handled = true;
+    }
+
+    // ==================== Free games bell (ported from Bridge) ====================
+    private readonly FreeGamesService _freeGamesService = new();
+    private List<FreeGameNotification> _freeGames = [];
+    private bool _hasUnseenFreeGames;
+
+    public bool HasUnseenFreeGames => _hasUnseenFreeGames;
+
+    private async Task RefreshFreeGamesAsync()
+    {
+        try
+        {
+            _freeGames = await _freeGamesService.GetFreeGamesAsync();
+            var visible = _freeGames.Take(10).ToList();
+            FreeGamesList.ItemsSource = visible;
+            FreeGamesEmpty.Visibility = visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            var seen = FreeGamesSeenStore.Load();
+            var unseen = visible.Count(g => !seen.Contains(g.Id));
+            UpdateFreeGamesBadge(unseen);
+        }
+        catch { }
+    }
+
+    private void UpdateFreeGamesBadge(int unseen)
+    {
+        _hasUnseenFreeGames = unseen > 0;
+        BellBadge.Visibility = unseen > 0 ? Visibility.Visible : Visibility.Collapsed;
+        BellBadgeCount.Text = unseen.ToString();
+        PopupBadgePill.Visibility = unseen > 0 ? Visibility.Visible : Visibility.Collapsed;
+        PopupBadgeText.Text = unseen.ToString();
+    }
+
+    private void PositionNotificationsPopup()
+    {
+        if (NotificationsPopup.Child is not FrameworkElement content) return;
+        content.Measure(new Size(360, double.PositiveInfinity));
+        var width = content.DesiredSize.Width > 0 ? content.DesiredSize.Width : 360;
+
+        var transform = BellButton.TransformToVisual(this);
+        var bellPos = transform.Transform(new Point(0, 0));
+
+        NotificationsPopup.PlacementTarget = this;
+        NotificationsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+        NotificationsPopup.HorizontalOffset = bellPos.X + BellButton.ActualWidth - width;
+        NotificationsPopup.VerticalOffset = bellPos.Y + BellButton.ActualHeight + 8;
+    }
+
+    private async void BellButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (NotificationsPopup.IsOpen)
+        {
+            NotificationsPopup.IsOpen = false;
+            return;
+        }
+
+        PositionNotificationsPopup();
+        NotificationsPopup.IsOpen = true;
+
+        // Opening clears the badge (mark seen)
+        if (_hasUnseenFreeGames)
+        {
+            FreeGamesSeenStore.MarkSeen(_freeGames.Select(g => g.Id));
+            UpdateFreeGamesBadge(0);
+        }
+
+        await RefreshFreeGamesAsync();
+    }
+
+    private void BtnMarkAllSeen_Click(object sender, RoutedEventArgs e)
+    {
+        FreeGamesSeenStore.MarkSeen(_freeGames.Select(g => g.Id));
+        UpdateFreeGamesBadge(0);
+        NotificationsPopup.IsOpen = false;
+    }
+
+    private void FreeGameClaim_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: FreeGameNotification game }) return;
+        var url = !string.IsNullOrWhiteSpace(game.OpenGiveawayUrl) ? game.OpenGiveawayUrl : game.GamerpowerUrl;
+        if (string.IsNullOrWhiteSpace(url)) return;
+        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
+        FreeGamesSeenStore.MarkSeen([game.Id]);
+    }
+
+    private async void BtnRefreshFreeGames_Click(object sender, RoutedEventArgs e)
+    {
+        StatusMessage.Text = "Refreshing free games...";
+        await RefreshFreeGamesAsync();
+        StatusMessage.Text = "Free games updated.";
     }
 
     // ==================== Run All Quests (secuencia) ====================
