@@ -60,15 +60,15 @@ namespace OrbSpoofer;
         {
             try
             {
-                // Mica on Win11, fallback to solid on Win10 (Bridge pattern)
-                Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
-                    Wpf.Ui.Appearance.ApplicationTheme.Dark,
-                    Wpf.Ui.Controls.WindowBackdropType.Mica,
-                    updateAccent: false);
-                // Also set per-window backdrop if API available
+                // FluentWindow applies the backdrop itself on SourceInitialized
+                // from the WindowBackdropType property — no manual call needed
+                // (WPF-UI 4.3 has no public per-window ApplyBackdrop API).
                 if (window is Wpf.Ui.Controls.FluentWindow fw)
                     fw.WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType.Mica;
             }
-            catch { }
+            catch
+            {
+                // Win10 or composition disabled — FluentWindow falls back to solid
+            }
         }
     }

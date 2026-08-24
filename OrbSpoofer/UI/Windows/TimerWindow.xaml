@@ -21,7 +21,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.RowSpan="4" Background="#99000000"/>
+        <Border Grid.RowSpan="4" Background="#22000000"/>
         <ui:TitleBar Grid.Row="0" Title="Timer" Height="32" Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}"/>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
