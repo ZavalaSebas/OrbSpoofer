@@ -140,6 +140,20 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         {
             Dispatcher.Invoke(() =>
             {
+                // The timer process writes completed-quests.json right before it
+                // closes — reflect that in the status bar instead of leaving
+                // "spoof active" hanging after the session ended.
+                if (_activeSpoofQuestName is not null)
+                {
+                    StatusMessage.Text = $"Quest completed: {_activeSpoofQuestName}";
+                    _activeSpoofQuestName = null;
+                }
+                else
+                {
+                    StatusMessage.Text = "Quest completed";
+                }
+                StatusMessage.Foreground = _textSecondaryBrush;
+
                 if (QuestsView.Visibility == Visibility.Visible)
                     _ = LoadQuestsAsync();
             });
@@ -149,6 +163,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             Debug.WriteLine($"Failed to refresh quests: {ex.Message}");
         }
     }
+
+    // Name of the quest/game currently being spoofed (set when a timer starts,
+    // cleared when the timer process reports completion via the file watcher).
+    private string? _activeSpoofQuestName;
 
     private void ShowView(FrameworkElement view)
     {
@@ -619,6 +637,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
             if (path != null && _faker.LaunchExecutable(path, game.Name, quest.Id))
             {
+                _activeSpoofQuestName = quest.GameName;
                 StatusMessage.Text = $"Quest spoof active: {quest.GameName}";
             }
             else
@@ -1182,6 +1201,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
             if (path != null && _faker.LaunchExecutable(path, info.Name, questId, discordAppId))
             {
+                if (questId != null) _activeSpoofQuestName = info.Name;
                 StatusMessage.Text = questId != null
                     ? $"Quest spoof active (Steam): {info.Name}"
                     : $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
