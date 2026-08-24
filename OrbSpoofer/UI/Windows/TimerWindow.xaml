@@ -21,6 +21,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <ui:TitleBar Grid.Row="0" Title="Timer" Height="32"/>
+
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock x:Name="GameNameText" Text="Unknown"
                        FontSize="14" FontWeight="SemiBold"

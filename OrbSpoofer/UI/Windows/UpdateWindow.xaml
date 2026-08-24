@@ -21,6 +21,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <ui:TitleBar Grid.Row="0" Title="Update" Height="32"/>
+
         <!-- Header -->
         <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
