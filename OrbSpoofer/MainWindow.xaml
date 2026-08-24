@@ -187,11 +187,11 @@
                                  TextChanged="UnifiedSearchBox_TextChanged"
                                  VerticalContentAlignment="Center"/>
                         <ui:Button x:Name="BtnUnifiedSearchGo" Grid.Column="1" Content="Search"
-                                Appearance="Primary" Margin="10,0,0,0"
+                                Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2" Margin="10,0,0,0"
                                 Click="BtnUnifiedSearchGo_Click"/>
                     </Grid>
 
-                    <ListBox x:Name="UnifiedResultsList" Grid.Row="2"
+                    <ListBox x:Name="UnifiedResultsList" Grid.Row="2" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              MouseDoubleClick="UnifiedResultsList_MouseDoubleClick">
@@ -296,11 +296,11 @@
                                  TextChanged="SearchBox_TextChanged"
                                  VerticalContentAlignment="Center"/>
                         <ui:Button x:Name="BtnSearch" Grid.Column="1" Content="Search"
-                                Appearance="Primary" Margin="10,0,0,0"
+                                Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2" Margin="10,0,0,0"
                                 Click="BtnSearch_Click"/>
                     </Grid>
 
-                    <ListBox x:Name="ResultsList" Grid.Row="2"
+                    <ListBox x:Name="ResultsList" Grid.Row="2" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              MouseDoubleClick="ResultsList_MouseDoubleClick">
@@ -456,11 +456,11 @@
                                  TextChanged="SteamSearchBox_TextChanged"
                                  VerticalContentAlignment="Center"/>
                         <ui:Button x:Name="BtnSteamSearch" Grid.Column="1" Content="Search"
-                                Appearance="Primary" Margin="10,0,0,0"
+                                Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2" Margin="10,0,0,0"
                                 Click="BtnSteamSearch_Click"/>
                     </Grid>
 
-                    <ListBox x:Name="SteamResultsList" Grid.Row="3"
+                    <ListBox x:Name="SteamResultsList" Grid.Row="3" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0"
                              Margin="0,12,0,0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -531,8 +531,9 @@
                                FontSize="14" Foreground="{StaticResource TextMutedBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Visibility="Collapsed"/>
-                    <ListBox x:Name="QuestsList" Grid.Row="2"
+                    <ListBox x:Name="QuestsList" Grid.Row="2" Padding="0,0,12,0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
@@ -707,6 +708,9 @@
                                         OrbSpoofer is a game process spoofer that tricks Discord into thinking
                                         you're running a game by creating fake processes with the exact names
                                         Discord expects. No client modification. No code injection.
+                                    </TextBlock>
+                                    <TextBlock Margin="0,12,0,0">
+                                        <Hyperlink NavigateUri="https://github.com/ZavalaSebas/OrbSpoofer" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#5865F2" TextDecorations="Underline">View on GitHub — ZavalaSebas/OrbSpoofer →</Hyperlink>
                                     </TextBlock>
                                 </StackPanel>
                             </Border>

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Windows.Navigation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -233,6 +234,12 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
         ShowView(CreditsView);
         DispatchAnimation(AnimateCreditCardsAsync);
+    }
+
+    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
+        e.Handled = true;
     }
 
     private async void BtnQuests_Click(object sender, RoutedEventArgs e)
