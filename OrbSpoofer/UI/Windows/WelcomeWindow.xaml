@@ -1,4 +1,4 @@
-<ui:FluentWindow x:Class="OrbSpoofer.UI.Windows.WelcomeWindow"
+﻿<ui:FluentWindow x:Class="OrbSpoofer.UI.Windows.WelcomeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -82,12 +82,12 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Buy me a coffee ☕"
-                                    Style="{StaticResource PrimaryButton}"
+                            <ui:Button Grid.Column="0" Content="Buy me a coffee ☕"
+                                    Appearance="Primary"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
                                     Click="Kofi_Click"/>
-                            <Button Grid.Column="2" Content="GitHub Sponsor ❤"
-                                    Style="{StaticResource GhostButton}"
+                            <ui:Button Grid.Column="2" Content="GitHub Sponsor ❤"
+                                    Appearance="Secondary"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
                                     Foreground="{StaticResource ErrorBrush}"
                                     BorderBrush="{StaticResource ErrorBrush}"
@@ -116,8 +116,8 @@
                           FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
                           VerticalAlignment="Center"/>
 
-                <Button x:Name="BtnGetStarted" Grid.Column="2" Content="Get Started"
-                        Style="{StaticResource PrimaryButton}"
+                <ui:Button x:Name="BtnGetStarted" Grid.Column="2" Content="Get Started"
+                        Appearance="Primary"
                         Padding="20,8" FontSize="13"
                         Click="GetStarted_Click"/>
             </Grid>
