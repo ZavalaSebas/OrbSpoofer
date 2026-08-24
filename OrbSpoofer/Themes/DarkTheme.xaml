@@ -30,9 +30,9 @@
     <SolidColorBrush x:Key="OrangeBrush" Color="#E67E22"/>
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
 
-    <!-- Fonts -->
-    <FontFamily x:Key="HeaderFont">Segoe UI</FontFamily>
-    <FontFamily x:Key="BodyFont">Segoe UI</FontFamily>
+    <!-- Fonts — Fluent Segoe UI Variable (Win11) fallback Segoe UI -->
+    <FontFamily x:Key="HeaderFont">Segoe UI Variable, Segoe UI</FontFamily>
+    <FontFamily x:Key="BodyFont">Segoe UI Variable, Segoe UI</FontFamily>
     <FontFamily x:Key="MonoFont">Cascadia Code, Consolas, Courier New</FontFamily>
 
     <!-- Button Style -->

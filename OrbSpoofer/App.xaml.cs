@@ -15,6 +15,7 @@ namespace OrbSpoofer;
         {
             // Fluent dark + accent before any window shows (mirrors Bridge/App.xaml.cs)
             try { Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark); } catch { }
+            Services.ThemeManager.ApplyAccent();
             base.OnStartup(e);
 
             if (e.Args.Contains("--timer-mode"))

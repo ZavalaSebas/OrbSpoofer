@@ -804,7 +804,7 @@
                                            Cursor="Hand" MouseLeftButtonDown="Strykey_Click"
                                            Text="Strykey" Margin="0,0,0,0"/>
                                 <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}"
-                                           Text=" � "/>
+                                           Text=" · "/>
                                 <TextBlock FontSize="12" Foreground="{StaticResource PrimaryBrush}"
                                            Cursor="Hand" MouseLeftButtonDown="Orbshacker_Click"
                                            Text="orbshacker"/>
@@ -837,7 +837,7 @@
                     <TextBlock x:Name="GameCount" Text=""
                                FontSize="12" Foreground="{StaticResource TextMutedBrush}"
                                VerticalAlignment="Center"/>
-                    <TextBlock Text="?" FontSize="14" Foreground="{StaticResource ErrorBrush}"
+                    <ui:SymbolIcon Symbol="Heart24" FontSize="16" Foreground="{StaticResource ErrorBrush}"
                                VerticalAlignment="Center" Margin="14,0,0,0" Cursor="Hand"
                                ToolTip="Enjoying OrbSpoofer? Buy me a coffee!"
                                MouseLeftButtonDown="Kofi_HeartClick"/>

@@ -82,16 +82,24 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ui:Button Grid.Column="0" Content="Buy me a coffee ☕"
-                                    Appearance="Primary"
+                            <ui:Button Grid.Column="0" Appearance="Primary"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
-                                    Click="Kofi_Click"/>
-                            <ui:Button Grid.Column="2" Content="GitHub Sponsor ❤"
-                                    Appearance="Secondary"
+                                    Click="Kofi_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Buy me a coffee" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </ui:Button>
+                            <ui:Button Grid.Column="2" Appearance="Secondary"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
                                     Foreground="{StaticResource ErrorBrush}"
                                     BorderBrush="{StaticResource ErrorBrush}"
-                                    Click="GitHubSponsor_Click"/>
+                                    Click="GitHubSponsor_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="GitHub Sponsor" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </ui:Button>
                         </Grid>
                     </StackPanel>
                 </Border>
