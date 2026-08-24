@@ -70,7 +70,7 @@
     <SolidColorBrush x:Key="Orb.Card.Hover" Color="{StaticResource Orb.Background.Tertiary.Color}" />
     <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#2A2A2E" />
 
-    <!-- Card + ContextMenu polish matching Bridge -->
+    <!-- Card + ContextMenu polish matching Bridge (elevation + hover) -->
     <Style x:Key="Orb.Card" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource Orb.Card.Background}" />
         <Setter Property="BorderBrush" Value="{StaticResource Orb.SeparatorBrush}" />
@@ -78,6 +78,19 @@
         <Setter Property="CornerRadius" Value="{StaticResource Orb.CornerRadius.Card}" />
         <Setter Property="Padding" Value="16" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.18" Color="#000000"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="Orb.CardHover" TargetType="Border" BasedOn="{StaticResource Orb.Card}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource Orb.SystemAccentBrush}"/>
+                <Setter Property="Background" Value="{StaticResource Orb.Card.Hover}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="ContextMenu">
