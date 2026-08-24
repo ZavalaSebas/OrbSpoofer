@@ -150,17 +150,13 @@
             <!-- Content Area -->
             <Grid Grid.Column="1" Margin="28,24">
 
-                <!-- Loading State -->
+                <!-- Loading State — Fluent ProgressRing -->
                 <StackPanel x:Name="LoadingPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
                             Visibility="Visible">
-                    <TextBlock Text="⏳" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                    <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48" Margin="0,0,0,16"/>
                     <TextBlock x:Name="LoadingText" Text="Loading..."
                                FontSize="16" Foreground="{StaticResource TextSecondaryBrush}"
                                HorizontalAlignment="Center"/>
-                    <ProgressBar x:Name="LoadingProgress" Width="200" Height="4" Margin="0,16,0,0"
-                                 Foreground="{StaticResource PrimaryBrush}"
-                                 Background="{StaticResource BorderBrush}"
-                                 IsIndeterminate="True" BorderThickness="0"/>
                 </StackPanel>
 
                 <!-- Unified Search View -->
@@ -376,8 +372,7 @@
                                VerticalAlignment="Bottom" Margin="0,28,0,0"
                                Text="Enter the exact process name Discord expects"/>
 
-                    <Border Grid.Row="1" Background="{StaticResource CardBrush}" CornerRadius="10"
-                            Padding="16" Margin="0,20,0,0">
+                    <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,20,0,0">
                         <StackPanel>
                             <TextBlock Text="Examples:" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
@@ -408,8 +403,7 @@
                     </Grid>
 
                     <Border x:Name="ManualResultPanel" Grid.Row="3" Visibility="Collapsed"
-                            Background="{StaticResource CardBrush}" CornerRadius="10"
-                            Padding="16" Margin="0,16,0,0">
+                            Style="{StaticResource Orb.Card}" Margin="0,16,0,0">
                         <StackPanel>
                             <TextBlock x:Name="ManualResultText" FontSize="14"
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
