@@ -271,6 +271,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         _isRunningAll = true;
         _runAllCts = new CancellationTokenSource();
         SetRunAllUi(running: true, pending.Count);
+        var anyCompleted = false;
 
         try
         {
@@ -282,20 +283,39 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                 StatusMessage.Text = $"[{i + 1}/{pending.Count}] Running quest: {quest.GameName} (15 min)...";
                 RunAllText.Text = $"Running {i + 1}/{pending.Count} — click to stop";
 
-                var ok = await RunSingleQuestAsync(quest);
-                if (!ok)
+                var launched = await RunSingleQuestAsync(quest);
+                if (launched == null)
                 {
                     StatusMessage.Text = $"[{i + 1}/{pending.Count}] Could not run: {quest.GameName} — skipping";
                     continue;
                 }
 
-                // Wait for the 15-minute timer window process to exit (the
-                // timer app closes itself when done), or until cancel.
-                await WaitForCurrentSpoofToFinishAsync(_runAllCts.Token);
+                // SECUENCIAL: esperar a que ESTE proceso timer termine (los 15
+                // min) o cancelación — no se lanza la siguiente hasta que este
+                // cierra. El timer se cierra solo al completar.
+                if (launched.Value.process != null)
+                {
+                    try
+                    {
+                        await launched.Value.process.WaitForExitAsync(_runAllCts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // stop pedido: matar el timer actual y cortar
+                        try { launched.Value.process.Kill(true); } catch { }
+                        break;
+                    }
+                }
+                else
+                {
+                    // Steam mode no devuelve proceso: esperar por ventana Timer
+                    await WaitForCurrentSpoofToFinishAsync(_runAllCts.Token);
+                    if (_runAllCts.Token.IsCancellationRequested) break;
+                }
 
-                if (_runAllCts.Token.IsCancellationRequested) break;
-
+                // Marcar completa SOLO cuando el timer de ESTA quest terminó
                 MarkQuestCompleted(quest);
+                anyCompleted = true;
                 StatusMessage.Text = $"[{i + 1}/{pending.Count}] Completed: {quest.GameName}";
             }
         }
@@ -306,7 +326,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             _runAllCts = null;
             SetRunAllUi(running: false);
             StatusMessage.Text = "Quest sequence finished.";
-            await LoadQuestsAsync();
+            if (anyCompleted) await LoadQuestsAsync();
         }
     }
 
@@ -317,9 +337,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         RunAllIcon.Symbol = running ? Wpf.Ui.Controls.SymbolRegular.Stop24 : Wpf.Ui.Controls.SymbolRegular.Play24;
     }
 
-    // Lanza el spoof de una quest (misma lógica que QuestsSpoof_Click) y
-    // devuelve true si el proceso timer arrancó.
-    private async Task<bool> RunSingleQuestAsync(QuestItem quest)
+    // Lanza el spoof de una quest (misma lógica que QuestsSpoof_Click).
+    // Devuelve (true, process) si arrancó el timer, (true, null) en Steam mode
+    // (no hay proceso rastreable) o (false, null) si no se pudo lanzar.
+    private async Task<(bool ok, Process? process)?> RunSingleQuestAsync(QuestItem quest)
     {
         try
         {
@@ -329,24 +350,26 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
                     g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) ||
                     quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            if (matches.Count == 0) return false;
+            if (matches.Count == 0) return (false, null);
 
             var game = matches[0];
             if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
             {
                 await SteamSpoof(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
-                return true;
+                return (true, null); // Steam mode: esperar por ventana
             }
 
             var exeName = DiscordDatabase.GetWin32Executable(game);
-            if (exeName == null) return false;
+            if (exeName == null) return (false, null);
 
             var path = _faker.CreateFakeGame(exeName);
-            if (path == null) return false;
+            if (path == null) return (false, null);
 
-            return _faker.LaunchExecutable(path, game.Name, quest.Id);
+            if (_faker.LaunchExecutable(path, out var process, game.Name, quest.Id))
+                return (true, process);
+            return (false, null);
         }
-        catch { return false; }
+        catch { return (false, null); }
     }
 
     // Espera hasta que ya no haya procesos "OrbSpoofer --timer-mode" vivos

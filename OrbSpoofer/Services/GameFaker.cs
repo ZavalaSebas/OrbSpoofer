@@ -149,6 +149,14 @@ public class GameFaker
 
     public bool LaunchExecutable(string exePath, string? gameName = null, string? questId = null, string? discordAppId = null)
     {
+        return LaunchExecutable(exePath, out _, gameName, questId, discordAppId);
+    }
+
+    // Overload que devuelve el Process del timer lanzado — permite esperar a
+    // que termine (secuencia Run-all) en vez de sondear por título de ventana.
+    public bool LaunchExecutable(string exePath, out Process? launchedProcess, string? gameName = null, string? questId = null, string? discordAppId = null)
+    {
+        launchedProcess = null;
         try
         {
             var args = $"--timer-mode --exe-path \"{exePath}\" --game-name \"{gameName ?? Path.GetFileNameWithoutExtension(exePath)}\"";
@@ -164,8 +172,9 @@ public class GameFaker
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            using var process = new Process { StartInfo = psi };
+            var process = new Process { StartInfo = psi };
             process.Start();
+            launchedProcess = process;
             return true;
         }
         catch (Exception ex)
