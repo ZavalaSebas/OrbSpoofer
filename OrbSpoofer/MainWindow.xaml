@@ -191,13 +191,13 @@
                                 Click="BtnUnifiedSearchGo_Click"/>
                     </Grid>
 
-                    <ListBox x:Name="UnifiedResultsList" Grid.Row="2" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    <ListBox x:Name="UnifiedResultsList" Grid.Row="2" Padding="0,0,20,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              MouseDoubleClick="UnifiedResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource Orb.Card}" Margin="0,8,0,6"
+                                <Border Style="{StaticResource Orb.Card}" Margin="0,16,0,6"
                                         ToolTip="Double-click to spoof">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -300,13 +300,13 @@
                                 Click="BtnSearch_Click"/>
                     </Grid>
 
-                    <ListBox x:Name="ResultsList" Grid.Row="2" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    <ListBox x:Name="ResultsList" Grid.Row="2" Padding="0,0,20,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              MouseDoubleClick="ResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                 <Border Style="{StaticResource Orb.Card}" Margin="0,8,0,6"
+                                 <Border Style="{StaticResource Orb.Card}" Margin="0,16,0,6"
                                          ToolTip="Double-click to spoof">
                                      <Grid>
                                          <Grid.ColumnDefinitions>
@@ -460,14 +460,14 @@
                                 Click="BtnSteamSearch_Click"/>
                     </Grid>
 
-                    <ListBox x:Name="SteamResultsList" Grid.Row="3" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    <ListBox x:Name="SteamResultsList" Grid.Row="3" Padding="0,0,20,0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0"
                              Margin="0,12,0,0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              MouseDoubleClick="SteamResultsList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                 <Border Style="{StaticResource Orb.Card}" Margin="0,8,0,6"
+                                 <Border Style="{StaticResource Orb.Card}" Margin="0,16,0,6"
                                          ToolTip="Double-click to spoof">
                                      <Grid>
                                          <Grid.ColumnDefinitions>
@@ -560,7 +560,7 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                  <Border Margin="0,8,0,10"
+                                  <Border Margin="0,16,0,10"
                                          ToolTip="Double-click to spoof">
                                       <Border.Style>
                                          <Style TargetType="Border" BasedOn="{StaticResource Orb.Card}">
