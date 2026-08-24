@@ -531,7 +531,7 @@
                                FontSize="14" Foreground="{StaticResource TextMutedBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Visibility="Collapsed"/>
-                    <ListBox x:Name="QuestsList" Grid.Row="2" Padding="0,0,12,0"
+                    <ListBox x:Name="QuestsList" Grid.Row="2" Padding="0,0,20,0"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                              Background="Transparent" BorderThickness="0">
@@ -560,7 +560,7 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                  <Border Margin="0,16,0,10"
+                                  <Border Margin="0,16,24,10"
                                          ToolTip="Double-click to spoof">
                                       <Border.Style>
                                          <Style TargetType="Border" BasedOn="{StaticResource Orb.Card}">
