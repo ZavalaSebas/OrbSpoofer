@@ -82,7 +82,7 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ui:Button Grid.Column="0" Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
+                            <ui:Button Grid.Column="0" Appearance="Primary" Background="#ED4245" Foreground="White" BorderBrush="#ED4245"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
                                     Click="Kofi_Click">
                                 <StackPanel Orientation="Horizontal">
@@ -90,7 +90,7 @@
                                     <TextBlock Text="Buy me a coffee" VerticalAlignment="Center" Foreground="White"/>
                                 </StackPanel>
                             </ui:Button>
-                            <ui:Button Grid.Column="2" Appearance="Primary" Background="#5865F2" Foreground="White" BorderBrush="#5865F2"
+                            <ui:Button Grid.Column="2" Appearance="Primary" Background="#ED4245" Foreground="White" BorderBrush="#ED4245"
                                     Padding="14,6" FontSize="12" Cursor="Hand"
                                     Click="GitHubSponsor_Click">
                                 <StackPanel Orientation="Horizontal">

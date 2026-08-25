@@ -1,5 +1,5 @@
-Unified Search — one bar for Discord and Steam, one row per game
-Source badges show Discord, Steam, or Both
-Advanced panel still has Database, Steam Quest, and Manual
-Steam-only quests (like Tokon) auto-switch to Steam mode
-More reliable Steam spoofs for nested install paths and anti-cheat launchers
+Revamped Fluent UI with Mica and new navigation
+More stable spoofing with MVVM architecture and lifecycle fixes
+Free Games section — auto-detects free games on Steam & Epic
+Centralized search with badges and accent color personalization
+Stability fixes for HELLDIVERS 2, DLCs and GamerPower

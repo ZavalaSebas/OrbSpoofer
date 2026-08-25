@@ -1,305 +1,64 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.Windows.Navigation;
-using System.Threading;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Threading;
-using OrbSpoofer.Models;
-using OrbSpoofer.Services;
+using OrbSpoofer.ViewModels;
 
 namespace OrbSpoofer;
 
 public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
-    private readonly DiscordDatabase _db = new();
-    private readonly GameFaker _faker = new();
-    private string? _pendingUpdateTag;
-    private string? _pendingUpdateUrl;
-    private readonly DispatcherTimer _searchDebounceTimer;
-    private readonly DispatcherTimer _steamSearchDebounceTimer;
-    private readonly DispatcherTimer _unifiedSearchDebounceTimer;
-    private CancellationTokenSource? _imageResolutionCts;
-    private FileSystemWatcher? _completedQuestsWatcher;
-    private Brush _textSecondaryBrush = System.Windows.Media.Brushes.Gray;
+    public Wpf.Ui.Controls.ContentDialogHost DialogHostControl => DialogHost;
+    private readonly MainViewModel _vm;
 
-    public MainWindow()
+    public MainWindow(MainViewModel vm)
     {
+        _vm = vm;
+        DataContext = _vm;
         InitializeComponent();
-        _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
-        _searchDebounceTimer.Tick += (_, _) =>
-        {
-            _searchDebounceTimer.Stop();
-            PerformDatabaseSearch(animate: true);
-        };
-        _steamSearchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
-        _steamSearchDebounceTimer.Tick += (_, _) =>
-        {
-            _steamSearchDebounceTimer.Stop();
-            _ = PerformSteamSearch();
-        };
-        _unifiedSearchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
-        _unifiedSearchDebounceTimer.Tick += (_, _) =>
-        {
-            _unifiedSearchDebounceTimer.Stop();
-            _ = PerformUnifiedSearch();
-        };
-        Loaded += MainWindow_Loaded;
-        Closed += (_, _) =>
-        {
-            _completedQuestsWatcher?.Dispose();
-            // Full cleanup on exit: fake exes (Desktop\OrbSpooferFake) and the
-            // fake appmanifest_*.acf we wrote into steamapps (tracked ids only).
-            CleanupLeftoverFakeExes();
-            SteamService.DeleteTrackedManifests();
-        };
+        Loaded += OnLoaded;
+        Closed += (_, _) => _vm.Cleanup();
+        _vm.PropertyChanged += OnVmPropertyChanged;
+        LocationChanged += (_, _) => { if (NotificationsPopup.IsOpen) NotificationsPopup.IsOpen = false; if (AccentPopup.IsOpen) AccentPopup.IsOpen = false; };
+        Deactivated += (_, _) => { if (NotificationsPopup.IsOpen) NotificationsPopup.IsOpen = false; };
+        PreviewMouseDown += OnPreviewMouseDown;
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-        try
+        // Close popups when clicking outside them (StaysOpen=False already handles most, but ensure)
+        if (NotificationsPopup.IsOpen && !NotificationsPopup.IsMouseOver && !BellButton.IsMouseOver)
+            NotificationsPopup.IsOpen = false;
+    }
+
+    private async void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        await _vm.InitializeAsync(msg => { /* progress handled via binding */ });
+        if (UI.Windows.WelcomeWindow.ShouldShow())
         {
-            _textSecondaryBrush = (Brush)FindResource("TextSecondaryBrush");
-            await _faker.InitializeAsync(new Progress<string>(msg =>
-            {
-                LoadingText.Text = msg;
-                StatusMessage.Text = msg;
-            }));
-
-            CleanupLeftoverFakeExes();
-            Updater.CleanupOldExe();
-
-            await _db.LoadAsync(msg =>
-            {
-                LoadingText.Text = msg;
-                StatusMessage.Text = msg;
-            });
-
-            DbSourceText.Text = $"Database: {_db.Source} ({_db.Games.Count:N0} games)";
-
-            if (_db.CacheAgeDays.HasValue)
-            {
-                StatusMessage.Text = $"Database: Local Cache ({_db.Games.Count:N0} games, {_db.CacheAgeDays.Value}d old)";
-                StatusMessage.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
-            }
-            else
-            {
-                StatusMessage.Text = $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
-            }
-            HeaderStatusText.Text = _db.CacheAgeDays.HasValue
-                ? $"{_db.Games.Count:N0} games (cached {_db.CacheAgeDays.Value}d ago)"
-                : $"{_db.Games.Count:N0} games loaded from {_db.Source}";
-            HeaderStatusText.Foreground = _textSecondaryBrush;
-            VersionText.Text = $"v{Config.AssemblyVersion}";
-            GameCount.Text = $"{_db.Games.Count:N0} games in database";
-
-            var steamPath = SteamService.GetSteamPath();
-            SteamPathText.Text = steamPath ?? "Steam not found";
-
-            var questsOk = await LoadQuestsAsync();
-            ShowView(questsOk ? QuestsView : UnifiedSearchView);
-
-            // Free games bell (Bridge parity) — fire and forget
-            _ = RefreshFreeGamesAsync();
-
-            if (UI.Windows.WelcomeWindow.ShouldShow())
-            {
-                var welcome = new UI.Windows.WelcomeWindow
-                {
-                    Owner = this
-                };
-                welcome.ShowDialog();
-            }
-
-            try
-            {
-                Directory.CreateDirectory(Config.AppDataPath);
-                _completedQuestsWatcher = new FileSystemWatcher
-                {
-                    Path = Config.AppDataPath,
-                    Filter = Config.CompletedQuestsFile,
-                    NotifyFilter = NotifyFilters.LastWrite,
-                    EnableRaisingEvents = true,
-                };
-                _completedQuestsWatcher.Changed += OnCompletedQuestsChanged;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to set up completed quests watcher: {ex.Message}");
-            }
-
-            _ = CheckForUpdateAsync();
-        }
-        catch (Exception ex)
-        {
-            LoadingText.Text = $"Failed to load: {ex.Message}";
-            StatusMessage.Text = "Error during initialization";
+            var w = new UI.Windows.WelcomeWindow { Owner = this };
+            w.ShowDialog();
         }
     }
 
-    private void OnCompletedQuestsChanged(object sender, FileSystemEventArgs e)
+    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        try
+        if (e.PropertyName == nameof(MainViewModel.SidebarCollapsed))
         {
-            Dispatcher.Invoke(() =>
-            {
-                // The timer process writes completed-quests.json right before it
-                // closes — reflect that in the status bar instead of leaving
-                // "spoof active" hanging after the session ended.
-                if (_activeSpoofQuestName is not null)
-                {
-                    StatusMessage.Text = $"Quest completed: {_activeSpoofQuestName}";
-                    _activeSpoofQuestName = null;
-                }
-                else
-                {
-                    StatusMessage.Text = "Quest completed";
-                }
-                StatusMessage.Foreground = _textSecondaryBrush;
-
-                if (QuestsView.Visibility == Visibility.Visible)
-                    _ = LoadQuestsAsync();
-            });
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to refresh quests: {ex.Message}");
+            var collapsed = _vm.SidebarCollapsed;
+            SidebarColumn.Width = new GridLength(collapsed ? 48 : 220);
+            SidebarBorder.Width = collapsed ? 48 : 220;
         }
     }
 
-    // Name of the quest/game currently being spoofed (set when a timer starts,
-    // cleared when the timer process reports completion via the file watcher).
-    private string? _activeSpoofQuestName;
-
-    private void ShowView(FrameworkElement view)
+    // Bell popup positioning (view-only, stays in code-behind)
+    private void BellButton_Click(object sender, RoutedEventArgs e)
     {
-        LoadingPanel.Visibility = Visibility.Collapsed;
-        UnifiedSearchView.Visibility = Visibility.Collapsed;
-        DatabaseView.Visibility = Visibility.Collapsed;
-        ManualView.Visibility = Visibility.Collapsed;
-        SteamView.Visibility = Visibility.Collapsed;
-        CreditsView.Visibility = Visibility.Collapsed;
-        QuestsView.Visibility = Visibility.Collapsed;
-        view.Visibility = Visibility.Visible;
-
-        ResetButtonStyles();
-        var btn = view switch
-        {
-            _ when view == UnifiedSearchView => BtnUnifiedSearch,
-            _ when view == DatabaseView => BtnDatabase,
-            _ when view == ManualView => BtnManual,
-            _ when view == SteamView => BtnSteam,
-            _ when view == CreditsView => BtnCredits,
-            _ when view == QuestsView => BtnQuests,
-            _ => null
-        };
-        if (btn != null)
-            btn.Background = (System.Windows.Media.Brush)FindResource("CardBrush");
-
-        if (view == DatabaseView || view == ManualView || view == SteamView)
-            SetAdvancedExpanded(true);
-    }
-
-    private void ResetButtonStyles()
-    {
-        var transparent = System.Windows.Media.Brushes.Transparent;
-        BtnQuests.Background = transparent;
-        BtnUnifiedSearch.Background = transparent;
-        BtnDatabase.Background = transparent;
-        BtnManual.Background = transparent;
-        BtnSteam.Background = transparent;
-        BtnCredits.Background = transparent;
-    }
-
-    private void ResetStatusColor()
-    {
-        StatusMessage.Foreground = _textSecondaryBrush;
-    }
-
-    private void AdvancedToggle_Click(object sender, MouseButtonEventArgs e) =>
-        SetAdvancedExpanded(AdvancedPanel.Visibility != Visibility.Visible);
-
-    private void SetAdvancedExpanded(bool expanded)
-    {
-        AdvancedPanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
-        AdvancedToggle.Text = expanded ? "▾  Advanced" : "▸  Advanced";
-    }
-
-    private bool _sidebarCollapsed = false;
-    private void BtnToggleSidebar_Click(object sender, RoutedEventArgs e)
-    {
-        _sidebarCollapsed = !_sidebarCollapsed;
-        SidebarBorder.Width = _sidebarCollapsed ? 48 : 220;
-        SidebarColumn.Width = new GridLength(_sidebarCollapsed ? 48 : 220);
-        var buttons = new[] { BtnQuests, BtnUnifiedSearch, BtnDatabase, BtnSteam, BtnManual, BtnCredits, BtnUpdateReminder };
-        foreach (var btn in buttons)
-        {
-            if (btn.Content is StackPanel sp && sp.Children.Count == 2 && sp.Children[1] is System.Windows.Controls.TextBlock tb)
-            {
-                tb.Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
-                if (_sidebarCollapsed) btn.ToolTip = tb.Text; else btn.ToolTip = null;
-            }
-        }
-        AdvancedToggle.Visibility = _sidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
-        AdvancedPanel.Visibility = _sidebarCollapsed ? Visibility.Collapsed : (AdvancedToggle.Text.StartsWith("▾") ? Visibility.Visible : Visibility.Collapsed);
-    }
-
-    private void BtnUnifiedSearch_Click(object sender, RoutedEventArgs e) => ShowView(UnifiedSearchView);
-    private void BtnDatabase_Click(object sender, RoutedEventArgs e) => ShowView(DatabaseView);
-    private void BtnManual_Click(object sender, RoutedEventArgs e) => ShowView(ManualView);
-    private void BtnSteam_Click(object sender, RoutedEventArgs e) => ShowView(SteamView);
-    private void BtnCredits_Click(object sender, RoutedEventArgs e)
-    {
-        foreach (var card in new UIElement[] { CreditAbout, CreditHowItWorks, CreditSteam, CreditDisclaimer, CreditSupport })
-        {
-            card.Opacity = 0;
-            card.RenderTransform = new TranslateTransform(0, 15);
-        }
-
-        ShowView(CreditsView);
-        DispatchAnimation(AnimateCreditCardsAsync);
-    }
-
-    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-    {
-        try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
-        e.Handled = true;
-    }
-
-    // ==================== Free games bell (ported from Bridge) ====================
-    private readonly FreeGamesService _freeGamesService = new();
-    private List<FreeGameNotification> _freeGames = [];
-    private bool _hasUnseenFreeGames;
-
-    public bool HasUnseenFreeGames => _hasUnseenFreeGames;
-
-    private async Task RefreshFreeGamesAsync()
-    {
-        try
-        {
-            _freeGames = await _freeGamesService.GetFreeGamesAsync();
-            var visible = _freeGames.Take(10).ToList();
-            FreeGamesList.ItemsSource = visible;
-            FreeGamesEmpty.Visibility = visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-            var seen = FreeGamesSeenStore.Load();
-            var unseen = visible.Count(g => !seen.Contains(g.Id));
-            UpdateFreeGamesBadge(unseen);
-        }
-        catch { }
-    }
-
-    private void UpdateFreeGamesBadge(int unseen)
-    {
-        _hasUnseenFreeGames = unseen > 0;
-        BellBadge.Visibility = unseen > 0 ? Visibility.Visible : Visibility.Collapsed;
-        BellBadgeCount.Text = unseen.ToString();
-        PopupBadgePill.Visibility = unseen > 0 ? Visibility.Visible : Visibility.Collapsed;
-        PopupBadgeText.Text = unseen.ToString();
+        if (NotificationsPopup.IsOpen) { NotificationsPopup.IsOpen = false; return; }
+        PositionNotificationsPopup();
+        NotificationsPopup.IsOpen = true;
+        _vm.FreeGames.MarkSeenOnOpen();
+        _ = _vm.FreeGames.RefreshCommand.ExecuteAsync(null);
     }
 
     private void PositionNotificationsPopup()
@@ -307,921 +66,84 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         if (NotificationsPopup.Child is not FrameworkElement content) return;
         content.Measure(new Size(360, double.PositiveInfinity));
         var width = content.DesiredSize.Width > 0 ? content.DesiredSize.Width : 360;
-
         var transform = BellButton.TransformToVisual(this);
         var bellPos = transform.Transform(new Point(0, 0));
-
         NotificationsPopup.PlacementTarget = this;
         NotificationsPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
         NotificationsPopup.HorizontalOffset = bellPos.X + BellButton.ActualWidth - width;
         NotificationsPopup.VerticalOffset = bellPos.Y + BellButton.ActualHeight + 8;
     }
 
-    private async void BellButton_Click(object sender, RoutedEventArgs e)
+    private void AccentButton_Click(object sender, RoutedEventArgs e)
     {
-        if (NotificationsPopup.IsOpen)
+        if (AccentPopup.IsOpen) { AccentPopup.IsOpen = false; return; }
+        if (AccentPopup.Child is FrameworkElement content)
         {
-            NotificationsPopup.IsOpen = false;
-            return;
+            content.Measure(new Size(220, double.PositiveInfinity));
+            var w = content.DesiredSize.Width > 0 ? content.DesiredSize.Width : 220;
+            var t = AccentButton.TransformToVisual(this).Transform(new Point(0, 0));
+            AccentPopup.PlacementTarget = this;
+            AccentPopup.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+            AccentPopup.HorizontalOffset = t.X + AccentButton.ActualWidth - w;
+            AccentPopup.VerticalOffset = t.Y + AccentButton.ActualHeight + 8;
         }
-
-        PositionNotificationsPopup();
-        NotificationsPopup.IsOpen = true;
-
-        // Opening clears the badge (mark seen)
-        if (_hasUnseenFreeGames)
-        {
-            FreeGamesSeenStore.MarkSeen(_freeGames.Select(g => g.Id));
-            UpdateFreeGamesBadge(0);
-        }
-
-        await RefreshFreeGamesAsync();
+        AccentPopup.IsOpen = true;
     }
+
+    private void AccentColor_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button { Tag: string hex })
+        {
+            Services.ThemeManager.ApplyAccent(hex);
+            AccentPopup.IsOpen = false;
+        }
+    }
+
+    private void AdvancedToggle_Click(object sender, MouseButtonEventArgs e) => _vm.ToggleAdvancedCommand.Execute(null);
 
     private void BtnMarkAllSeen_Click(object sender, RoutedEventArgs e)
     {
-        FreeGamesSeenStore.MarkSeen(_freeGames.Select(g => g.Id));
-        UpdateFreeGamesBadge(0);
+        _vm.FreeGames.MarkAllSeenCommand.Execute(null);
         NotificationsPopup.IsOpen = false;
     }
 
-    private void FreeGameClaim_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: FreeGameNotification game }) return;
-        var url = !string.IsNullOrWhiteSpace(game.OpenGiveawayUrl) ? game.OpenGiveawayUrl : game.GamerpowerUrl;
-        if (string.IsNullOrWhiteSpace(url)) return;
-        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
-        FreeGamesSeenStore.MarkSeen([game.Id]);
-    }
+    private void BtnClosePopup_Click(object sender, RoutedEventArgs e) => NotificationsPopup.IsOpen = false;
 
-    private async void BtnRefreshFreeGames_Click(object sender, RoutedEventArgs e)
-    {
-        StatusMessage.Text = "Refreshing free games...";
-        await RefreshFreeGamesAsync();
-        StatusMessage.Text = "Free games updated.";
-    }
+    private void NotificationsPopup_Closed(object sender, EventArgs e) { }
 
-    // ==================== Run All Quests (secuencia) ====================
-    // Ejecuta cada quest activa una por una: lanza el spoof, espera los 15
-    // minutos del timer (el proceso TimerWindow hijo se cierra solo al
-    // terminar), marca la quest como completa y sigue con la siguiente.
-    private CancellationTokenSource? _runAllCts;
-    private bool _isRunningAll;
-
-    private async void BtnRunAllQuests_Click(object sender, RoutedEventArgs e)
+    private void ClaimButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_isRunningAll)
+        Services.FreeGameNotification? game = null;
+        if (sender is System.Windows.Controls.Button btn)
         {
-            _runAllCts?.Cancel(); // stop request
-            StatusMessage.Text = "Stopping quest sequence after the current one...";
-            return;
+            if (btn.Tag is Services.FreeGameNotification t) game = t;
+            else if (btn.DataContext is Services.FreeGameNotification dc) game = dc;
+            else if (btn.CommandParameter is Services.FreeGameNotification cp) game = cp;
         }
-
-        if (QuestsList.ItemsSource is not List<QuestItem> quests || quests.Count == 0)
-            return;
-
-        var pending = quests.Where(q => !q.IsCompleted).ToList();
-        if (pending.Count == 0)
+        if (game == null && sender is FrameworkElement fe && fe.DataContext is Services.FreeGameNotification pdc) game = pdc;
+        if (game == null)
         {
-            StatusMessage.Text = "All quests are already completed.";
-            return;
-        }
-
-        _isRunningAll = true;
-        _runAllCts = new CancellationTokenSource();
-        SetRunAllUi(running: true, pending.Count);
-        var anyCompleted = false;
-
-        try
-        {
-            for (int i = 0; i < pending.Count; i++)
+            try
             {
-                var quest = pending[i];
-                if (_runAllCts.Token.IsCancellationRequested) break;
-
-                StatusMessage.Text = $"[{i + 1}/{pending.Count}] Running quest: {quest.GameName} (15 min)...";
-                RunAllText.Text = $"Running {i + 1}/{pending.Count} — click to stop";
-
-                var launched = await RunSingleQuestAsync(quest);
-                if (launched == null)
+                var parent = (sender as FrameworkElement)?.Parent as FrameworkElement;
+                while (parent != null && game == null)
                 {
-                    StatusMessage.Text = $"[{i + 1}/{pending.Count}] Could not run: {quest.GameName} — skipping";
-                    continue;
+                    if (parent.DataContext is Services.FreeGameNotification pd) game = pd;
+                    parent = parent.Parent as FrameworkElement;
                 }
-
-                // SECUENCIAL: esperar a que ESTE proceso timer termine (los 15
-                // min) o cancelación — no se lanza la siguiente hasta que este
-                // cierra. El timer se cierra solo al completar.
-                if (launched.Value.process != null)
-                {
-                    try
-                    {
-                        await launched.Value.process.WaitForExitAsync(_runAllCts.Token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // stop pedido: matar el timer actual y cortar
-                        try { launched.Value.process.Kill(true); } catch { }
-                        break;
-                    }
-                }
-                else
-                {
-                    // Steam mode no devuelve proceso: esperar por ventana Timer
-                    await WaitForCurrentSpoofToFinishAsync(_runAllCts.Token);
-                    if (_runAllCts.Token.IsCancellationRequested) break;
-                }
-
-                // Marcar completa SOLO cuando el timer de ESTA quest terminó
-                MarkQuestCompleted(quest);
-                anyCompleted = true;
-                StatusMessage.Text = $"[{i + 1}/{pending.Count}] Completed: {quest.GameName}";
             }
+            catch { }
         }
-        finally
-        {
-            _isRunningAll = false;
-            _runAllCts?.Dispose();
-            _runAllCts = null;
-            SetRunAllUi(running: false);
-            StatusMessage.Text = "Quest sequence finished.";
-            if (anyCompleted) await LoadQuestsAsync();
-        }
-    }
-
-    private void SetRunAllUi(bool running, int? total = null)
-    {
-        BtnRunAllQuests.Visibility = Visibility.Visible;
-        RunAllText.Text = running ? $"Running 0/{total} — click to stop" : "Run all quests";
-        RunAllIcon.Symbol = running ? Wpf.Ui.Controls.SymbolRegular.Stop24 : Wpf.Ui.Controls.SymbolRegular.Play24;
-    }
-
-    // Lanza el spoof de una quest (misma lógica que QuestsSpoof_Click).
-    // Devuelve (true, process) si arrancó el timer, (true, null) en Steam mode
-    // (no hay proceso rastreable) o (false, null) si no se pudo lanzar.
-    private async Task<(bool ok, Process? process)?> RunSingleQuestAsync(QuestItem quest)
-    {
-        try
-        {
-            var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
-            if (matches.Count == 0)
-                matches = _db.Games.Where(g =>
-                    g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) ||
-                    quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            if (matches.Count == 0) return (false, null);
-
-            var game = matches[0];
-            if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
-            {
-                await SteamSpoof(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
-                return (true, null); // Steam mode: esperar por ventana
-            }
-
-            var exeName = DiscordDatabase.GetWin32Executable(game);
-            if (exeName == null) return (false, null);
-
-            var path = _faker.CreateFakeGame(exeName);
-            if (path == null) return (false, null);
-
-            if (_faker.LaunchExecutable(path, out var process, game.Name, quest.Id))
-                return (true, process);
-            return (false, null);
-        }
-        catch { return (false, null); }
-    }
-
-    // Espera hasta que ya no haya procesos "OrbSpoofer --timer-mode" vivos
-    // (el timer cierra solo al terminar los 15 min) o hasta cancelación.
-    private async Task WaitForCurrentSpoofToFinishAsync(CancellationToken ct)
-    {
-        while (!ct.IsCancellationRequested)
-        {
-            try { await Task.Delay(5000, ct); } catch (TaskCanceledException) { break; }
-            if (ct.IsCancellationRequested) break;
-
-            var timerAlive = Process.GetProcessesByName("OrbSpoofer")
-                .Any(p =>
-                {
-                    try { return p.MainWindowTitle.Contains("Timer", StringComparison.OrdinalIgnoreCase); }
-                    catch { return false; }
-                });
-
-            if (!timerAlive) break;
-        }
-    }
-
-    private void MarkQuestCompleted(QuestItem quest)
-    {
-        try
-        {
-            var ids = Config.LoadCompletedQuestIds();
-            ids.Add(quest.Id);
-            Config.SaveCompletedQuestIds(ids);
-            quest.IsCompleted = true;
-        }
-        catch { }
-    }
-
-    private async void BtnQuests_Click(object sender, RoutedEventArgs e)
-    {
-        ShowView(QuestsView);
-        await LoadQuestsAsync();
-    }
-
-    private async Task<bool> LoadQuestsAsync()
-    {
-        try
-        {
-            QuestsLoadingText.Visibility = Visibility.Visible;
-            QuestsList.Visibility = Visibility.Collapsed;
-            QuestsEmptyText.Visibility = Visibility.Collapsed;
-
-            var allQuests = await QuestService.GetActivePlayQuestsAsync();
-
-            var spoofableGames = _db.Games.Where(g => DiscordDatabase.GetWin32Executable(g) != null).ToList();
-            var spoofableIds = new HashSet<string>(spoofableGames.Select(g => g.Id));
-
-            var completedIds = Config.LoadCompletedQuestIds();
-
-            var quests = allQuests.Where(q =>
-            {
-                if (spoofableIds.Contains(q.ApplicationId ?? ""))
-                    return true;
-
-                return _db.Games.Any(g =>
-                    g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) ||
-                    q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
-            }).ToList();
-
-            foreach (var q in quests)
-            {
-                q.IsCompleted = completedIds.Contains(q.Id);
-                var matchingGame = _db.Games.FirstOrDefault(g =>
-                    g.Id == q.ApplicationId ||
-                    g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) ||
-                    q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
-                q.NeedsSteamMode = matchingGame != null && DiscordDatabase.GetWin32Executable(matchingGame) == null;
-            }
-
-            quests = quests.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
-
-            if (quests.Count == 0)
-            {
-                QuestsEmptyText.Text = "No active quests found. Try Search to spoof a game manually.";
-                QuestsEmptyText.Visibility = Visibility.Visible;
-                BtnRunAllQuests.Visibility = Visibility.Collapsed;
-                return false;
-            }
-
-            if (!_isRunningAll)
-            {
-                var pendingCount = quests.Count(q => !q.IsCompleted);
-                BtnRunAllQuests.Visibility = pendingCount > 0 ? Visibility.Visible : Visibility.Collapsed;
-            }
-
-            QuestsList.ItemsSource = quests;
-            QuestsList.Visibility = Visibility.Visible;
-            StatusMessage.Text = $"{quests.Count} active quest(s) loaded";
-            _ = Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-            {
-                HideAllListBoxItems(QuestsList);
-                DispatchAnimation(() => AnimateListBoxItemsAsync(QuestsList));
-            }));
-            return true;
-        }
-        catch (Exception)
-        {
-            QuestsEmptyText.Text = "No active quests found. The API may be unavailable — use Search to spoof a game.";
-            QuestsEmptyText.Visibility = Visibility.Visible;
-            return false;
-        }
-        finally
-        {
-            QuestsLoadingText.Visibility = Visibility.Collapsed;
-        }
-    }
-
-    private async void QuestsSpoof_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button { Tag: Models.QuestItem quest })
-        {
-            StatusMessage.Text = $"Looking up game: {quest.GameName}...";
-
-            var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
-            if (matches.Count == 0)
-                matches = _db.Games.Where(g =>
-                    g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) ||
-                    quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            if (matches.Count == 0)
-            {
-                StatusMessage.Text = $"No matching game found for: {quest.GameName}";
-                return;
-            }
-
-            var game = matches[0];
-            if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
-            {
-                StatusMessage.Text = $"{quest.GameName} has no Discord executable — using Steam mode...";
-                await SteamSpoof(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
-                return;
-            }
-
-            var exeName = DiscordDatabase.GetWin32Executable(game);
-            if (exeName == null)
-            {
-                new UI.Windows.InfoDialog(
-                    "No executable found",
-                    $"{quest.GameName} has no executable registered in Discord's database, so process spoofing won't work.",
-                    "Use Steam Quest mode or Manual mode to spoof this game.").ShowDialog();
-                StatusMessage.Text = $"{quest.GameName} has no executable in Discord's database";
-                return;
-            }
-
-            StatusMessage.Text = $"Creating fake process for quest: {exeName}...";
-            var path = _faker.CreateFakeGame(exeName);
-
-            if (path != null && _faker.LaunchExecutable(path, game.Name, quest.Id))
-            {
-                _activeSpoofQuestName = quest.GameName;
-                StatusMessage.Text = $"Quest spoof active: {quest.GameName}";
-            }
-            else
-            {
-                StatusMessage.Text = $"Failed to launch spoof for: {quest.GameName}";
-            }
-        }
-    }
-
-    private async void QuestCompleteToggle_Click(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is Border { Tag: QuestItem quest })
-        {
-            quest.IsCompleted = !quest.IsCompleted;
-
-            var completedIds = Config.LoadCompletedQuestIds();
-            if (quest.IsCompleted)
-                completedIds.Add(quest.Id);
-            else
-                completedIds.Remove(quest.Id);
-            Config.SaveCompletedQuestIds(completedIds);
-
-            var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
-            var fadeDuration = TimeSpan.FromSeconds(0.2);
-
-            ListBoxItem? clickedItem = null;
-            if (sender is UIElement element)
-            {
-                var parent = VisualTreeHelper.GetParent(element) as UIElement;
-                while (parent != null && parent is not ListBoxItem)
-                    parent = VisualTreeHelper.GetParent(parent) as UIElement;
-                clickedItem = parent as ListBoxItem;
-            }
-
-            if (clickedItem != null)
-            {
-                clickedItem.BeginAnimation(UIElement.OpacityProperty,
-                    new DoubleAnimation(1, 0, fadeDuration) { EasingFunction = ease });
-                await Task.Delay(fadeDuration);
-            }
-
-            var quests = ((List<QuestItem>)QuestsList.ItemsSource)
-                .OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
-            QuestsList.ItemsSource = quests;
-
-            if (clickedItem != null)
-            {
-                await Task.Delay(20);
-                clickedItem.BeginAnimation(UIElement.OpacityProperty,
-                    new DoubleAnimation(0, 1, fadeDuration) { EasingFunction = ease });
-            }
-
-            StatusMessage.Text = quest.IsCompleted
-                ? $"Marked \"{quest.GameName}\" as completed"
-                : $"Marked \"{quest.GameName}\" as not completed";
-        }
-    }
-
-    private void Kofi_Click(object sender, RoutedEventArgs e) => OpenUrl(Config.KofiUrl);
-    private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => OpenUrl(Config.KofiUrl);
-
-    private void GitHubSponsor_Click(object sender, RoutedEventArgs e) => OpenUrl(Config.GitHubSponsorUrl);
-
-    private void GitHubProfile_Click(object sender, MouseButtonEventArgs e) => OpenUrl(Config.RepoUrl);
-
-    private void Strykey_Click(object sender, MouseButtonEventArgs e) => OpenUrl("https://github.com/Strykey");
-
-    private void Orbshacker_Click(object sender, MouseButtonEventArgs e) => OpenUrl("https://github.com/strykey/orbshacker");
-
-    private void OpenUrl(string url)
-    {
-        try
-        {
-            using var process = Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true,
-            });
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Text = $"Could not open link: {ex.Message}";
-        }
-    }
-
-    // Database Search
-    private void SearchBox_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-            PerformDatabaseSearch(animate: true);
-    }
-
-    private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-    {
-        _searchDebounceTimer.Stop();
-        _searchDebounceTimer.Start();
-    }
-
-    private void BtnSearch_Click(object sender, RoutedEventArgs e) => PerformDatabaseSearch(animate: true);
-
-    private void UnifiedSearchBox_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-            _ = PerformUnifiedSearch();
-    }
-
-    private void UnifiedSearchBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        _unifiedSearchDebounceTimer.Stop();
-        _unifiedSearchDebounceTimer.Start();
-    }
-
-    private void BtnUnifiedSearchGo_Click(object sender, RoutedEventArgs e) => _ = PerformUnifiedSearch();
-
-    private async Task PerformUnifiedSearch()
-    {
-        var query = UnifiedSearchBox.Text.Trim();
-        if (string.IsNullOrEmpty(query))
-        {
-            UnifiedResultsList.ItemsSource = null;
-            UnifiedNoResultsText.Text = "Type a game name or process.exe and press Search";
-            UnifiedNoResultsText.Visibility = Visibility.Visible;
-            return;
-        }
-
-        StatusMessage.Text = $"Searching '{query}'...";
-        List<SteamSearchResult> steamHits = [];
-        try
-        {
-            steamHits = await SteamService.SearchGamesAsync(query);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Steam search failed: {ex.Message}");
-        }
-
-        var discordHits = _db.SearchGames(query);
-        var items = UnifiedSearch.Merge(query, discordHits, steamHits);
-
-        foreach (var item in items.Where(i => i.DiscordGame != null && string.IsNullOrEmpty(i.ImageUrl)))
-        {
-            var game = item.DiscordGame!;
-            _ = GameImageService.GetImageUrlAsync(game).ContinueWith(t =>
-            {
-                if (t.IsCompletedSuccessfully && t.Result != null)
-                    Dispatcher.BeginInvoke(() => item.ImageUrl = t.Result);
-            });
-        }
-
-        UnifiedResultsList.ItemsSource = items;
-        UnifiedNoResultsText.Visibility = items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        StatusMessage.Text = items.Count > 0
-            ? $"Found {items.Count} result(s) for '{query}'"
-            : $"No results for '{query}'";
-
-        if (items.Count > 0)
-            DispatchAnimation(() => AnimateListBoxItemsAsync(UnifiedResultsList));
-    }
-
-    private async void UnifiedSpoof_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button { Tag: UnifiedSearchItem item })
-            await SpoofUnified(item);
-    }
-
-    private async void UnifiedResultsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (UnifiedResultsList.SelectedItem is UnifiedSearchItem item)
-            await SpoofUnified(item);
-    }
-
-    private async Task SpoofUnified(UnifiedSearchItem item)
-    {
-        if (!string.IsNullOrEmpty(item.ManualExe))
-        {
-            var exeName = item.ManualExe;
-            StatusMessage.Text = $"Creating fake process: {exeName}...";
-            var path = _faker.CreateFakeGame(exeName);
-            StatusMessage.Text = path != null && _faker.LaunchExecutable(path, exeName)
-                ? $"Running: {exeName}"
-                : $"Failed to launch: {exeName}";
-            return;
-        }
-
-        if (item.DiscordGame != null && DiscordDatabase.GetWin32Executable(item.DiscordGame) is { } exe)
-        {
-            SpoofGame(new GameDisplayItem { Name = item.Name, Game = item.DiscordGame });
-            return;
-        }
-
-        if (item.SteamAppId is int steamId and > 0)
-        {
-            await SteamSpoof(new SteamGameDisplayItem { Id = steamId, Name = item.Name });
-            return;
-        }
-
-        new UI.Windows.InfoDialog(
-            "No executable found",
-            $"{item.Name} has no Discord executable or Steam AppID.",
-            "Try Advanced → Manual Mode with the exact process name.").ShowDialog();
-        StatusMessage.Text = $"{item.Name} cannot be spoofed automatically";
-    }
-
-    private void PerformDatabaseSearch(bool animate = false)
-    {
-        _imageResolutionCts?.Cancel();
-        _imageResolutionCts?.Dispose();
-        _imageResolutionCts = new CancellationTokenSource();
-        var ct = _imageResolutionCts.Token;
-        var query = SearchBox.Text.Trim();
-
-        if (string.IsNullOrEmpty(query))
-        {
-            ResultsList.ItemsSource = null;
-            NoResultsText.Text = "Type the game name and click ▶ to spoof";
-            NoResultsText.Visibility = Visibility.Visible;
-            ResetStatusColor();
-            StatusMessage.Text = _db.CacheAgeDays.HasValue
-                ? $"Database: Local Cache ({_db.Games.Count:N0} games, {_db.CacheAgeDays.Value}d old)"
-                : $"Ready — {_db.Games.Count:N0} games loaded from {_db.Source}";
-            return;
-        }
-
-        var results = _db.SearchGames(query);
-        var items = results.Select(g => new GameDisplayItem
-        {
-            Id = g.Id,
-            Name = g.Name,
-            Aliases = g.Aliases,
-            AliasDisplay = g.Aliases.Count > 0
-                ? "Aliases: " + string.Join(", ", g.Aliases.Take(Config.MaxDisplayedAliases)) +
-                  (g.Aliases.Count > Config.MaxDisplayedAliases
-                      ? $" (+{g.Aliases.Count - Config.MaxDisplayedAliases} more)" : "")
-                : "",
-            Game = g
-        }).ToList();
-
-        ResultsList.ItemsSource = items;
-
-        if (items.Count == 0)
-        {
-            NoResultsText.Text = $"No games found for '{query}'";
-            NoResultsText.Visibility = Visibility.Visible;
-            StatusMessage.Text = $"No results for '{query}'";
-        }
-        else
-        {
-            NoResultsText.Visibility = Visibility.Collapsed;
-            StatusMessage.Text = $"Found {items.Count} game(s) for '{query}'";
-
-            if (animate)
-                DispatchAnimation(() => AnimateListBoxItemsAsync(ResultsList));
-
-            _ = ResolveGameImagesAsync(items, ct);
-        }
-    }
-
-    private async Task ResolveGameImagesAsync(List<GameDisplayItem> items, CancellationToken ct)
-    {
-        await Parallel.ForEachAsync(items, new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = ct }, async (item, token) =>
-        {
-            var url = await GameImageService.GetImageUrlAsync(item.Game);
-            if (url != null && !token.IsCancellationRequested)
-                item.ImageUrl = url;
-        });
-    }
-
-    private static void HideAllListBoxItems(ListBox listBox)
-    {
-        for (int i = 0; i < listBox.Items.Count; i++)
-        {
-            if (listBox.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem item)
-            {
-                item.Opacity = 0;
-                item.RenderTransform = new TranslateTransform(0, 16);
-            }
-        }
-    }
-
-    private async Task AnimateListBoxItemsAsync(ListBox listBox, int delayMs = 60)
-    {
-        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
-        var duration = TimeSpan.FromSeconds(0.35);
-
-        // Ensure everything is hidden before starting staggered animation
-        HideAllListBoxItems(listBox);
-
-        await Task.Delay(15);
-
-        for (int i = 0; i < listBox.Items.Count; i++)
-        {
-            if (listBox.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem item)
-            {
-                item.BeginAnimation(UIElement.OpacityProperty,
-                    new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
-
-                var translate = new TranslateTransform(0, 16);
-                item.RenderTransform = translate;
-                translate.BeginAnimation(TranslateTransform.YProperty,
-                    new DoubleAnimation(16, 0, duration) { EasingFunction = ease });
-            }
-
-            await Task.Delay(delayMs);
-        }
-    }
-
-    private void DispatchAnimation(Func<Task> animation)
-    {
-        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(async () => await animation()));
-    }
-
-    private async Task AnimateCreditCardsAsync()
-    {
-        var cards = new UIElement[] { CreditAbout, CreditHowItWorks, CreditSteam, CreditDisclaimer, CreditSupport };
-        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
-
-        foreach (var card in cards)
-        {
-            card.Opacity = 0;
-            card.RenderTransform = new TranslateTransform(0, 15);
-
-            card.BeginAnimation(UIElement.OpacityProperty,
-                new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.3)) { EasingFunction = ease });
-            ((TranslateTransform)card.RenderTransform).BeginAnimation(TranslateTransform.YProperty,
-                new DoubleAnimation(15, 0, TimeSpan.FromSeconds(0.3)) { EasingFunction = ease });
-
-            await Task.Delay(100);
-        }
-    }
-
-    private static void CleanupLeftoverFakeExes()
-    {
-        var fakeDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-            Config.FakeExeDir);
-
-        try
-        {
-            if (!Directory.Exists(fakeDir)) return;
-
-            foreach (var file in Directory.GetFiles(fakeDir, "*.exe"))
-            {
-                try { File.Delete(file); }
-                catch (Exception ex) { Debug.WriteLine($"Failed to delete leftover fake exe: {ex.Message}"); }
-            }
-
-            if (!Directory.EnumerateFileSystemEntries(fakeDir).Any())
-                Directory.Delete(fakeDir);
-        }
-        catch (Exception ex) { Debug.WriteLine($"Failed to cleanup fake exe directory: {ex.Message}"); }
-    }
-
-    private async Task CheckForUpdateAsync()
-    {
-        try
-        {
-            var (needsUpdate, tagName, downloadUrl) = await Updater.CheckForUpdateAsync();
-
-            if (!needsUpdate || string.IsNullOrEmpty(downloadUrl)) return;
-
-            var updateWindow = new UI.Windows.UpdateWindow(tagName!, downloadUrl)
-            {
-                Owner = this
-            };
-            updateWindow.ShowDialog();
-
-            _pendingUpdateTag = tagName;
-            _pendingUpdateUrl = downloadUrl;
-            BtnUpdateReminder.Visibility = Visibility.Visible;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Update check failed: {ex.Message}");
-        }
+        if (game == null) return;
+        try { _vm.FreeGames.ClaimCommand.Execute(game); } catch { }
     }
 
     private void UpdateReminder_Click(object sender, RoutedEventArgs e)
     {
-        if (_pendingUpdateTag == null || _pendingUpdateUrl == null) return;
-
-        var updateWindow = new UI.Windows.UpdateWindow(_pendingUpdateTag, _pendingUpdateUrl)
-        {
-            Owner = this
-        };
-        updateWindow.ShowDialog();
+        if (_vm.PendingUpdateTag == null || _vm.PendingUpdateUrl == null) return;
+        var w = new UI.Windows.UpdateWindow(_vm.PendingUpdateTag, _vm.PendingUpdateUrl) { Owner = this };
+        w.ShowDialog();
     }
 
-    private void SpoofGame_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is GameDisplayItem item)
-            SpoofGame(item);
-    }
-
-    private void ResultsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (ResultsList.SelectedItem is GameDisplayItem item)
-            SpoofGame(item);
-    }
-
-    private void SpoofGame(GameDisplayItem item)
-    {
-        var exeName = DiscordDatabase.GetWin32Executable(item.Game);
-        if (exeName == null)
-        {
-            new UI.Windows.InfoDialog(
-                "No executable found",
-                $"{item.Name} has no executable registered in Discord's database, so process spoofing won't work.",
-                "Use Steam Quest mode or Manual mode to spoof this game.").ShowDialog();
-            StatusMessage.Text = $"{item.Name} has no executable in Discord's database";
-            return;
-        }
-
-        StatusMessage.Text = $"Creating fake process: {exeName}...";
-        var path = _faker.CreateFakeGame(exeName);
-
-        if (path != null && _faker.LaunchExecutable(path, exeName))
-        {
-            StatusMessage.Text = $"Running: {exeName} — Discord should detect the game";
-        }
-        else
-        {
-            StatusMessage.Text = $"Failed to launch: {exeName}";
-        }
-    }
-
-    // Manual Mode
-    private void ManualExeBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-    {
-        BtnManualSpoof.IsEnabled = !string.IsNullOrWhiteSpace(ManualExeBox.Text);
-    }
-
-    private void BtnManualSpoof_Click(object sender, RoutedEventArgs e)
-    {
-        var exeName = ManualExeBox.Text.Trim();
-        if (string.IsNullOrEmpty(exeName)) return;
-
-        if (!exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-            exeName += ".exe";
-
-        exeName = Path.GetFileName(exeName);
-
-        StatusMessage.Text = $"Creating fake process: {exeName}...";
-        var path = _faker.CreateFakeGame(exeName);
-
-        if (path != null && _faker.LaunchExecutable(path, exeName))
-        {
-            StatusMessage.Text = $"Running: {exeName}";
-            ManualResultPanel.Visibility = Visibility.Visible;
-            ManualResultText.Text = $"✓ {exeName} launched successfully!";
-        }
-        else
-        {
-            StatusMessage.Text = $"Failed to launch: {exeName}";
-            ManualResultPanel.Visibility = Visibility.Visible;
-            ManualResultText.Text = "✗ Failed to create the executable";
-        }
-    }
-
-    // Steam Quest Mode
-    private async void SteamSearchBox_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-            await PerformSteamSearch();
-    }
-
-    private async void SteamSearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-    {
-        _steamSearchDebounceTimer.Stop();
-        _steamSearchDebounceTimer.Start();
-    }
-
-    private async void BtnSteamSearch_Click(object sender, RoutedEventArgs e) => await PerformSteamSearch();
-
-    private async Task PerformSteamSearch()
-    {
-        var query = SteamSearchBox.Text.Trim();
-        if (string.IsNullOrEmpty(query))
-        {
-            SteamResultsList.ItemsSource = null;
-            SteamNoResultsText.Visibility = Visibility.Visible;
-            return;
-        }
-
-        StatusMessage.Text = $"Searching Steam for '{query}'...";
-        try
-        {
-            var results = await SteamService.SearchGamesAsync(query);
-
-            var items = results.Select(g => new SteamGameDisplayItem
-            {
-                Id = g.Id,
-                Name = g.Name,
-            }).ToList();
-
-            SteamResultsList.ItemsSource = items;
-            SteamNoResultsText.Visibility = items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            StatusMessage.Text = items.Count > 0
-                ? $"Found {items.Count} results"
-                : $"No results for '{query}'";
-
-            if (items.Count > 0)
-                DispatchAnimation(() => AnimateListBoxItemsAsync(SteamResultsList));
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Text = $"Steam search failed: {ex.Message}";
-        }
-    }
-
-    private async void SteamSpoof_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is SteamGameDisplayItem item)
-            await SteamSpoof(item);
-    }
-
-    private async void SteamResultsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (SteamResultsList.SelectedItem is SteamGameDisplayItem item)
-            await SteamSpoof(item);
-    }
-
-    private async Task SteamSpoof(SteamGameDisplayItem item, string? questId = null)
-    {
-        try
-        {
-            var steamPath = SteamService.GetSteamPath();
-            if (steamPath == null)
-            {
-                StatusMessage.Text = "Steam installation not found";
-                return;
-            }
-
-            StatusMessage.Text = $"Fetching app info for {item.Name}...";
-            var info = await SteamService.FetchAppInfoAsync(item.Id);
-            if (info == null)
-            {
-                StatusMessage.Text = "Could not fetch app info from SteamCMD API";
-                return;
-            }
-
-            if (string.IsNullOrEmpty(info.Executable))
-            {
-                StatusMessage.Text = "No executable found for this game";
-                return;
-            }
-
-            StatusMessage.Text = "Generating appmanifest...";
-            var acfCreated = SteamService.WriteAppManifest(
-                item.Id, info.Name, info.InstallDir, steamPath, info.DepotId);
-
-            if (!acfCreated)
-            {
-                StatusMessage.Text = "Failed to create appmanifest";
-                return;
-            }
-
-            var exePath = SteamService.GetInstallExePath(steamPath, info.InstallDir, info.Executable);
-            StatusMessage.Text = "Creating fake executable...";
-            var path = _faker.CreateSteamFakeGame(exePath);
-            var discordAppId = _db.FindBySteamAppId(item.Id)?.Id;
-
-            if (path != null && _faker.LaunchExecutable(path, info.Name, questId, discordAppId))
-            {
-                if (questId != null) _activeSpoofQuestName = info.Name;
-                StatusMessage.Text = questId != null
-                    ? $"Quest spoof active (Steam): {info.Name}"
-                    : $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
-            }
-            else
-            {
-                StatusMessage.Text = $"Failed to launch Steam spoof for: {info.Name}";
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Text = $"Steam spoof failed: {ex.Message}";
-        }
-    }
+    private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => Helpers.UrlLauncher.Open(Config.KofiUrl);
 }
-

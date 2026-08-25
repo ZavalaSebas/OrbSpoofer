@@ -69,27 +69,15 @@ public static class Config
         ["Origin"] = "https://discord.com",
     };
 
+    // Backed by SettingsStoreBase for corruption tolerance (see Infrastructure/Settings)
     public static HashSet<string> LoadCompletedQuestIds()
     {
-        var path = Path.Combine(AppDataPath, CompletedQuestsFile);
-        if (!File.Exists(path)) return new HashSet<string>();
-        try
-        {
-            var json = File.ReadAllText(path);
-            var arr = JsonSerializer.Deserialize<List<string>>(json);
-            return arr != null ? new HashSet<string>(arr) : new HashSet<string>();
-        }
-        catch
-        {
-            return new HashSet<string>();
-        }
+        try { return new Infrastructure.Settings.CompletedQuestsStore().Load(); }
+        catch { return []; }
     }
 
     public static void SaveCompletedQuestIds(HashSet<string> ids)
     {
-        Directory.CreateDirectory(AppDataPath);
-        var path = Path.Combine(AppDataPath, CompletedQuestsFile);
-        var json = JsonSerializer.Serialize(ids.ToList());
-        File.WriteAllText(path, json);
+        try { new Infrastructure.Settings.CompletedQuestsStore().Save(ids); } catch { }
     }
 }

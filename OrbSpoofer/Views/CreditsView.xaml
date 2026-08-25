@@ -1,0 +1,54 @@
+<UserControl x:Class="OrbSpoofer.Views.CreditsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,8">
+            <TextBlock Text="Credits &amp; Info" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,20"/>
+            <Border x:Name="CreditAbout" Style="{StaticResource Orb.Card}" Padding="20" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="About" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,10"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22">
+                        OrbSpoofer is a game process spoofer that tricks Discord into thinking you're running a game by creating fake processes with the exact names Discord expects. No client modification. No code injection.
+                    </TextBlock>
+                    <TextBlock Margin="0,12,0,0"><Hyperlink NavigateUri="https://github.com/ZavalaSebas/OrbSpoofer" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource PrimaryBrush}" TextDecorations="Underline">View on GitHub — ZavalaSebas/OrbSpoofer →</Hyperlink></TextBlock>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Orb.Card}" Padding="20" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="How it works" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,10"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22">
+                        <Run>1. Your active Discord quests appear automatically on launch</Run><LineBreak/>
+                        <Run>2. Double-click a quest or press ▶ to start spoofing</Run><LineBreak/>
+                        <Run>3. OrbSpoofer finds the exact process name Discord expects</Run><LineBreak/>
+                        <Run>4. Copies the app executable and renames it to match</Run><LineBreak/>
+                        <Run>5. Launches the fake process in background</Run><LineBreak/>
+                        <Run>6. Discord scans running processes and detects the fake process</Run><LineBreak/>
+                        <Run>7. Discord thinks you're playing the game</Run>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Orb.Card}" Padding="20" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Support" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource ErrorBrush}" Margin="0,0,0,10"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" LineHeight="22" Margin="0,0,0,14">Enjoying OrbSpoofer? Your support keeps the project alive!</TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Appearance="Primary" Background="#ED4245" Foreground="White" BorderBrush="#ED4245" Padding="16,8" FontSize="13" Cursor="Hand" Click="Kofi_Click">
+                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/><TextBlock Text="Buy me a coffee" VerticalAlignment="Center" Foreground="White"/></StackPanel>
+                        </ui:Button>
+                        <ui:Button Appearance="Primary" Background="#ED4245" Foreground="White" BorderBrush="#ED4245" Padding="16,8" FontSize="13" Cursor="Hand" Margin="12,0,0,0" Click="Sponsor_Click">
+                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Heart24" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/><TextBlock Text="GitHub Sponsor" VerticalAlignment="Center" Foreground="White"/></StackPanel>
+                        </ui:Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,4">
+                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}"><Run Text="Original concept by "/></TextBlock>
+                <TextBlock FontSize="12" Foreground="{DynamicResource PrimaryBrush}" Cursor="Hand" MouseLeftButtonDown="Strykey_Click" Text="Strykey" Margin="0,0,0,0"/>
+                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text=" · "/>
+                <TextBlock FontSize="12" Foreground="{DynamicResource PrimaryBrush}" Cursor="Hand" MouseLeftButtonDown="Orbshacker_Click" Text="orbshacker"/>
+            </StackPanel>
+            <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Cursor="Hand" MouseLeftButtonDown="GitHubProfile_Click"><Run Text="Made with love by "/><Run Text="ZavalaSebas" Foreground="{DynamicResource PrimaryBrush}"/></TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

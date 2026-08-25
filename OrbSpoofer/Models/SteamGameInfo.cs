@@ -4,6 +4,7 @@ public class SteamSearchResult
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";
+    public bool IsDlc { get; set; }
 }
 
 public class SteamAppInfo

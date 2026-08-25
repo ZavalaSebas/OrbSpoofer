@@ -4,10 +4,27 @@
 
 ```
 OrbSpoofer/
-├── OrbSpoofer/                    # Main WPF app
-│   ├── OrbSpoofer.csproj          # Version lives here
+├── OrbSpoofer/                    # Main WPF app (MVVM + DI, WPF-UI Fluent)
+│   ├── OrbSpoofer.csproj          # Version lives here (WPF-UI 4.3, CommunityToolkit.Mvvm 8.4, DI 9.0)
+│   ├── App.xaml / App.xaml.cs     # DI container (ConfigureServices), Mica + Dark theme init, --timer-mode
 │   ├── Config.cs                  # App constants (repo URLs, timeouts, etc.)
-│   ├── MainWindow.xaml.cs         # Main UI logic, calls CheckForUpdateAsync on load
+│   ├── MainWindow.xaml            # Shell (205L): TitleBar/Mica, header, sidebar, content host, status bar — binds to MainViewModel
+│   ├── MainWindow.xaml.cs         # Thin code-behind (66L): popup positioning, sidebar width sync, Welcome/Update dialogs
+│   ├── ViewModels/                # MVVM (CommunityToolkit.Mvvm ObservableObject + RelayCommand)
+│   │   ├── MainViewModel.cs       # Shell: NavigationView enum, SidebarCollapsed, CurrentView, status, delegates to sub-VMs
+│   │   ├── QuestsViewModel.cs     # Quests: LoadQuests, Spoof, ToggleCompleted, RunAll sequence, FileSystemWatcher
+│   │   ├── UnifiedSearchViewModel.cs # Unified: parallel Discord+Steam → Merge, image resolve, Spoof routing
+│   │   ├── DatabaseSearchViewModel.cs # DB search: debounce 150ms, SearchGames, ResolveGameImages (Parallel 5)
+│   │   ├── SteamSearchViewModel.cs # Steam: SearchGamesAsync, Spoof (FetchAppInfo → WriteAppManifest → CreateSteamFakeGame)
+│   │   ├── ManualViewModel.cs     # Manual: ExeName, CanSpoof, SpoofCommand
+│   │   └── FreeGamesViewModel.cs  # Bell: GetFreeGamesAsync, HasUnseen/UnseenCount, MarkSeen, Claim
+│   ├── Views/                     # UserControls bound to VMs (code-behind only for animations/popup)
+│   │   ├── QuestsView.xaml/.cs    # Quest cards + RunAll + toggle animation
+│   │   ├── UnifiedSearchView.xaml/.cs
+│   │   ├── DatabaseView.xaml/.cs
+│   │   ├── SteamView.xaml/.cs
+│   │   ├── ManualView.xaml/.cs
+│   │   └── CreditsView.xaml/.cs   # Static info + Ko-fi/Sponsor links
 │   ├── Services/
 │   │   ├── Updater.cs             # GitHub release check, download, swap, cleanup old .exe
 │   │   ├── NetworkHelper.cs       # HTTP client (User-Agent set here), FetchJson, DownloadFile
@@ -17,19 +34,28 @@ OrbSpoofer/
 │   │   ├── DiscordIpc.cs          # Timer-process Discord activity (Steam spoofs)
 │   │   ├── GameFaker.cs           # Fake game process spawning (--timer-mode, --quest-id)
 │   │   ├── QuestService.cs        # Active quests from api.discordquest.com
-│   │   └── GameImageService.cs    # Resolves game images (Discord CDN / Steam store)
+│   │   ├── GameImageService.cs    # Resolves game images (Discord CDN / Steam store)
+│   │   ├── FreeGamesService.cs    # GamerPower giveaways (Epic+Steam)
+│   │   └── FreeGamesSeenStore.cs  # Persists seen ids
 │   ├── Models/
 │   │   ├── GameDisplayItem.cs     # Display model for DB search results (INotifyPropertyChanged)
 │   │   ├── SteamGameDisplayItem.cs# Display model for Steam search + CDN image URL
 │   │   ├── QuestItem.cs           # Display model for active quests
 │   │   ├── UnifiedSearchItem.cs   # Merged Discord + Steam search row
 │   │   └── DiscordGame.cs         # Discord detectable game entry (+ SteamAppId, IconHash)
-│   ├── UI/
-│   │   └── Windows/
-│   │       ├── TimerWindow.xaml.cs   # Countdown timer, auto-saves quest completion on finish
-│   │       ├── UpdateWindow.xaml.cs   # Download progress UI
-│   │       ├── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
-│   │       └── InfoDialog.xaml.cs     # Themed dialog for warnings (no executable, etc.)
+│   ├── Helpers/
+│   │   ├── DialogService.cs       # IDialogService → InfoDialog, UrlLauncher
+│   │   └── TaskExtensions.cs      # FireAndForget
+│   ├── Converters/
+│   │   ├── BoolToVisibilityConverter.cs
+│   │   └── EnumToVisibilityConverter.cs
+│   ├── Styles/Theme.xaml          # Fluent tokens (Orb.Accent #5865F2, Mica, Orb.Card, ContextMenu)
+│   ├── Themes/DarkTheme.xaml      # Legacy brushes + ScrollBar + ListBoxItem (PrimaryButton/SearchBox removed)
+│   └── UI/Windows/
+│       ├── TimerWindow.xaml.cs    # Countdown timer, auto-saves quest completion on finish
+│       ├── UpdateWindow.xaml.cs   # Download progress UI
+│       ├── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
+│       └── InfoDialog.xaml.cs     # Themed dialog for warnings (no executable, etc.)
 ├── OrbSpoofer.Tests/              # xUnit test project (38 tests)
 │   ├── DiscordDatabaseTests.cs    # Search, filtering, exe matching, Steam SKU helpers
 │   ├── SteamServiceTests.cs       # Manifest generation, depots, ParseAppInfo, install paths
@@ -357,7 +383,8 @@ Additional conventions:
 - **`using` order**: System.* first, then third-party, then project namespaces
 - **No silent catch blocks** — every `catch` must at minimum log via `Debug.WriteLine()`
 - **`async void` only for WPF event handlers** — all other async methods return `Task` or `Task<T>`
-- **No MVVM frameworks, no dependency injection** — pure .NET, services are `static class` by convention (except where instance state is needed, like `DiscordDatabase` and `GameFaker`)
+- **MVVM with CommunityToolkit.Mvvm** — `ObservableObject` + `[ObservableProperty]` + `[RelayCommand]`; ViewModels in `ViewModels/`, Views in `Views/` (UserControl, DataContext = VM). Code-behind only for animations, popup positioning, Mica.
+- **Dependency injection** — `Microsoft.Extensions.DependencyInjection` in `App.xaml.cs:ConfigureServices`; `DiscordDatabase`, `GameFaker`, `FreeGamesService` as singletons, VMs as singletons, `MainWindow` transient. `IDialogService` for `InfoDialog`. No `new` in views.
 
 Good commit structure:
 ```

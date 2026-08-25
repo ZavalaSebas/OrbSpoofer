@@ -6,29 +6,10 @@ namespace OrbSpoofer.Services;
 /// <summary>Persists seen giveaway ids (ported from Bridge FreeGamesSeenStore).</summary>
 public static class FreeGamesSeenStore
 {
-    private static string FilePath => Path.Combine(Config.AppDataPath, "free-games-seen.json");
+    private static Infrastructure.Settings.FreeGamesSeenStoreTyped Store => new();
 
-    public static HashSet<int> Load()
-    {
-        try
-        {
-            if (!File.Exists(FilePath)) return [];
-            var json = File.ReadAllText(FilePath);
-            var arr = JsonSerializer.Deserialize<HashSet<int>>(json);
-            return arr ?? [];
-        }
-        catch { return []; }
-    }
-
-    public static void Save(HashSet<int> ids)
-    {
-        try
-        {
-            Directory.CreateDirectory(Config.AppDataPath);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(ids));
-        }
-        catch { }
-    }
+    public static HashSet<int> Load() => Store.Load();
+    public static void Save(HashSet<int> ids) => Store.Save(ids);
 
     public static void MarkSeen(IEnumerable<int> ids)
     {

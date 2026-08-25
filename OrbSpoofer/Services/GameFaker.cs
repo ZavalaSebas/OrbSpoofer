@@ -129,9 +129,19 @@ public class GameFaker
         if (!exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             exeName += ".exe";
 
-        exeName = exeName.Replace('\\', '/');
+        exeName = exeName.Replace('\\', '/').Trim().TrimStart('/', '\\');
+        // Preserve subdirectories like bin/helldivers2.exe — needed for Discord detection (HELLDIVERS 2)
+        // Validate traversal and invalid chars per segment
+        if (string.IsNullOrWhiteSpace(exeName) || exeName.Contains(".."))
+            return null;
+        var segments = exeName.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 0) return null;
+        foreach (var seg in segments)
+            if (seg.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
+        if (!exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return null;
 
-        var targetPath = Path.Combine(DesktopPath, Config.FakeExeDir, exeName);
+        var targetPath = Security.PathContainment.TryResolveUnderRoot(Path.Combine(DesktopPath, Config.FakeExeDir), exeName);
+        if (targetPath == null) return null;
 
         try
         {
@@ -201,7 +211,11 @@ public class GameFaker
     public string? CreateSteamFakeGame(string exePath)
     {
         if (_sourceExe == null) return null;
-
+        // Validate containment under steamapps/common (prevent path traversal via crafted installDir)
+        var steamRoot = Services.SteamService.GetSteamPath();
+        var commonRoot = steamRoot != null ? Path.Combine(steamRoot, "steamapps", "common") : null;
+        if (commonRoot != null && !Security.PathContainment.IsUnderRoot(exePath, commonRoot) && !Security.PathContainment.IsUnderRoot(exePath, Path.Combine(steamRoot!, "steamapps")))
+            return null;
         try
         {
             var dir = Path.GetDirectoryName(exePath)!;

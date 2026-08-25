@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.0.0] — 2026-08-25
+
+### Added
+
+- **Fluent UI 2.0** — full migration to WPF-UI 4.3: `FluentWindow`, `Mica` backdrop, `TitleBar` on 6 windows, `SymbolIcon`, `ProgressRing`, `InfoBar`, `Orb.*` tokens and `ContentDialogHost` for native dialogs
+- **MVVM architecture** — `CommunityToolkit.Mvvm` + `Microsoft.Extensions.DependencyInjection`: `MainViewModel` shell + 6 VMs (`Quests`, `Unified`, `Database`, `Steam`, `Manual`, `FreeGames`), 6 `Views` UserControls, `IDialogService` and `ICollectionView` with `SortDescriptions` without recreating collection
+- **Free Games** — section that auto-detects free games on Steam and Epic via GamerPower API, badge with counter, anchored popup and seen persistence (`free-games-seen.json`)
+- **Centralized search** — `UnifiedSearch` as main view with badges `Discord`/`Steam`/`Both`/`DLC`/`Manual`, 150ms debounce and `Parallel.ForEachAsync` for images
+- **Personalization** — accent picker with 8 presets (Blurple, Red, Green...) in header, persisted in `theme.json` and applied live with `DynamicResource` + `RefreshWindow`
+- **Infrastructure** — centralized `Directory.Packages.props`/`Directory.Build.props`, `SettingsStoreBase` for `completed_quests`/`created-manifests`/`free-games-seen`, `ApplicationSingleInstance` (mutex), `PathContainment` to sanitize `bin/helldivers2.exe`, typed `HttpClient` with `IHttpClientFactory`
+- **Unified cache** — `Infrastructure/Cache/CacheStore` with 30d TTL, atomic writes and expired cleanup; `GameImageService` now persists `image_urls.json` to disk in addition to `steam_ids.json`
+
+### Changed
+
+- `MainWindow` 1227→66L and 992→252L — shell delegates to VMs, code-behind only for animations and popup positioning
+- `DarkTheme.xaml` cleaned: removed dead `PrimaryButton`/`GhostButton`/`SearchBox`, now uses `ui:Button`/`ui:TextBox`
+- `ThemeManager` now saves accent and refreshes live windows; `App` migrates `%LOCALAPPDATA%/OrbSpoofer` with `AppDataMigrator` and validates single instance
+- `SteamService` sanitizes `installDir`/`executable` (`:` → `_`) for `Call of Duty: Modern Warfare 4` and DLCs, detects `type=="DLC"` and uses `parent` (`Call of Duty HQ`) for manifest
+- Free Games price now strikethrough (`$29.99`) + `$0` in green to emphasize free
+
+### Fixed
+
+- **HELLDIVERS 2** (`bin/helldivers2.exe`) not detected due to subdirectory strip in `GameFaker` — now preserves `bin/` via `PathContainment`
+- **Call of Duty: Modern Warfare 4** (`4435490` DLC) `Failed to launch Steam spoof` due to `:` in `installdir` — sanitized and resolved via parent
+- **GamerPower** `No URL for Bolmn` — `JsonOptions` now `SnakeCaseLower` for `gamerpower_url`/`open_giveaway_url`
+- **Claim double open** — removed duplicate `Process.Start` fallback in `MainWindow`
+- **Pinned popup** — `StaysOpen`→`False` + `LocationChanged`/`Deactivated` now close and `Claim` uses `Tag` instead of broken `RelativeSource` in `Popup`
+- **Timer** `ExitCode` 0/1, `bat` with `timeout`/`rmdir /s /q`, `DeleteTrackedManifests` immediate and on app close (kills orphan timers), `Run All` `AllowConcurrentExecutions` for Stop button and cancels without marking as completed if closed manually
+- **Quests** `HasNoQuests` inverted and `IsLoading` collapsed list, DLC badge at end
+
 ## [1.2.4] — 2026-08-21
 
 ### Added

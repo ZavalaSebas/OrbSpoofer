@@ -75,7 +75,8 @@ public class SteamServiceTests
 
         Assert.NotNull(info);
         Assert.Equal("Arknights: Endfield", info!.Name);
-        Assert.Equal("Arknights: Endfield.exe", info.Executable);
+        // InstallDir/Executable are sanitized for Windows file system (':' -> '_')
+        Assert.Equal("Arknights_ Endfield.exe", info.Executable);
     }
 
     [Fact]

@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2.4-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.0.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -17,6 +17,10 @@ Automate Discord orb quests without downloading games :)
 [Get Started](#-get-started) · [How It Works](#how-it-works) · [Usage](#usage) · [Active Quests](#active-quests) · [Features](#features) · [Steam Quest](#steam-quest-mode)
 
 </div>
+
+<br/>
+
+> **✨ New in 2.0 — Revamped Fluent UI, more stable and customizable.** Fluent + Mica, MVVM architecture, **Free Games** section (Steam/Epic auto-detect), centralized search and accent picker. Fixes for `HELLDIVERS 2`, DLCs and GamerPower. [See changelog](./CHANGELOG.md#200--2026-08-25).
 
 <br/>
 
@@ -152,23 +156,23 @@ When OrbSpoofer launches, it automatically fetches your active Discord quests fr
 
 <br/>
 
-## Features
+## Features — What's new in 2.0
 
-**Active Quests** — Fetches your live Discord quests on launch. Double-click or press ▶ to start spoofing. Steam-only quests switch to Steam mode automatically. Falls back to Search if the API is unavailable.
+**Active Quests** — Fetches your live Discord quests on launch. Double-click or press ▶ to start spoofing. Steam-only quests switch to Steam mode automatically. With `ICollectionView` and virtualization for long lists.
 
-**Dark Native UI** — Built entirely in WPF with a dark theme, sidebar navigation, styled cards, and smooth interactions. No terminal, no ugly text.
+**Free Games (new)** — Auto-detects free games on **Steam** and **Epic** via GamerPower, badge with counter, anchored popup and direct `Claim`. Strikethrough price + `$0`.
 
-**Discord Game Database** — Pulls the official detectable games list live from Discord's API, with a GitHub-hosted backup if the API is down.
+**Fluent UI 2.0 (revamped)** — `FluentWindow` + `Mica`, `TitleBar`, `SymbolIcon`, `ProgressRing`, `InfoBar` and `ContentDialogHost`. Dark theme with `Orb.*` tokens and accent picker (8 presets) persisted.
 
-**Unified Search** — One search bar for Discord and Steam. One row per game, with a badge showing Discord, Steam, or Both.
+**Centralized search** — Single `UnifiedSearch` for Discord + Steam, one row per game with badges `Discord`/`Steam`/`Both`/`DLC`/`Manual`, 150ms debounce and `Parallel` for images. `DLC` at the end or hidden.
 
-**Game Images** — Results show game images resolved from Discord's CDN or Steam's store automatically.
+**Personalization** — Change accent (Blurple, Red, Green...) from the header, saved to `theme.json` and applied live with `DynamicResource`.
 
-**Advanced modes** — Database-only, Steam Quest, and Manual process-name spoofing are still available under Advanced.
+**More stable** — `GameFaker` preserves `bin/helldivers2.exe`, sanitizes `:` for `Call of Duty: Modern Warfare 4`, `Timer` with `ExitCode` and robust `bat`, `Run All` with `AllowConcurrentExecutions` and cancellation without marking as completed.
 
-**Process Counter** — See how many fake processes are currently active in the status bar.
+**Discord Game Database** — Pulls the official detectable games list live from Discord's API, with GitHub backup and unified cache (`CacheStore` TTL 30d).
 
-**Quest Timer** — A 15-minute countdown window that opens with each fake process so you know exactly how long to wait.
+**Advanced modes** — Database-only, Steam Quest and Manual remain in `▸ Advanced`.
 
 <br/>
 
@@ -184,57 +188,39 @@ Some games need more than a process name. Discord also checks that Steam shows t
 
 <br/>
 
-## Project Structure
+## Project Structure — 2.0 (MVVM)
 
 ```
 OrbSpoofer/
-├── OrbSpoofer.slnx
-├── .github/
-│   └── FUNDING.yml                  Ko-fi & GitHub Sponsors
+├── Directory.Packages.props / Directory.Build.props  Centralized versions
 ├── OrbSpoofer/
-│   ├── OrbSpoofer.csproj            .NET 10 WPF project config
-│   ├── App.xaml / .cs              Entry point, theme merge, dual-mode launch
-│   ├── Config.cs                    Constants & centralized configuration
-│   ├── MainWindow.xaml / .cs        Main UI: Quests, Search, Advanced
-│   ├── AssemblyInfo.cs              Assembly metadata
-│   ├── Models/
-│   │   ├── DiscordGame.cs           Discord game data models
-│   │   ├── QuestItem.cs             Active quest display model
-│   │   ├── SteamGameInfo.cs         Steam data models
-│   │   └── UnifiedSearchItem.cs     Merged Discord + Steam search row
-│   ├── Services/
-│   │   ├── DiscordDatabase.cs       Fetch & search Discord's game list
-│   │   ├── GameFaker.cs             Create & launch fake processes
-│   │   ├── GameImageService.cs      Resolve game images (Discord CDN / Steam)
-│   │   ├── QuestService.cs          Fetch & filter live Discord quests
-│   │   ├── SteamService.cs          Steam detection, API, appmanifest generation
-│   │   ├── UnifiedSearch.cs         Merge Discord + Steam results (one row per game)
-│   │   ├── NetworkHelper.cs         Centralized HTTP client
-│   │   └── Updater.cs               GitHub-based update checker
-│   ├── Exceptions/
-│   │   └── OrbSpooferExceptions.cs  Custom exception hierarchy
-│   ├── Themes/
-│   │   └── DarkTheme.xaml           Full dark theme with custom controls
-│   └── UI/
-│       └── Windows/
-│           ├── WelcomeWindow.xaml/.cs   First-launch welcome & what's new
-│           └── TimerWindow.xaml/.cs     15-minute quest countdown
-└── README.md
+│   ├── App.xaml / .cs              DI container, Mica, SingleInstance, AppDataMigrator
+│   ├── MainWindow.xaml / .cs       Shell 252L + DialogHost + popups (Mica)
+│   ├── ViewModels/                 MVVM (CommunityToolkit.Mvvm)
+│   │   ├── MainViewModel.cs        Shell + nav + status
+│   │   ├── QuestsViewModel.cs      ICollectionView + RunAll
+│   │   ├── UnifiedSearchViewModel  Merge + debounce
+│   │   └── FreeGamesViewModel      GamerPower + Claim
+│   ├── Views/                      UserControls (virtualized)
+│   ├── Infrastructure/             SettingsStoreBase, SingleInstance, CacheStore, AppDataMigrator
+│   ├── Security/PathContainment    Sanitiza bin/helldivers2.exe y :
+│   ├── Services/                   DiscordDatabase, SteamService (DLC parent), GameFaker, Updater
+│   ├── Styles/Theme.xaml           Tokens Orb.*  +  Themes/DarkTheme.xaml
+│   └── UI/Windows/                 Welcome, Timer (ExitCode), Update
+└── OrbSpoofer.Tests/               50 tests (ViewModels, Steam Tokon, PathContainment)
 ```
 
 <br/>
 
-## Architecture
+## Architecture — 2.0
 
-No MVVM frameworks, no NuGet dependencies — pure .NET base class library.
+MVVM + DI (`CommunityToolkit.Mvvm` + `Microsoft.Extensions.DependencyInjection` + `IHttpClientFactory`), `WPF-UI` Fluent.
 
-- **Dual-mode launch**: The same exe runs as either the main UI or a hidden timer process via `--timer-mode`. When you spoof a game, OrbSpoofer copies itself, renames the copy, and relaunches it as the fake process.
-- **QuestService**: Fetches live quests from `api.discordquest.com`, filters by type (PLAY_ON_DESKTOP), deduplicates, cross-references with the detectable games DB, and excludes promotional quests.
-- **GameImageService**: Resolves game images from Discord's CDN (via icon hashes) or Steam Store search (header.jpg). Results are cached in memory.
-- **DiscordDatabase**: Tries the official API first, falls back to a GitHub-hosted Gist. Parses executables per platform and filters out anti-cheat launchers and uninstallers.
-- **GameFaker**: Copies the OrbSpoofer executable to `~/Desktop/Win64/<GameExe>.exe`, renames it, and launches it hidden.
-- **SteamService**: Reads the Steam registry for your install path and user ID, searches the SteamCMD API for game metadata, and generates realistic VDF-format appmanifest files.
-- **DarkTheme**: 13 named colors, 4 button styles, custom scrollbars, styled list items — all in XAML, no code.
+- **Dual-mode launch**: Same exe as UI or `--timer-mode` with `ExitCode` 0/1, `bat` `rmdir /s /q` and `DeleteTrackedManifests`.
+- **ViewModels**: `MainViewModel` orchestrates `Quests` (sorted `ICollectionView`), `FreeGames` (GamerPower `SnakeCaseLower`), `UnifiedSearch` (Both/DLC).
+- **CacheStore**: Atomic JSON + 30d TTL for `db_cache`, `steam_search`, `image_urls`/`steam_ids` persisted.
+- **Security**: `PathContainment` validates `Desktop/Win64` and `steamapps/common`, sanitizes `:` in DLCs.
+- **Theme**: `ThemeManager` with `DynamicResource` + `RefreshWindow` and persisted `Accent`.
 
 <br/>
 

@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace OrbSpoofer.Services;
 
 /// <summary>GamerPower giveaways client — Epic + Steam, 1h cache (ported from Bridge).</summary>
-public sealed class FreeGamesService(HttpClient? httpClient = null)
+public sealed class FreeGamesService(IHttpClientFactory? factory = null, HttpClient? httpClient = null)
 {
     private const string ApiBase = "https://www.gamerpower.com/api/giveaways";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
@@ -12,7 +12,7 @@ public sealed class FreeGamesService(HttpClient? httpClient = null)
     private static List<FreeGameNotification>? _cache;
     private static readonly object CacheLock = new();
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
 
     public async Task<List<FreeGameNotification>> GetFreeGamesAsync()
     {
@@ -24,7 +24,7 @@ public sealed class FreeGamesService(HttpClient? httpClient = null)
 
         try
         {
-            var client = httpClient ?? SharedHttp;
+            var client = httpClient ?? factory?.CreateClient("OrbSpoofer") ?? SharedHttp;
             var epicTask = FetchPlatformAsync(client, "epic-games-store");
             var steamTask = FetchPlatformAsync(client, "steam");
             await Task.WhenAll(epicTask, steamTask);

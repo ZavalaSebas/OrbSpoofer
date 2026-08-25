@@ -78,6 +78,7 @@ public partial class WelcomeWindow : Wpf.Ui.Controls.FluentWindow
                     FontSize = 11,
                     Foreground = (Brush)FindResource("TextSecondaryBrush"),
                     LineHeight = 18,
+                    TextWrapping = TextWrapping.Wrap,
                     Text = $"• {line.Trim()}",
                 });
             }
@@ -94,12 +95,12 @@ public partial class WelcomeWindow : Wpf.Ui.Controls.FluentWindow
         var brush = TryFindResource("TextSecondaryBrush") as Brush ?? Brushes.Gray;
         WhatsNewItems.Children.Add(new TextBlock
         {
-            FontSize = 11, Foreground = brush, LineHeight = 18,
+            FontSize = 11, Foreground = brush, LineHeight = 18, TextWrapping = TextWrapping.Wrap,
             Text = "• Timer grace period to ensure Discord detects the game",
         });
         WhatsNewItems.Children.Add(new TextBlock
         {
-            FontSize = 11, Foreground = brush, LineHeight = 18,
+            FontSize = 11, Foreground = brush, LineHeight = 18, TextWrapping = TextWrapping.Wrap,
             Text = "• Initial release quality-of-life improvements",
         });
     }

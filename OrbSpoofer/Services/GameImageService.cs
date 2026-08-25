@@ -15,11 +15,14 @@ public static class GameImageService
     private static readonly object _steamIdLock = new();
     private static bool _steamIdCacheLoaded;
     private static bool _steamIdCacheDirty;
+    private static bool _imageCacheDirty;
     private static bool _exitHooked;
     private static readonly DispatcherTimer _steamIdSaveTimer;
 
     private static readonly string SteamIdCachePath =
         Path.Combine(Config.AppDataPath, Config.SteamIdCacheFile);
+    private static readonly string ImageCachePath =
+        Path.Combine(Config.AppDataPath, "cache", "image_urls.json");
 
     static GameImageService()
     {
@@ -28,8 +31,12 @@ public static class GameImageService
         {
             _steamIdSaveTimer.Stop();
             SaveSteamIdCache();
+            SaveImageCache();
         };
         LoadSteamIdCache();
+        LoadImageCache();
+        // background cleanup of expired steam_search caches
+        try { Infrastructure.Cache.CacheStore.CleanupExpired(Path.Combine(Config.AppDataPath, Config.SteamSearchCacheDir), Config.MaxCacheAgeDays); } catch { }
     }
 
     public static async Task<string?> GetImageUrlAsync(DiscordGame game)
@@ -41,6 +48,8 @@ public static class GameImageService
 
         var url = await ResolveImageUrlAsync(game);
         Cache[game.Id] = url;
+        _imageCacheDirty = true;
+        ScheduleSteamIdSave();
         return url;
     }
 
@@ -81,7 +90,7 @@ public static class GameImageService
                 if (!_exitHooked && System.Windows.Application.Current != null)
                 {
                     _exitHooked = true;
-                    System.Windows.Application.Current.Exit += (_, _) => SaveSteamIdCache();
+                    System.Windows.Application.Current.Exit += (_, _) => { SaveSteamIdCache(); SaveImageCache(); };
                 }
                 _steamIdSaveTimer.Stop();
                 _steamIdSaveTimer.Start();
@@ -90,6 +99,7 @@ public static class GameImageService
         catch
         {
             SaveSteamIdCache();
+            SaveImageCache();
         }
     }
 
@@ -158,29 +168,12 @@ public static class GameImageService
     {
         if (_steamIdCacheLoaded) return;
         _steamIdCacheLoaded = true;
-
         try
         {
-            if (!File.Exists(SteamIdCachePath)) return;
-
-            var fileInfo = new FileInfo(SteamIdCachePath);
-            if ((DateTime.Now - fileInfo.LastWriteTime).Days > Config.MaxCacheAgeDays)
-            {
-                File.Delete(SteamIdCachePath);
-                return;
-            }
-
-            var json = File.ReadAllText(SteamIdCachePath);
-            var dict = JsonSerializer.Deserialize<Dictionary<string, int?>>(json);
-            if (dict == null) return;
-
-            foreach (var kv in dict)
-                SteamIdCache[kv.Key] = kv.Value;
+            if (Infrastructure.Cache.CacheStore.TryLoad<Dictionary<string, int?>>(SteamIdCachePath, Config.MaxCacheAgeDays, out var dict) && dict != null)
+                foreach (var kv in dict) SteamIdCache[kv.Key] = kv.Value;
         }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to load Steam ID cache: {ex.Message}");
-        }
+        catch (Exception ex) { Debug.WriteLine($"Failed to load Steam ID cache: {ex.Message}"); }
     }
 
     private static void SaveSteamIdCache()
@@ -190,20 +183,35 @@ public static class GameImageService
             if (!_steamIdCacheDirty) return;
             _steamIdCacheDirty = false;
         }
-
         try
         {
-            Directory.CreateDirectory(Config.AppDataPath);
             Dictionary<string, int?> dict;
-            lock (_steamIdLock)
-            {
-                dict = SteamIdCache.ToDictionary(kv => kv.Key, kv => kv.Value);
-            }
-            File.WriteAllText(SteamIdCachePath, JsonSerializer.Serialize(dict));
+            lock (_steamIdLock) dict = SteamIdCache.ToDictionary(kv => kv.Key, kv => kv.Value);
+            Infrastructure.Cache.CacheStore.Save(SteamIdCachePath, dict);
         }
-        catch (Exception ex)
+        catch (Exception ex) { Debug.WriteLine($"Failed to save Steam ID cache: {ex.Message}"); }
+    }
+
+    private static void LoadImageCache()
+    {
+        try
         {
-            Debug.WriteLine($"Failed to save Steam ID cache: {ex.Message}");
+            if (Infrastructure.Cache.CacheStore.TryLoad<Dictionary<string, string?>>(ImageCachePath, Config.MaxCacheAgeDays, out var dict) && dict != null)
+                foreach (var kv in dict) Cache[kv.Key] = kv.Value;
         }
+        catch (Exception ex) { Debug.WriteLine($"Failed to load image cache: {ex.Message}"); }
+    }
+
+    private static void SaveImageCache()
+    {
+        // no lock needed for ConcurrentDictionary snapshot, but check dirty
+        if (!_imageCacheDirty) return;
+        _imageCacheDirty = false;
+        try
+        {
+            var dict = Cache.ToDictionary(kv => kv.Key, kv => kv.Value);
+            Infrastructure.Cache.CacheStore.Save(ImageCachePath, dict);
+        }
+        catch (Exception ex) { Debug.WriteLine($"Failed to save image cache: {ex.Message}"); }
     }
 }

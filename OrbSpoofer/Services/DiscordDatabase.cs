@@ -68,36 +68,20 @@ public class DiscordDatabase
 
     private void SaveCache(JsonElement json)
     {
-        try
-        {
-            Directory.CreateDirectory(Config.AppDataPath);
-            File.WriteAllText(CachePath, json.GetRawText());
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to save DB cache: {ex.Message}");
-        }
+        try { Infrastructure.Cache.CacheStore.Save(CachePath, json.GetRawText()); }
+        catch (Exception ex) { Debug.WriteLine($"Failed to save DB cache: {ex.Message}"); }
     }
 
     private bool LoadFromCache()
     {
         try
         {
-            if (!File.Exists(CachePath)) return false;
-
-            var fileInfo = new FileInfo(CachePath);
-            var ageDays = (DateTime.Now - fileInfo.LastWriteTime).Days;
-            if (ageDays > Config.MaxCacheAgeDays)
-            {
-                Debug.WriteLine($"DB cache is {ageDays} days old (max {Config.MaxCacheAgeDays}), ignoring");
+            if (!Infrastructure.Cache.CacheStore.TryLoad<string>(CachePath, Config.MaxCacheAgeDays, out var rawJson) || rawJson == null)
                 return false;
-            }
-
-            var rawJson = File.ReadAllText(CachePath);
             var json = JsonSerializer.Deserialize<JsonElement>(rawJson);
             ParseGames(json);
             Source = "Local Cache";
-            CacheAgeDays = ageDays;
+            CacheAgeDays = (int)(DateTime.Now - File.GetLastWriteTime(CachePath)).TotalDays;
             return true;
         }
         catch (Exception ex)

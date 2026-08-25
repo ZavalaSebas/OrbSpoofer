@@ -87,32 +87,17 @@ public static class SteamService
 
     private static void SaveSearchCache(string query, List<SteamSearchResult> results)
     {
-        try
-        {
-            var dir = Path.Combine(Config.AppDataPath, Config.SteamSearchCacheDir);
-            Directory.CreateDirectory(dir);
-            var path = GetSearchCachePath(query);
-            File.WriteAllText(path, JsonSerializer.Serialize(results));
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to save Steam search cache: {ex.Message}");
-        }
+        try { Infrastructure.Cache.CacheStore.Save(GetSearchCachePath(query), results); }
+        catch (Exception ex) { Debug.WriteLine($"Failed to save Steam search cache: {ex.Message}"); }
     }
 
     private static List<SteamSearchResult>? LoadSearchCache(string query)
     {
         try
         {
-            var path = GetSearchCachePath(query);
-            if (!File.Exists(path)) return null;
-
-            var fileInfo = new FileInfo(path);
-            var ageDays = (DateTime.Now - fileInfo.LastWriteTime).Days;
-            if (ageDays > Config.MaxCacheAgeDays) return null;
-
-            var json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<SteamSearchResult>>(json);
+            if (Infrastructure.Cache.CacheStore.TryLoad<List<SteamSearchResult>>(GetSearchCachePath(query), Config.MaxCacheAgeDays, out var cached) && cached != null)
+                return cached;
+            return null;
         }
         catch (Exception ex)
         {
@@ -127,6 +112,31 @@ public static class SteamService
     {
         [3787240] = "Binaries/Win64/MTFSSteam-Win64-Shipping.exe",
     };
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, bool> IsDlcCache = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, string?> ParentCache = new();
+
+    public static async Task<bool> IsDlcAsync(int appId)
+    {
+        if (IsDlcCache.TryGetValue(appId, out var cached)) return cached;
+        try
+        {
+            var json = await NetworkHelper.FetchJsonAsync($"{Config.SteamCmdApiUrl}/{appId}");
+            if (json.TryGetProperty("data", out var data) && data.TryGetProperty(appId.ToString(), out var appData) && appData.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                var isDlc = false;
+                if (appData.TryGetProperty("common", out var common) && common.TryGetProperty("type", out var t) && t.GetString() == "DLC")
+                    isDlc = true;
+                IsDlcCache[appId] = isDlc;
+                if (isDlc && appData.TryGetProperty("common", out var c2) && c2.TryGetProperty("parent", out var p) && p.GetString() is string ps && int.TryParse(ps, out _))
+                    ParentCache[appId] = ps;
+                return isDlc;
+            }
+        }
+        catch { }
+        IsDlcCache[appId] = false;
+        return false;
+    }
 
     public static async Task<SteamAppInfo?> FetchAppInfoAsync(int appId)
     {
@@ -160,6 +170,7 @@ public static class SteamService
         var installDir = name;
         if (hasConfig && config.TryGetProperty("installdir", out var dirProp) && dirProp.ValueKind == JsonValueKind.String)
             installDir = dirProp.GetString() ?? installDir;
+        installDir = SanitizePathSegment(installDir);
 
         var executable = "";
         if (DiscordVerifiedExes.TryGetValue(appId, out var verifiedExe))
@@ -168,7 +179,9 @@ public static class SteamService
             executable = PickWindowsExe(launch);
 
         if (string.IsNullOrEmpty(executable))
-            executable = installDir.Split('/').LastOrDefault() + ".exe";
+            executable = SanitizeFileName(installDir.Split('/').LastOrDefault() ?? installDir) + ".exe";
+        else
+            executable = string.Join("/", executable.Split('/').Select(SanitizeFileName));
 
         string? depotId = null;
         if (appData.TryGetProperty("depots", out var depots) && depots.ValueKind == JsonValueKind.Object)
@@ -236,6 +249,22 @@ public static class SteamService
             return exe;
         }
         return "";
+    }
+
+    private static string SanitizeFileName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "game";
+        var invalid = new HashSet<char>(Path.GetInvalidFileNameChars());
+        foreach (var c in new[] { ':', '*', '?', '"', '<', '>', '|', '/', '\\' }) invalid.Add(c);
+        var sanitized = new string(name.Select(c => invalid.Contains(c) ? '_' : c).ToArray());
+        sanitized = sanitized.Trim().Trim('_', ' ', '.');
+        return string.IsNullOrWhiteSpace(sanitized) ? "game" : sanitized;
+    }
+
+    private static string SanitizePathSegment(string segment)
+    {
+        var parts = segment.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+        return string.Join("/", parts.Select(SanitizeFileName));
     }
 
     public static string GenerateAppManifest(
@@ -327,29 +356,20 @@ public static class SteamService
     // OrbSpoofer writes fake appmanifest_*.acf files into steamapps. Track the
     // ids we created (AppData json) so app close can delete exactly ours and
     // never touch the user's real manifests.
-    private static string ManifestsTrackPath => Path.Combine(Config.AppDataPath, "created-manifests.json");
+    private static Infrastructure.Settings.CreatedManifestsStore Store => new();
 
     private static void TrackCreatedManifest(int appId)
     {
         try
         {
-            var ids = LoadTrackedManifests();
+            var ids = Store.Load();
             ids.Add(appId);
-            Directory.CreateDirectory(Config.AppDataPath);
-            File.WriteAllText(ManifestsTrackPath, JsonSerializer.Serialize(ids));
+            Store.Save(ids);
         }
         catch (Exception ex) { Debug.WriteLine($"TrackCreatedManifest failed: {ex.Message}"); }
     }
 
-    private static HashSet<int> LoadTrackedManifests()
-    {
-        try
-        {
-            if (!File.Exists(ManifestsTrackPath)) return [];
-            return JsonSerializer.Deserialize<HashSet<int>>(File.ReadAllText(ManifestsTrackPath)) ?? [];
-        }
-        catch { return []; }
-    }
+    private static HashSet<int> LoadTrackedManifests() => Store.Load();
 
     /// <summary>Deletes the fake appmanifest_*.acf files OrbSpoofer created.</summary>
     public static void DeleteTrackedManifests()
@@ -371,7 +391,9 @@ public static class SteamService
 
         try
         {
-            if (File.Exists(ManifestsTrackPath)) File.Delete(ManifestsTrackPath);
+            // clear store file after deleting manifests (use direct delete for store path)
+            var p = System.IO.Path.Combine(Config.AppDataPath, "created-manifests.json");
+            if (File.Exists(p)) File.Delete(p);
         }
         catch { }
     }

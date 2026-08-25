@@ -8,9 +8,13 @@ namespace OrbSpoofer.Services;
 
 public static class NetworkHelper
 {
-    private static readonly HttpClient Client = CreateClient();
+    private static IHttpClientFactory? _factory;
+    private static HttpClient Client => _factory?.CreateClient("OrbSpoofer") ?? FallbackClient;
+    private static readonly HttpClient FallbackClient = CreateFallbackClient();
 
-    private static HttpClient CreateClient()
+    public static void Initialize(IHttpClientFactory factory) => _factory = factory;
+
+    private static HttpClient CreateFallbackClient()
     {
         var client = new HttpClient();
         client.DefaultRequestHeaders.UserAgent.ParseAdd("OrbSpoofer");

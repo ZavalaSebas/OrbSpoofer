@@ -15,6 +15,7 @@ public partial class TimerWindow : Wpf.Ui.Controls.FluentWindow
     private readonly string? _questId;
     private int _remaining;
     private bool _cleanedUp;
+    private bool _completed;
 
     private static readonly SolidColorBrush CompleteBrush =
         new((Color)ColorConverter.ConvertFromString(Config.TimerCompleteColor));
@@ -58,20 +59,27 @@ public partial class TimerWindow : Wpf.Ui.Controls.FluentWindow
                 Path.GetTempPath(),
                 $"OrbSpoofer_cleanup_{Guid.NewGuid()}.bat");
 
+            // Use timeout for reliability and /s for steam dirs that may have been created
             var batContent = $"""
-@ping 127.0.0.1 -n 3 > nul
-@del /f /q "{_exePathToCleanup}"
-@if exist "{exeDir}" @rmdir "{exeDir}" 2>nul
-@del "%~f0"
+@echo off
+@timeout /t 2 /nobreak > nul
+@del /f /q "{_exePathToCleanup}" 2>nul
+@if exist "{exeDir}" @rmdir /s /q "{exeDir}" 2>nul
+@del "%~f0" 2>nul
 """;
             File.WriteAllText(batPath, batContent);
 
             Process.Start(new ProcessStartInfo
             {
-                FileName = batPath,
-                UseShellExecute = true,
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{batPath}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
             });
+            // also try immediate delete for non-locked files (helps when timer already exited)
+            try { if (File.Exists(_exePathToCleanup)) File.Delete(_exePathToCleanup); } catch { }
+            try { if (exeDir != null && Directory.Exists(exeDir) && !Directory.EnumerateFileSystemEntries(exeDir).Any()) Directory.Delete(exeDir); } catch { }
         }
         catch (Exception ex)
         {
@@ -105,6 +113,8 @@ public partial class TimerWindow : Wpf.Ui.Controls.FluentWindow
                 completedIds.Add(_questId);
                 Config.SaveCompletedQuestIds(completedIds);
             }
+            _completed = true;
+            Environment.ExitCode = 0;
             Cleanup();
             Application.Current.Shutdown();
             return;
@@ -121,6 +131,8 @@ public partial class TimerWindow : Wpf.Ui.Controls.FluentWindow
     {
         _timer.Stop();
         _timer.Tick -= Timer_Tick;
+        if (!_completed)
+            Environment.ExitCode = 1;
         Cleanup();
         Application.Current.Shutdown();
         base.OnClosed(e);
