@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.0.1] — 2026-08-25
+
+### Fixed
+
+- **Manual mode button not working** — `ManualViewModel` now calls `NotifyCanExecuteChanged` when `ExeName` changes so `SpoofCommand` enables correctly
+
 ## [2.0.0] — 2026-08-25
 
 ### Added

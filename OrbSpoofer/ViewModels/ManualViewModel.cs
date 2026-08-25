@@ -23,6 +23,7 @@ public partial class ManualViewModel : ObservableObject
     partial void OnExeNameChanged(string value)
     {
         CanSpoof = !string.IsNullOrWhiteSpace(value);
+        SpoofCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanSpoof))]
