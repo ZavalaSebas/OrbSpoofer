@@ -101,11 +101,11 @@ dotnet publish -c Release -r win-x64 \
 <table>
 <tr>
 <td align="center">
-<img width="976" height="689" alt="Captura de pantalla 2026-07-21 205710" src="https://github.com/user-attachments/assets/81c24ee6-7c45-458a-933a-6c34c8fb15b6" />
+<img width="996" height="699" alt="image" src="https://github.com/user-attachments/assets/f51cb071-6df2-4e0a-ac40-54d14acdc023" />
 <br/><sub><i>Active Quest</i></sub>
 </td>
 <td align="center">
-<img width="983" height="690" alt="Captura de pantalla 2026-07-21 205725" src="https://github.com/user-attachments/assets/00021d28-bb2b-49f0-a7b5-5f2d25c77875" />
+<img width="994" height="701" alt="image" src="https://github.com/user-attachments/assets/ea687e60-735e-4f67-aa19-b3eb372f10a6" />
 <br/><sub><i>Let 15 Mins pass</i></sub>
 </td>
 </tr>
