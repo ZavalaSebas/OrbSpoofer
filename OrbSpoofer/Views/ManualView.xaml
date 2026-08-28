@@ -4,25 +4,82 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-        <StackPanel Grid.Row="0">
-            <TextBlock Text="Manual Mode" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
-            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Enter the exact process name Discord expects"/>
-        </StackPanel>
-        <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,12,0,0" Padding="13">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0" Background="#2A1A14">
+                <ui:SymbolIcon Symbol="Wrench24" FontSize="18" Foreground="#FFA500" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Manual Mode" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Enter the exact process name Discord expects" Margin="0,2,0,0"/>
+            </StackPanel>
+        </Grid>
+        <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,14,0,0" Padding="16">
             <StackPanel>
-                <TextBlock Text="Examples:" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,3" Text="• TslGame.exe (PUBG)"/>
-                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,3" Text="• League of Legends.exe (LoL)"/>
-                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="• Overwatch.exe"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <ui:SymbolIcon Symbol="Lightbulb24" FontSize="14" Foreground="#FFA500" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Examples" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Background="#1A1510" CornerRadius="8" Padding="10,8" BorderBrush="#2E2214" BorderThickness="1" Margin="0,0,0,6">
+                    <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="TslGame.exe — PUBG"/>
+                </Border>
+                <Border Background="#1A1510" CornerRadius="8" Padding="10,8" BorderBrush="#2E2214" BorderThickness="1" Margin="0,0,0,6">
+                    <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="League of Legends.exe — LoL"/>
+                </Border>
+                <Border Background="#1A1510" CornerRadius="8" Padding="10,8" BorderBrush="#2E2214" BorderThickness="1">
+                    <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="Overwatch.exe"/>
+                </Border>
             </StackPanel>
         </Border>
-        <Grid Grid.Row="2" Margin="0,12,0,0">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-            <ui:TextBox Grid.Column="0" PlaceholderText="e.g. TslGame.exe" Text="{Binding ExeName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
-            <ui:Button Grid.Column="1" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Margin="8,0,0,0" Padding="0" Width="44" Height="44" ToolTip="Spoof" Command="{Binding SpoofCommand}"><ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15"/></ui:Button>
-        </Grid>
-        <Border Grid.Row="3" Style="{StaticResource Orb.Card}" Margin="0,12,0,0" Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibilityConverter}}">
-            <TextBlock FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="{Binding ResultText}"/>
+        <Border Grid.Row="2" Margin="0,12,0,0" Background="#0F0F11" CornerRadius="12" Padding="4" BorderBrush="#1E1E22" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <ui:SymbolIcon Grid.Column="0" Symbol="Document24" FontSize="16" Foreground="{StaticResource TextMutedBrush}" Margin="10,0,6,0" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" VerticalContentAlignment="Center" Padding="0,10"
+                         Text="{Binding ExeName, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Transparent">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TextBox">
+                                        <Grid>
+                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                            <TextBlock Text="e.g. TslGame.exe" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" x:Name="Ph"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="Text" Value=""><Setter TargetName="Ph" Property="Visibility" Value="Visible"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <Button Grid.Column="2" Command="{Binding SpoofCommand}" ToolTip="Spoof" Cursor="Hand" Width="42" Height="42" BorderThickness="0" Background="Transparent" Padding="0" Margin="4,2,2,2">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="10" Width="42" Height="42" Background="{StaticResource Orb.Accent.Gradient}">
+                                <Border.Effect><DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.28" Color="#5865F2"/></Border.Effect>
+                                <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.92"/></Trigger>
+                                <Trigger Property="IsPressed" Value="True"><Setter Property="Opacity" Value="0.78"/></Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+        <Border Grid.Row="3" Margin="0,12,0,0" Background="#0F1A14" CornerRadius="10" Padding="14" BorderBrush="#1E3A28" BorderThickness="1"
+                Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Width="28" Height="28" CornerRadius="8" Background="#1E3A28" Margin="0,0,10,0">
+                    <ui:SymbolIcon Symbol="Checkmark24" FontSize="14" Foreground="#57F287" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Grid.Column="1" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="{Binding ResultText}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

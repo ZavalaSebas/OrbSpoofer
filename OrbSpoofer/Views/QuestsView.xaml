@@ -4,22 +4,52 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="0,0,0,4">
-            <TextBlock Text="Active Quests" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-            <ui:Button HorizontalAlignment="Right" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="12,6" FontSize="12" Cursor="Hand"
+
+        <!-- Header vivo -->
+        <Grid Grid.Row="0" Margin="0,0,0,6">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#5865F2" Offset="0"/>
+                        <GradientStop Color="#7B83FF" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <ui:SymbolIcon Symbol="Trophy24" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Active Quests" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="Your live Discord quests — double-click to spoof" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+            </StackPanel>
+            <ui:Button Grid.Column="2" HorizontalAlignment="Right" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="14,7" FontSize="12" Cursor="Hand" VerticalAlignment="Center"
                        Visibility="{Binding CanRunAll, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RunAllCommand}">
+                <ui:Button.Effect><DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.28" Color="#5865F2"/></ui:Button.Effect>
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon Symbol="Play24" Filled="True" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                    <TextBlock Text="{Binding RunAllText}" VerticalAlignment="Center" Foreground="White"/>
+                    <TextBlock Text="{Binding RunAllText}" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold"/>
                 </StackPanel>
             </ui:Button>
         </Grid>
-        <ui:InfoBar Grid.Row="1" Margin="0,0,0,12" IsOpen="True" IsClosable="False" Severity="Informational" Title="Heads up" Message="Quests vary by region and availability. If there's nothing here, open Search and type the game name."/>
+
+        <Border Grid.Row="1" Margin="0,8,0,14" Background="#1A1A1E" CornerRadius="10" Padding="12,10" BorderBrush="#23232A" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Width="28" Height="28" CornerRadius="8" Background="#1E2230" Margin="0,0,10,0">
+                    <ui:SymbolIcon Symbol="Info24" FontSize="14" Foreground="#7B83FF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Grid.Column="1" Text="Quests vary by region and availability. If there's nothing here, open Search and type the game name." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
         <Grid Grid.Row="2">
-            <ui:ProgressRing IsIndeterminate="True" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
-            <TextBlock Text="{Binding EmptyText}" FontSize="14" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Visibility="{Binding HasNoQuests, Converter={StaticResource BoolToVisibilityConverter}}"/>
-            <ListBox x:Name="QuestsList" Padding="0,0,12,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
+            <ui:ProgressRing IsIndeterminate="True" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasNoQuests, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border Width="64" Height="64" CornerRadius="18" Background="#1A1A1E" HorizontalAlignment="Center" BorderBrush="#23232A" BorderThickness="1">
+                    <ui:SymbolIcon Symbol="Trophy24" FontSize="28" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="{Binding EmptyText}" FontSize="14" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,14,0,0" TextAlignment="Center"/>
+            </StackPanel>
+            <ListBox x:Name="QuestsList" Padding="0,0,8,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
                      ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True" ScrollViewer.IsDeferredScrollingEnabled="True">
                 <ListBox.Style>
                     <Style TargetType="ListBox">
@@ -32,14 +62,11 @@
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0,0,0,2"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
                                     <Border x:Name="border" Background="Transparent" Padding="0"><ContentPresenter/></Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="border" Property="Background" Value="Transparent"/></Trigger>
-                                        <Trigger Property="IsSelected" Value="True"><Setter TargetName="border" Property="Background" Value="Transparent"/></Trigger>
-                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
@@ -47,16 +74,16 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="0,0,16,4" ToolTip="Double-click to spoof">
+                        <Border Margin="0,0,10,6" ToolTip="Double-click to spoof">
                             <Border.Style>
-                                <Style TargetType="Border" BasedOn="{StaticResource Orb.Card}">
-                                    <Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Opacity" Value="0.45"/></DataTrigger></Style.Triggers>
+                                <Style TargetType="Border" BasedOn="{StaticResource Orb.CardHover}">
+                                    <Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Opacity" Value="0.48"/></DataTrigger></Style.Triggers>
                                 </Style>
                             </Border.Style>
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="8" Background="{StaticResource SurfaceBrush}" Margin="0,0,12,0">
-                                    <Image Source="{Binding ImageUrl}" Width="52" Height="52" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Border Grid.Column="0" Width="54" Height="54" CornerRadius="11" Background="#0A0A0C" Margin="0,0,14,0" ClipToBounds="True" BorderBrush="#1E1E22" BorderThickness="1">
+                                    <Image Source="{Binding ImageUrl}" Width="54" Height="54" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding GameName}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">
@@ -65,26 +92,52 @@
                                     <TextBlock Text="{Binding QuestName}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="TextDecorations" Value="Strikethrough"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
-                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                        <TextBlock FontSize="12" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"><Run Text="{Binding Reward, Mode=OneWay}"/></TextBlock>
-                                        <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="10,0,0,0"><Run Text="{Binding TaskMinutes, Mode=OneWay}"/><Run Text=" min"/></TextBlock>
-                                        <TextBlock FontSize="12" Foreground="{StaticResource WarningBrush}" Margin="10,0,0,0"><Run Text="Ends "/><Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/></TextBlock>
-                                        <TextBlock FontSize="12" Foreground="{StaticResource WarningBrush}" Margin="10,0,0,0">
-                                            <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding NeedsSteamMode}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-                                            <Run Text="⚠ Steam required"/>
-                                        </TextBlock>
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <Border Background="#1E2A22" CornerRadius="6" Padding="7,3" BorderBrush="#2A4A32" BorderThickness="1">
+                                            <TextBlock FontSize="11" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"><Run Text="{Binding Reward, Mode=OneWay}"/></TextBlock>
+                                        </Border>
+                                        <Border Background="#1A1A1E" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#23232A" BorderThickness="1">
+                                            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="{Binding TaskMinutes, Mode=OneWay}"/><Run Text=" min"/></TextBlock>
+                                        </Border>
+                                        <Border Background="#2A2210" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#3D3214" BorderThickness="1">
+                                            <TextBlock FontSize="11" Foreground="{StaticResource WarningBrush}"><Run Text="Ends "/><Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/></TextBlock>
+                                        </Border>
+                                        <Border Background="#2A1A1A" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#3D2222" BorderThickness="1">
+                                            <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding NeedsSteamMode}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                                            <TextBlock FontSize="11" Foreground="#FF8A8A" Text="⚠ Steam required"/>
+                                        </Border>
                                     </StackPanel>
                                 </StackPanel>
-                                <Border Grid.Column="2" Width="28" Height="28" CornerRadius="14" Cursor="Hand" Tag="{Binding}" ToolTip="Toggle completed" BorderThickness="1.5" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0" PreviewMouseLeftButtonDown="ToggleCompleted_Click">
-                                    <Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Background" Value="#4CAF50"/><Setter Property="BorderBrush" Value="#4CAF50"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                                <Border Grid.Column="2" Width="30" Height="30" CornerRadius="15" Cursor="Hand" Tag="{Binding}" ToolTip="Toggle completed" BorderThickness="1.5" Background="#141418" BorderBrush="#2A2A30" VerticalAlignment="Center" Margin="0,0,10,0" PreviewMouseLeftButtonDown="ToggleCompleted_Click">
+                                    <Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Background" Value="#57F287"/><Setter Property="BorderBrush" Value="#57F287"/></DataTrigger></Style.Triggers></Style></Border.Style>
                                     <TextBlock Text="✓" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Hidden"/><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
                                 </Border>
-                                <ui:Button Grid.Column="3" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="0" Width="44" Height="44" ToolTip="Spoof"
-                                           Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
-                                    <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15"/>
-                                </ui:Button>
+                                <Button Grid.Column="3" Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Spoof" Cursor="Hand" Padding="0" Width="44" Height="44" BorderThickness="0" Background="Transparent">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bg" CornerRadius="11" Width="44" Height="44">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#5865F2" Offset="0"/>
+                                                        <GradientStop Color="#7B83FF" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Border.Effect><DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.30" Color="#5865F2"/></Border.Effect>
+                                                <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Effect">
+                                                        <Setter.Value><DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.40" Color="#5865F2"/></Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.85"/></Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>

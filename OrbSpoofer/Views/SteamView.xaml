@@ -4,47 +4,98 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <StackPanel Grid.Row="0">
-            <TextBlock Text="Steam Quest Mode" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
-            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Generates a fake Steam appmanifest for games that verify Steam ownership"/>
-        </StackPanel>
-        <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Padding="13" Margin="0,12,0,0">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0" Background="#1B2838">
+                <ui:SymbolIcon Symbol="Games24" FontSize="18" Foreground="#66C0F4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Steam Quest Mode" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Fake Steam appmanifest for games that verify Steam ownership" Margin="0,2,0,0"/>
+            </StackPanel>
+        </Grid>
+        <Border Grid.Row="1" Background="#13151A" CornerRadius="10" Padding="12" Margin="0,14,0,0" BorderBrush="#1B2838" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Steam:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                <TextBlock Grid.Column="1" Text="{Binding SteamPathText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
+                <Border Width="28" Height="28" CornerRadius="7" Background="#1B2838" Margin="0,0,10,0">
+                    <ui:SymbolIcon Symbol="Folder24" FontSize="13" Foreground="#66C0F4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Steam Path" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding SteamPathText}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
             </Grid>
         </Border>
-        <Grid Grid.Row="2" Margin="0,10,0,0">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-            <ui:TextBox Grid.Column="0" PlaceholderText="Search games..." Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
-            <ui:Button Grid.Column="1" Content="Search" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Margin="8,0,0,0" Command="{Binding SearchCommand}"/>
-        </Grid>
-        <Grid Grid.Row="3" Margin="0,10,0,0">
-            <ListBox x:Name="SteamResultsList" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding Results}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True" ScrollViewer.IsDeferredScrollingEnabled="True" MouseDoubleClick="List_MouseDoubleClick">
+        <Border Grid.Row="2" Margin="0,12,0,0" Background="#0F0F11" CornerRadius="12" Padding="4" BorderBrush="#1E1E22" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <ui:SymbolIcon Grid.Column="0" Symbol="Search24" FontSize="16" Foreground="{StaticResource TextMutedBrush}" Margin="10,0,6,0" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" VerticalContentAlignment="Center" Padding="0,10"
+                         Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Transparent">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TextBox">
+                                        <Grid>
+                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Search Steam games..." Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" x:Name="Ph"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="Text" Value=""><Setter TargetName="Ph" Property="Visibility" Value="Visible"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <Button Grid.Column="2" Content="Search" Padding="18,8" Margin="4,2,2,2" Cursor="Hand" FontWeight="SemiBold" FontSize="12" Foreground="White" Command="{Binding SearchCommand}" BorderThickness="0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="8" Padding="{TemplateBinding Padding}" Background="#1B2838">
+                                <Border.Effect><DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.25" Color="#1B2838"/></Border.Effect>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <ListBox x:Name="SteamResultsList" Padding="0,0,8,0" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding Results}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True" ScrollViewer.IsDeferredScrollingEnabled="True" MouseDoubleClick="List_MouseDoubleClick">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource Orb.Card}" Margin="0,0,16,4" ToolTip="Double-click to spoof">
+                        <Border Style="{StaticResource Orb.CardHover}" Margin="0,0,10,6" ToolTip="Double-click to spoof">
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Width="78" Height="42" CornerRadius="8" Background="{StaticResource SurfaceBrush}" Margin="0,0,12,0">
-                                    <Image Source="{Binding ImageUrl}" Width="78" Height="42" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Border Grid.Column="0" Width="78" Height="42" CornerRadius="9" Background="#0A0A0C" Margin="0,0,14,0" ClipToBounds="True" BorderBrush="#1E1E22" BorderThickness="1">
+                                    <Image Source="{Binding ImageUrl}" Width="78" Height="42" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,3,0,0"><Run Text="AppID: "/><Run Text="{Binding Id, Mode=OneWay}"/></TextBlock>
+                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"><Run Text="AppID: "/><Run Text="{Binding Id, Mode=OneWay}" Foreground="#66C0F4"/></TextBlock>
                                 </StackPanel>
-                                <ui:Button Grid.Column="2" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="0" Width="44" Height="44" ToolTip="Spoof"
-                                           Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
-                                    <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15"/>
-                                </ui:Button>
+                                <Button Grid.Column="2" Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Spoof" Cursor="Hand" Width="42" Height="42" BorderThickness="0" Background="Transparent" Padding="0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border CornerRadius="10" Width="42" Height="42" Background="#1B2838">
+                                                <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <TextBlock Text="Search a Steam game and click ▶ to spoof" FontSize="14" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Visibility="{Binding HasNoResults, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasNoResults, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border Width="56" Height="56" CornerRadius="14" Background="#0E141E" HorizontalAlignment="Center" BorderBrush="#1B2838" BorderThickness="1">
+                    <ui:SymbolIcon Symbol="Games24" FontSize="24" Foreground="#66C0F4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="Search a Steam game and click ▶ to spoof" FontSize="13" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

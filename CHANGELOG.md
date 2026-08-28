@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.1.0] — 2026-08-28
+
+### Added
+- **Aurora redesign — vivo + suave sin perder seriedad:** fondo con glows radiales (`#5865F2`/`#7B83FF`), cards `Orb.CardHover` con elevacion `-1.5px + Scale 1.012` y sombra dinamica, transiciones de vistas `Fade + SlideY` (320ms `EaseOutCubic`), sidebar animada `280ms` en vez de snap, popups con `Scale 0.92->1.0` y sombra premium
+- **Motion system:** tokens `Orb.Motion.{Fast,Normal,Slow}` + `Orb.Easing.EaseOut/Emphasized` + `Orb.ViewHost` para todas las vistas, `Badge` con bounce en notificaciones y `ProgressRing` con pulse
+- **Views pulidas:** headers con icono gradient (Trophy/Search/Database/Games/Wrench/Info), search boxes unificados `Corner 12 + Search icon + placeholder animado` + boton `Gradient + DropShadow`, todas las cards con `Border 12 + ClipToBounds + hover accent`
+- **Status bar vivo:** dot pulsante con halo, heart `Hover -> #1A1A1E`, version pill con borde `#1E1E22`
+
+### Changed
+- `Styles/Theme.xaml` — nueva paleta `Orb.Accent.Gradient`, `Orb.Glow.Radial`, `Orb.Header/Sidebar.Gradient`, `CornerRadius Card 8->12`, `Motion 0.12->0.18/0.28/0.40s` y 4 estilos animados nuevos (`Orb.CardHover`, `Orb.CardAnimated`, `Orb.ViewHost`, `Orb.PlayButton`)
+- `Themes/DarkTheme.xaml` — scrollbar `Hover #5865F2` animado, `Border #222228->#1E1E22`
+- `MainWindow.xaml` — shell con aurora `220L->483L`, contenido con glow interno `420x320 Opacity 0.04`, header/sidebar con gradient + shadow, icon original `OS.png 34x34` preservado a pedido del usuario
+
+### Fixed
+- Build errors tras aurora: `LetterSpacing` invalido en `ManualView`, `Border.Style` duplicado en `QuestsView`, y `ListBoxItem` template order en `DarkTheme`
+
 ## [2.0.2] — 2026-08-28
 
 ### Changed

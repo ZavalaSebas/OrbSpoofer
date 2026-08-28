@@ -2,11 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- OrbSpoofer Fluent Theme — Dark first, WPF-UI 4.3 tokens. Mirrors Bridge/Styles/Theme.xaml structure. -->
-    <!-- Accent: Discord Blurple #5865F2 (primary) + Success #57F287 for Play, Mica backdrop -->
-
+    <!-- OrbSpoofer Fluent Theme — V2 Aurora. Dark, vivo pero serio. -->
     <Color x:Key="Orb.Accent.Primary.Color">#5865F2</Color>
     <Color x:Key="Orb.Accent.Secondary.Color">#7B83FF</Color>
+    <Color x:Key="Orb.Accent.Tertiary.Color">#3A44D0</Color>
     <Color x:Key="SystemAccentColorPrimary">#5865F2</Color>
     <Color x:Key="SystemAccentColorSecondary">#7B83FF</Color>
     <Color x:Key="SystemAccentColorTertiary">#3A44D0</Color>
@@ -14,6 +13,19 @@
     <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="{StaticResource SystemAccentColorSecondary}" />
     <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="{StaticResource SystemAccentColorTertiary}" />
     <SolidColorBrush x:Key="Orb.SystemAccentBrush" Color="{StaticResource SystemAccentColorPrimary}" />
+    <!-- Gradient brushes — sutiles, no neon -->
+    <LinearGradientBrush x:Key="Orb.Accent.Gradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#5865F2" Offset="0"/>
+        <GradientStop Color="#7B83FF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Orb.Accent.GradientHover" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#6A75F5" Offset="0"/>
+        <GradientStop Color="#8E96FF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Orb.Play.Gradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#57F287" Offset="0"/>
+        <GradientStop Color="#3DD67A" Offset="1"/>
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="Orb.PlayBrush" Color="#57F287" />
     <SolidColorBrush x:Key="Orb.StopBrush" Color="#ED4245" />
     <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="{StaticResource SystemAccentColorPrimary}" />
@@ -28,7 +40,6 @@
     <Color x:Key="Orb.Text.Secondary.Color">#9A9AA0</Color>
     <Color x:Key="Orb.Text.Muted.Color">#5E5E66</Color>
 
-    <!-- WPF-UI overrides — más oscuro, menos gris -->
     <Color x:Key="ApplicationBackgroundColor">#08080A</Color>
     <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="{StaticResource Orb.Background.Primary.Color}" />
     <Color x:Key="SolidBackgroundFillColorBase">#08080A</Color>
@@ -58,41 +69,195 @@
     <Thickness x:Key="Orb.Spacing.SM">8</Thickness>
     <Thickness x:Key="Orb.Spacing.MD">12</Thickness>
     <Thickness x:Key="Orb.Spacing.LG">16</Thickness>
-    <CornerRadius x:Key="Orb.CornerRadius.Card">10</CornerRadius>
-    <CornerRadius x:Key="Orb.CornerRadius.Control">6</CornerRadius>
+    <CornerRadius x:Key="Orb.CornerRadius.Card">12</CornerRadius>
+    <CornerRadius x:Key="Orb.CornerRadius.Control">8</CornerRadius>
 
-    <Duration x:Key="Orb.Motion.Fast">0:0:0.12</Duration>
-    <Duration x:Key="Orb.Motion.Normal">0:0:0.15</Duration>
-    <KeySpline x:Key="Orb.Easing.EaseOut">0.25,0.46,0.45,0.94</KeySpline>
+    <!-- Motion — profesional, suave -->
+    <Duration x:Key="Orb.Motion.Fast">0:0:0.18</Duration>
+    <Duration x:Key="Orb.Motion.Normal">0:0:0.28</Duration>
+    <Duration x:Key="Orb.Motion.Slow">0:0:0.40</Duration>
+    <Duration x:Key="Orb.Motion.ExtraSlow">0:0:0.55</Duration>
+    <CubicEase x:Key="Orb.Ease.OutCubic" EasingMode="EaseOut"/>
+    <CubicEase x:Key="Orb.Ease.InOutCubic" EasingMode="EaseInOut"/>
+    <KeySpline x:Key="Orb.Easing.EaseOut">0.22,1,0.36,1</KeySpline>
+    <KeySpline x:Key="Orb.Easing.Emphasized">0.2,0,0,1</KeySpline>
+    <KeySpline x:Key="Orb.Easing.Standard">0.4,0,0.2,1</KeySpline>
 
+    <!-- Brushes base -->
     <SolidColorBrush x:Key="Orb.Sidebar.Background" Color="{StaticResource Orb.Background.Secondary.Color}" />
-    <SolidColorBrush x:Key="Orb.Card.Background" Color="{StaticResource Orb.Background.Secondary.Color}" />
-    <SolidColorBrush x:Key="Orb.Card.Hover" Color="{StaticResource Orb.Background.Tertiary.Color}" />
-    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#222228" />
+    <SolidColorBrush x:Key="Orb.Card.Background" Color="#0F0F11" />
+    <SolidColorBrush x:Key="Orb.Card.Hover" Color="#18181C" />
+    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#1E1E22" />
+    <SolidColorBrush x:Key="Orb.SeparatorSubtleBrush" Color="#16161A" />
+    <!-- Glass / glow -->
+    <SolidColorBrush x:Key="Orb.Glow.Accent" Color="#5865F2" Opacity="0.08"/>
+    <RadialGradientBrush x:Key="Orb.Glow.Radial" GradientOrigin="0.5,0.15" Center="0.5,0.15" RadiusX="0.9" RadiusY="0.7">
+        <GradientStop Color="#185865F2" Offset="0"/>
+        <GradientStop Color="#005865F2" Offset="1"/>
+    </RadialGradientBrush>
+    <LinearGradientBrush x:Key="Orb.Header.Gradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#0F0F11" Offset="0"/>
+        <GradientStop Color="#0A0A0C" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Orb.Sidebar.Gradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#0F0F11" Offset="0"/>
+        <GradientStop Color="#0C0C0E" Offset="1"/>
+    </LinearGradientBrush>
 
-    <!-- Card + ContextMenu polish — más compacto, menos plástico -->
+    <!-- ===== Cards ===== -->
     <Style x:Key="Orb.Card" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource Orb.Card.Background}" />
         <Setter Property="BorderBrush" Value="{StaticResource Orb.SeparatorBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="13" />
+        <Setter Property="CornerRadius" Value="{StaticResource Orb.CornerRadius.Card}" />
+        <Setter Property="Padding" Value="14" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    <TranslateTransform X="0" Y="0"/>
+                </TransformGroup>
+            </Setter.Value>
+        </Setter>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.14" Color="#000000"/>
+                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.18" Color="#000000"/>
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Card animada — hover eleva + borde accent + sombra -->
     <Style x:Key="Orb.CardHover" TargetType="Border" BasedOn="{StaticResource Orb.Card}">
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="BorderBrush" Value="{StaticResource Orb.SystemAccentBrush}"/>
-                <Setter Property="Background" Value="{StaticResource Orb.Card.Hover}"/>
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#2A2E6A" Duration="{StaticResource Orb.Motion.Fast}"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#18181C" Duration="{StaticResource Orb.Motion.Fast}"/>
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.012" Duration="{StaticResource Orb.Motion.Fast}">
+                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.012" Duration="{StaticResource Orb.Motion.Fast}">
+                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-1.5" Duration="{StaticResource Orb.Motion.Fast}">
+                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#1E1E22" Duration="{StaticResource Orb.Motion.Fast}"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#0F0F11" Duration="{StaticResource Orb.Motion.Fast}"/>
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="{StaticResource Orb.Motion.Fast}"/>
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="{StaticResource Orb.Motion.Fast}"/>
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="0" Duration="{StaticResource Orb.Motion.Fast}"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
             </Trigger>
         </Style.Triggers>
     </Style>
 
+    <!-- Card con entrada animada (para stagger via Loaded) -->
+    <Style x:Key="Orb.CardAnimated" TargetType="Border" BasedOn="{StaticResource Orb.CardHover}">
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                    <TranslateTransform X="0" Y="8"/>
+                </TransformGroup>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.35">
+                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0.98" To="1" Duration="0:0:0.35">
+                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0.98" To="1" Duration="0:0:0.35">
+                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="8" To="0" Duration="0:0:0.40">
+                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- View host — fade + slide -->
+    <Style x:Key="Orb.ViewHost" TargetType="Grid">
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="12"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Visibility" Value="Visible">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.32">
+                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="(Grid.RenderTransform).(TranslateTransform.Y)" From="12" To="0" Duration="0:0:0.38">
+                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Sidebar button — accent slide indicator -->
+    <Style x:Key="Orb.SidebarButton" TargetType="Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#18181C"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Play button press -->
+    <Style x:Key="Orb.PlayButton" TargetType="Border">
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform"><Setter.Value><ScaleTransform ScaleX="1" ScaleY="1"/></Setter.Value></Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard><Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)" To="1.04" Duration="0:0:0.14"/>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)" To="1.04" Duration="0:0:0.14"/>
+                    </Storyboard></BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard><Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.14"/>
+                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.14"/>
+                    </Storyboard></BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ContextMenu polish — más compacto, menos plástico -->
     <Style TargetType="ContextMenu">
         <Setter Property="Background" Value="#E01A1A1E" />
         <Setter Property="BorderBrush" Value="#401A1A1E" />
@@ -103,8 +268,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                        <Border.Effect><DropShadowEffect BlurRadius="16" ShadowDepth="4" Opacity="0.45" Color="#000000"/></Border.Effect>
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                        <Border.Effect><DropShadowEffect BlurRadius="20" ShadowDepth="6" Opacity="0.45" Color="#000000"/></Border.Effect>
                         <ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsPresenter/></ScrollViewer>
                     </Border>
                 </ControlTemplate>
@@ -118,14 +283,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
                     <Grid>
-                        <Border x:Name="Bd" Background="Transparent" CornerRadius="5" Padding="{TemplateBinding Padding}"/>
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}"/>
                         <Grid Margin="{TemplateBinding Padding}">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="22"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                             <ContentPresenter Grid.Column="0" ContentSource="Icon" HorizontalAlignment="Center"/>
                             <ContentPresenter Grid.Column="1" ContentSource="Header" Margin="6,0,12,0"/>
                         </Grid>
                         <Popup x:Name="PART_Popup" Placement="Right" AllowsTransparency="True" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="Fade">
-                            <Border Background="#E01A1A1E" BorderBrush="#401A1A1E" BorderThickness="1" CornerRadius="10" Padding="6"><ItemsPresenter/></Border>
+                            <Border Background="#E01A1A1E" BorderBrush="#401A1A1E" BorderThickness="1" CornerRadius="12" Padding="6"><ItemsPresenter/></Border>
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>

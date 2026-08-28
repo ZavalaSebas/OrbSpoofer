@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using OrbSpoofer.ViewModels;
 
 namespace OrbSpoofer;
@@ -45,10 +46,39 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         if (e.PropertyName == nameof(MainViewModel.SidebarCollapsed))
         {
-            var collapsed = _vm.SidebarCollapsed;
-            SidebarColumn.Width = new GridLength(collapsed ? 48 : 220);
-            SidebarBorder.Width = collapsed ? 48 : 220;
+            AnimateSidebar(_vm.SidebarCollapsed);
         }
+    }
+
+    private void AnimateSidebar(bool collapsed)
+    {
+        var target = collapsed ? 48 : 220;
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+        // Animate ColumnDefinition.Width via animation on Width property workaround
+        // We animate the Border width and sync column via storyboard completing
+        var widthAnim = new DoubleAnimation
+        {
+            To = target,
+            Duration = TimeSpan.FromMilliseconds(280),
+            EasingFunction = ease
+        };
+        SidebarBorder.BeginAnimation(FrameworkElement.WidthProperty, widthAnim);
+
+        // Animate GridLength via timer — smooth interpolation
+        var from = SidebarColumn.Width.Value;
+        var anim = new DoubleAnimation(from, target, new Duration(TimeSpan.FromMilliseconds(280))) { EasingFunction = ease };
+        var clock = anim.CreateClock();
+        clock.CurrentTimeInvalidated += (_, _) =>
+        {
+            if (clock.CurrentProgress is double p && !double.IsNaN(p))
+            {
+                var v = from + (target - from) * p;
+                Dispatcher.Invoke(() => SidebarColumn.Width = new GridLength(v));
+            }
+        };
+        clock.Completed += (_, _) => SidebarColumn.Width = new GridLength(target);
+        clock.Controller?.Begin();
     }
 
     // Bell popup positioning (view-only, stays in code-behind)

@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.0.2-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.1.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -20,7 +20,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.0.2 — Darker & sharper polish.** Same Fluent + Mica core, now darker (`#08080A`/`#0F0F11`), filled icons, compact cards and better spacing/readability. [See changelog](./CHANGELOG.md#202--2026-08-28).
+> **✨ New in 2.1.0 — Aurora redesign.** Vivo + suave sin perder seriedad: glows, cards con elevacion, transiciones suaves, sidebar animada y toda la UI pulida. [See changelog](./CHANGELOG.md#210--2026-08-28).
 
 <br/>
 
@@ -156,7 +156,7 @@ When OrbSpoofer launches, it automatically fetches your active Discord quests fr
 
 <br/>
 
-## Features — What's new in 2.0
+## Features — What's new in 2.1
 
 **Active Quests** — Fetches your live Discord quests on launch. Double-click or press ▶ to start spoofing. Steam-only quests switch to Steam mode automatically. With `ICollectionView` and virtualization for long lists.
 

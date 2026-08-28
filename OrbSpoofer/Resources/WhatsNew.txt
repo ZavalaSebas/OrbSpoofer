@@ -1,4 +1,4 @@
-Darker & sharper polish — compact cards, filled icons, better spacing
-Improved readability on Active Quests (larger fonts, green orbs)
-Unified compact style across Search / Database / Steam / Manual
-More spacious window (1060×740) with flatter dark theme
+Aurora redesign — glows, cards con elevacion y transiciones suaves
+Sidebar animada 280ms + popups con scale y sombras premium
+Search boxes unificados + headers con icono gradient en todas las vistas
+Status bar vivo con dot pulsante y motion system completo

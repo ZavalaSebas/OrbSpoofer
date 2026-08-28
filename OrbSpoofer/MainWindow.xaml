@@ -21,25 +21,74 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Border Grid.RowSpan="4" Background="#0A0A0A" Opacity="0.85"/>
+
+        <!-- Fondo aurora: gradient oscuro + glows radiales sutiles -->
+        <Border Grid.RowSpan="4" Opacity="1">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#08080A" Offset="0"/>
+                    <GradientStop Color="#0B0B10" Offset="0.55"/>
+                    <GradientStop Color="#08080A" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+        <!-- Glow superior — accent muy sutil -->
+        <Ellipse Grid.RowSpan="4" Width="900" Height="520" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-220,0,0" IsHitTestVisible="False" Opacity="0.09">
+            <Ellipse.Fill>
+                <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                    <GradientStop Color="#5865F2" Offset="0"/>
+                    <GradientStop Color="#005865F2" Offset="1"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
+        <Ellipse Grid.RowSpan="4" Width="600" Height="400" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-120,-80" IsHitTestVisible="False" Opacity="0.05">
+            <Ellipse.Fill>
+                <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                    <GradientStop Color="#7B83FF" Offset="0"/>
+                    <GradientStop Color="#007B83FF" Offset="1"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
+        <!-- Velo Mica suave -->
+        <Border Grid.RowSpan="4" Background="#0A0A0A" Opacity="0.45" IsHitTestVisible="False"/>
+
         <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Icon="OS.png" Height="48" Padding="12,0" Background="Transparent"/>
 
-        <!-- Header — más oscuro ya viene de SurfaceBrush #0F0F11 -->
-        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="22,14">
+        <!-- Header — gradient + borde sutil + glow bottom -->
+        <Border Grid.Row="1" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="0,0,0,1" Padding="22,14">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#0F0F11" Offset="0"/>
+                    <GradientStop Color="#0C0C0E" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.18" Color="#000000"/>
+            </Border.Effect>
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Source="OS.png" Width="34" Height="34" Margin="0,0,11,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="OrbSpoofer" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" FontFamily="{StaticResource HeaderFont}"/>
+                        <TextBlock Text="OrbSpoofer" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" FontFamily="{StaticResource HeaderFont}"/>
                         <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" FontFamily="{StaticResource BodyFont}">
-                            <Run Text="Discord Orb Quest Spoofer"/><Run Text=" · " Foreground="{StaticResource TextMutedBrush}"/><Run Text="{Binding HeaderStatus, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
+                            <Run Text="Discord Orb Quest Spoofer"/><Run Text=" · " Foreground="{StaticResource TextMutedBrush}"/><Run Text="{Binding HeaderStatus, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}"/>
                         </TextBlock>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Grid Width="40" Height="40" Margin="0,0,8,0">
+                    <Grid Width="40" Height="40" Margin="0,0,6,0">
                         <Button x:Name="BellButton" Width="40" Height="40" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="BellButton_Click" ToolTip="Free games">
-                            <ui:SymbolIcon Symbol="Alert24" FontSize="20">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="10" Padding="0">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#1A1A1E"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <ui:SymbolIcon Symbol="Alert24" FontSize="19">
                                 <ui:SymbolIcon.Style>
                                     <Style TargetType="ui:SymbolIcon">
                                         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
@@ -50,29 +99,74 @@
                                 </ui:SymbolIcon.Style>
                             </ui:SymbolIcon>
                         </Button>
-                        <Border Width="16" Height="16" CornerRadius="8" Background="{StaticResource ErrorBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" IsHitTestVisible="False"
-                                Visibility="{Binding FreeGames.HasUnseen, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Border x:Name="BellBadge" Width="18" Height="18" CornerRadius="9" Background="{StaticResource ErrorBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0" IsHitTestVisible="False"
+                                Visibility="{Binding FreeGames.HasUnseen, Converter={StaticResource BoolToVisibilityConverter}}" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Border.RenderTransform>
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)" From="1" To="1.08" Duration="0:0:0.9">
+                                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)" From="1" To="1.08" Duration="0:0:0.9">
+                                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
                             <TextBlock Text="{Binding FreeGames.UnseenCount}" FontSize="9" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,1"/>
                         </Border>
                     </Grid>
                     <Button x:Name="AccentButton" Width="40" Height="40" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="AccentButton_Click" ToolTip="Accent color">
-                        <Border Width="18" Height="18" CornerRadius="9" Background="{DynamicResource Orb.SystemAccentBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"/>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg2" Background="Transparent" CornerRadius="10">
+                                    <Border Width="18" Height="18" CornerRadius="9" Background="{DynamicResource Orb.SystemAccentBrush}" BorderBrush="#2A2A30" BorderThickness="1.5">
+                                        <Border.Effect><DropShadowEffect BlurRadius="6" ShadowDepth="0" Opacity="0.35" Color="{Binding Source={StaticResource Orb.Accent.Primary.Color}}"/></Border.Effect>
+                                    </Border>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg2" Property="Background" Value="#1A1A1E"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
-                    <ui:Button Appearance="Secondary" Padding="8,6" Margin="0,0,8,0" ToolTip="Toggle sidebar" Command="{Binding ToggleSidebarCommand}">
+                    <ui:Button Appearance="Secondary" Padding="8,6" Margin="6,0,10,0" ToolTip="Toggle sidebar" Command="{Binding ToggleSidebarCommand}">
                         <ui:SymbolIcon Symbol="Navigation24" FontSize="16"/>
                     </ui:Button>
-                    <TextBlock Text="{Binding VersionText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    <Border Background="#141418" CornerRadius="8" Padding="8,4" VerticalAlignment="Center" BorderBrush="#1E1E22" BorderThickness="1">
+                        <TextBlock Text="{Binding VersionText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
+                    </Border>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Accent picker popup -->
+        <!-- Accent picker popup — con scale -->
         <Popup x:Name="AccentPopup" AllowsTransparency="True" PopupAnimation="Fade" Focusable="False" StaysOpen="False" Placement="Relative">
-            <Border CornerRadius="12" Background="#F0141414" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="1" Padding="12" Width="220">
+            <Border CornerRadius="14" Background="#F5141418" BorderBrush="#28282E" BorderThickness="1" Padding="14" Width="236" RenderTransformOrigin="0.85,0">
+                <Border.Effect><DropShadowEffect BlurRadius="24" ShadowDepth="8" Opacity="0.45" Color="#000000"/></Border.Effect>
+                <Border.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Border.RenderTransform>
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)" From="0.94" To="1" Duration="0:0:0.22">
+                                    <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)" From="0.94" To="1" Duration="0:0:0.22">
+                                    <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.18"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Border.Triggers>
                 <StackPanel>
-                    <TextBlock Text="Accent color" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <TextBlock Text="Accent color" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12"/>
                     <WrapPanel>
-                        <Button Width="36" Height="36" Margin="4" Background="#5865F2" BorderThickness="2" BorderBrush="#5865F2" Cursor="Hand" Tag="#5865F2" Click="AccentColor_Click" ToolTip="Blurple (default)"><Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="18" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/></ControlTemplate></Button.Template></Button>
+                        <Button Width="36" Height="36" Margin="4" Background="#5865F2" BorderThickness="2" BorderBrush="White" Cursor="Hand" Tag="#5865F2" Click="AccentColor_Click" ToolTip="Blurple (default)"><Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="18" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"><Border.Effect><DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.35" Color="#5865F2"/></Border.Effect></Border></ControlTemplate></Button.Template></Button>
                         <Button Width="36" Height="36" Margin="4" Background="#ED4245" BorderThickness="0" Cursor="Hand" Tag="#ED4245" Click="AccentColor_Click" ToolTip="Red"><Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="18"/></ControlTemplate></Button.Template></Button>
                         <Button Width="36" Height="36" Margin="4" Background="#57F287" BorderThickness="0" Cursor="Hand" Tag="#57F287" Click="AccentColor_Click" ToolTip="Green"><Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="18"/></ControlTemplate></Button.Template></Button>
                         <Button Width="36" Height="36" Margin="4" Background="#FEE75C" BorderThickness="0" Cursor="Hand" Tag="#FEE75C" Click="AccentColor_Click" ToolTip="Yellow"><Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="18"/></ControlTemplate></Button.Template></Button>
@@ -85,17 +179,40 @@
             </Border>
         </Popup>
 
-        <!-- Free games popup -->
+        <!-- Free games popup — con scale + sombra premium -->
         <Popup x:Name="NotificationsPopup" AllowsTransparency="True" PopupAnimation="Fade" Focusable="False" StaysOpen="False" Placement="Relative" Closed="NotificationsPopup_Closed">
-            <Border CornerRadius="12" Background="#F0141414" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="1" Width="360" MaxHeight="480">
+            <Border CornerRadius="14" Background="#F7141418" BorderBrush="#28282E" BorderThickness="1" Width="370" MaxHeight="500" RenderTransformOrigin="0.85,0">
+                <Border.Effect><DropShadowEffect BlurRadius="28" ShadowDepth="10" Opacity="0.50" Color="#000000"/></Border.Effect>
+                <Border.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Border.RenderTransform>
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)" From="0.92" To="1" Duration="0:0:0.24">
+                                    <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)" From="0.92" To="1" Duration="0:0:0.24">
+                                    <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.20"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Border.Triggers>
                 <Grid>
                     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="14,12" CornerRadius="12,12,0,0">
+                    <Border Grid.Row="0" Padding="16,14" CornerRadius="14,14,0,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#5865F2" Offset="0"/>
+                                <GradientStop Color="#7B83FF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
                         <Grid>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:SymbolIcon Symbol="Alert24" FontSize="16" Foreground="White" Margin="0,0,8,0"/>
+                                <ui:SymbolIcon Symbol="Gift24" FontSize="16" Foreground="White" Margin="0,0,8,0"/>
                                 <TextBlock Text="Free games" FontSize="14" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
-                                <Border Background="#33FFFFFF" CornerRadius="8" Padding="6,2" Margin="10,0,0,0" Visibility="{Binding FreeGames.HasUnseen, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Border Background="#33FFFFFF" CornerRadius="8" Padding="7,2" Margin="10,0,0,0" Visibility="{Binding FreeGames.HasUnseen, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <TextBlock Text="{Binding FreeGames.UnseenCount}" FontSize="11" FontWeight="Bold" Foreground="White"/>
                                 </Border>
                             </StackPanel>
@@ -109,26 +226,32 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="8,8,8,0">
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="10,10,10,0">
                         <StackPanel>
                             <ItemsControl ItemsSource="{Binding FreeGames.Games}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{StaticResource CardBrush}" CornerRadius="10" Padding="10" Margin="0,0,0,8">
+                                        <Border Background="#1A1A1E" CornerRadius="12" Padding="12" Margin="0,0,0,8" BorderBrush="#26262C" BorderThickness="1">
                                             <Grid>
                                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                                <Border Width="56" Height="56" CornerRadius="8" Margin="0,0,10,0"><Image Source="{Binding Thumbnail}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/></Border>
+                                                <Border Width="56" Height="56" CornerRadius="10" Margin="0,0,12,0" ClipToBounds="True"><Image Source="{Binding Thumbnail}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/></Border>
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="200"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="6" Padding="6,1"><TextBlock Text="{Binding PlatformLabel}" FontSize="10" Foreground="White"/></Border>
+                                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="180"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="6" Padding="6,2"><TextBlock Text="{Binding PlatformLabel}" FontSize="10" Foreground="White" FontWeight="SemiBold"/></Border>
                                                         <TextBlock Text="{Binding Worth}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="8,0,0,0" VerticalAlignment="Center" TextDecorations="Strikethrough"/>
                                                         <TextBlock Text="$0" FontSize="11" Foreground="{StaticResource SuccessBrush}" Margin="4,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                                     </StackPanel>
                                                 </StackPanel>
-                                                <Button Grid.Column="2" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderThickness="0" Padding="10,6" Cursor="Hand" VerticalAlignment="Center"
+                                                <Button Grid.Column="2" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderThickness="0" Padding="10,7" Cursor="Hand" VerticalAlignment="Center"
                                                         Tag="{Binding}" ToolTip="Open giveaway" Click="ClaimButton_Click">
-                                                    <StackPanel Orientation="Horizontal"><TextBlock Text="Claim" FontSize="11" VerticalAlignment="Center" Foreground="White"/><ui:SymbolIcon Symbol="Open24" FontSize="12" Margin="4,0,0,0" Foreground="White"/></StackPanel>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                                                <StackPanel Orientation="Horizontal"><TextBlock Text="Claim" FontSize="11" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold"/><ui:SymbolIcon Symbol="Open24" FontSize="12" Margin="5,0,0,0" Foreground="White"/></StackPanel>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
                                                 </Button>
                                             </Grid>
                                         </Border>
@@ -155,8 +278,18 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Sidebar -->
-            <Border x:Name="SidebarBorder" Grid.Column="0" Width="220" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+            <!-- Sidebar — gradient + sombra -->
+            <Border x:Name="SidebarBorder" Grid.Column="0" Width="220" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="0,0,1,0">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#0F0F11" Offset="0"/>
+                        <GradientStop Color="#0C0C0E" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.22" Color="#000000"/>
+                </Border.Effect>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="12,16">
                     <TextBlock Text="M  O  D  E  S" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="8,0,0,12" FontFamily="{StaticResource BodyFont}"
                                Visibility="{Binding SidebarCollapsed, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
@@ -164,19 +297,27 @@
                         <ui:Button.Style>
                             <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
                                 <Setter Property="Background" Value="Transparent"/><Setter Property="Appearance" Value="Secondary"/>
-                                <Style.Triggers><DataTrigger Binding="{Binding CurrentView}" Value="Quests"><Setter Property="Background" Value="{StaticResource CardBrush}"/></DataTrigger></Style.Triggers>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CurrentView}" Value="Quests">
+                                        <Setter Property="Background" Value="#1C1C20"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource Orb.SystemAccentBrush}"/>
+                                        <Setter Property="BorderThickness" Value="2,0,0,0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
                         </ui:Button.Style>
-                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Trophy24" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Active Quests" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
+                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Trophy24" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Active Quests" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
                     </ui:Button>
                     <ui:Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="UnifiedSearch">
                         <ui:Button.Style>
                             <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
                                 <Setter Property="Background" Value="Transparent"/><Setter Property="Appearance" Value="Secondary"/>
-                                <Style.Triggers><DataTrigger Binding="{Binding CurrentView}" Value="UnifiedSearch"><Setter Property="Background" Value="{StaticResource CardBrush}"/></DataTrigger></Style.Triggers>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers><DataTrigger Binding="{Binding CurrentView}" Value="UnifiedSearch"><Setter Property="Background" Value="#1C1C20"/><Setter Property="BorderBrush" Value="{StaticResource Orb.SystemAccentBrush}"/><Setter Property="BorderThickness" Value="2,0,0,0"/></DataTrigger></Style.Triggers>
                             </Style>
                         </ui:Button.Style>
-                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Search24" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Search" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
+                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Search24" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Search" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
                     </ui:Button>
                     <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="8,10,0,8" Cursor="Hand" MouseLeftButtonDown="AdvancedToggle_Click">
                         <TextBlock.Style>
@@ -192,64 +333,140 @@
                     <StackPanel Visibility="{Binding IsAdvancedExpanded, Converter={StaticResource BoolToVisibilityConverter}}" Margin="8,0,0,0">
                         <StackPanel.Style><Style TargetType="StackPanel"><Style.Triggers><DataTrigger Binding="{Binding SidebarCollapsed}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
                         <ui:Button Appearance="Secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="Database">
-                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Database24" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Discord Database" VerticalAlignment="Center"/></StackPanel>
+                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Database24" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Discord Database" VerticalAlignment="Center"/></StackPanel>
                         </ui:Button>
                         <ui:Button Appearance="Secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="Steam">
-                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Games24" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Steam Quest" VerticalAlignment="Center"/></StackPanel>
+                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Games24" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Steam Quest" VerticalAlignment="Center"/></StackPanel>
                         </ui:Button>
                         <ui:Button Appearance="Secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="Manual">
                             <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Wrench24" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Manual Mode" VerticalAlignment="Center"/></StackPanel>
                         </ui:Button>
                     </StackPanel>
-                    <Separator Background="{StaticResource BorderBrush}" Margin="0,12,0,12"/>
+                    <Separator Background="{StaticResource Orb.SeparatorBrush}" Margin="0,12,0,12"/>
                     <TextBlock Text="I  N  F  O" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" Margin="8,0,0,12" FontFamily="{StaticResource BodyFont}"
                                Visibility="{Binding SidebarCollapsed, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
                     <ui:Button Appearance="Secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="Credits">
-                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Info24" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Credits &amp; Info" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
+                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Info24" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Credits &amp; Info" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
                     </ui:Button>
                     <ui:Button Appearance="Secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Visibility="{Binding HasUpdate, Converter={StaticResource BoolToVisibilityConverter}}" Foreground="{StaticResource WarningBrush}" Click="UpdateReminder_Click">
-                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ArrowUp24" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/><TextBlock Text="Update Available" VerticalAlignment="Center"/></StackPanel>
+                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="ArrowUp24" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Update Available" VerticalAlignment="Center"/></StackPanel>
                     </ui:Button>
-                    <Separator Background="{StaticResource BorderBrush}" Margin="0,12,0,12"/>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
 
-            <!-- Content Area — fondo más oscuro, sin gris del Mica -->
-            <Grid Grid.Column="1" Margin="24,20" Background="#08080A">
-                <!-- Loading -->
-                <StackPanel Visibility="{Binding CurrentView, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Loading}" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48" Margin="0,0,0,16"/>
-                    <TextBlock Text="{Binding StatusMessage}" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
+            <!-- Content Area — con glow interno + transiciones -->
+            <Grid Grid.Column="1" Margin="24,20" Background="Transparent">
+                <!-- Glow sutil detrás del contenido -->
+                <Ellipse Width="420" Height="320" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-20,-40,0" IsHitTestVisible="False" Opacity="0.04">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                            <GradientStop Color="#5865F2" Offset="0"/>
+                            <GradientStop Color="#005865F2" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
 
-                <!-- Quests -->
-                <views:QuestsView DataContext="{Binding Quests}" Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Quests}"/>
+                <!-- Loading — con fade -->
+                <Grid Visibility="{Binding CurrentView, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Loading}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <Trigger Property="Visibility" Value="Visible">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.35"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RenderTransform><ScaleTransform ScaleX="1" ScaleY="1"/></Grid.RenderTransform>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48" Margin="0,0,0,16"/>
+                        <TextBlock Text="{Binding StatusMessage}" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Quests — host animado -->
+                <Grid x:Name="QuestsHost" Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Quests}"
+                      Style="{StaticResource Orb.ViewHost}">
+                    <views:QuestsView DataContext="{Binding Quests}" />
+                </Grid>
                 <!-- Search -->
-                <views:UnifiedSearchView DataContext="{Binding UnifiedSearch}" Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=UnifiedSearch}"/>
+                <Grid Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=UnifiedSearch}"
+                      Style="{StaticResource Orb.ViewHost}">
+                    <views:UnifiedSearchView DataContext="{Binding UnifiedSearch}" />
+                </Grid>
                 <!-- Database -->
-                <views:DatabaseView DataContext="{Binding Database}" Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Database}"/>
+                <Grid Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Database}"
+                      Style="{StaticResource Orb.ViewHost}">
+                    <views:DatabaseView DataContext="{Binding Database}" />
+                </Grid>
                 <!-- Steam -->
-                <views:SteamView DataContext="{Binding Steam}" Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Steam}"/>
+                <Grid Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Steam}"
+                      Style="{StaticResource Orb.ViewHost}">
+                    <views:SteamView DataContext="{Binding Steam}" />
+                </Grid>
                 <!-- Manual -->
-                <views:ManualView DataContext="{Binding Manual}" Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Manual}"/>
+                <Grid Visibility="{Binding DataContext.CurrentView, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Manual}"
+                      Style="{StaticResource Orb.ViewHost}">
+                    <views:ManualView DataContext="{Binding Manual}" />
+                </Grid>
                 <!-- Credits -->
-                <views:CreditsView Visibility="{Binding CurrentView, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Credits}"/>
+                <Grid Visibility="{Binding CurrentView, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Credits}"
+                      Style="{StaticResource Orb.ViewHost}">
+                    <views:CreditsView />
+                </Grid>
             </Grid>
         </Grid>
 
-        <!-- Dialog Host for ContentDialogService (WPF-UI) -->
+        <!-- Dialog Host -->
         <ui:ContentDialogHost x:Name="DialogHost" Grid.RowSpan="4" Panel.ZIndex="1000" />
 
-        <!-- Status Bar -->
-        <Border Grid.Row="3" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="20,10">
+        <!-- Status Bar — con glow y pulso -->
+        <Border Grid.Row="3" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="0,1,0,0" Padding="16,10">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#0F0F11" Offset="0"/>
+                    <GradientStop Color="#0A0A0C" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Ellipse Width="8" Height="8" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0"/>
+                    <Grid Width="10" Height="10" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <Ellipse Fill="#1A57F287" Width="10" Height="10" Opacity="0.35">
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.25" To="0.55" Duration="0:0:1.2"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" From="10" To="14" Duration="0:0:1.2"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Height" From="10" To="14" Duration="0:0:1.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
                     <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Text="{Binding GameCountText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
-                    <ui:SymbolIcon Symbol="Heart24" Filled="True" FontSize="16" Foreground="{StaticResource ErrorBrush}" VerticalAlignment="Center" Margin="14,0,0,0" Cursor="Hand" ToolTip="Enjoying OrbSpoofer? Buy me a coffee!" MouseLeftButtonDown="Kofi_HeartClick"/>
+                    <Border Width="28" Height="28" CornerRadius="14" Background="#1A1A1E" Margin="12,0,0,0" BorderBrush="#26262C" BorderThickness="1" Cursor="Hand" ToolTip="Enjoying OrbSpoofer? Buy me a coffee!">
+                        <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{x:Static ApplicationCommands.NotACommand}"/></Border.InputBindings>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="MouseDown">
+                                <BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.7" Duration="0:0:0.1" AutoReverse="True"/></Storyboard></BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                        <ui:SymbolIcon Symbol="Heart24" Filled="True" FontSize="14" Foreground="{StaticResource ErrorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonDown="Kofi_HeartClick"/>
+                    </Border>
                 </StackPanel>
             </Grid>
         </Border>

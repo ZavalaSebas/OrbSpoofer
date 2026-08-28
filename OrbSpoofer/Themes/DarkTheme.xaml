@@ -8,7 +8,7 @@
     <Color x:Key="BackgroundColor">#08080A</Color>
     <Color x:Key="SurfaceColor">#0F0F11</Color>
     <Color x:Key="CardColor">#0F0F11</Color>
-    <Color x:Key="BorderColor">#222228</Color>
+    <Color x:Key="BorderColor">#1E1E22</Color>
     <Color x:Key="TextPrimaryColor">#EDEDF0</Color>
     <Color x:Key="TextSecondaryColor">#9A9AA0</Color>
     <Color x:Key="TextMutedColor">#5E5E66</Color>
@@ -38,7 +38,7 @@
 
     <!-- Removed: PrimaryButton, GhostButton, SearchBox, ManualInputBox — now using Wpf.Ui (ui:Button, ui:TextBox PlaceholderText) -->
 
-    <!-- Scrollbar — Fluent overlay (Bridge-style: thin thumb, accent hover) -->
+    <!-- Scrollbar — Aurora: thin thumb, accent hover, animado -->
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Width" Value="10"/>
@@ -54,12 +54,19 @@
                                 <Thumb Focusable="False" IsTabStop="False">
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="Thumb">
-                                            <Border x:Name="ThumbBorder" CornerRadius="5" Margin="2,1" Background="#55FFFFFF" Opacity="0.5">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.9"/></Trigger></Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
+                                            <Border x:Name="ThumbBorder" CornerRadius="5" Margin="2,1" Background="#3A3A40" Opacity="0.9">
+                                                <Border.Triggers>
+                                                    <EventTrigger RoutedEvent="MouseEnter">
+                                                        <BeginStoryboard><Storyboard>
+                                                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#5865F2" Duration="0:0:0.18"/>
+                                                        </Storyboard></BeginStoryboard>
+                                                    </EventTrigger>
+                                                    <EventTrigger RoutedEvent="MouseLeave">
+                                                        <BeginStoryboard><Storyboard>
+                                                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#3A3A40" Duration="0:0:0.18"/>
+                                                        </Storyboard></BeginStoryboard>
+                                                    </EventTrigger>
+                                                </Border.Triggers>
                                             </Border>
                                         </ControlTemplate>
                                     </Thumb.Template>
@@ -81,7 +88,7 @@
                         <Track x:Name="PART_Track" VerticalAlignment="Stretch">
                             <Track.DecreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Focusable="False" IsTabStop="False" Opacity="0"/></Track.DecreaseRepeatButton>
                             <Track.IncreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Focusable="False" IsTabStop="False" Opacity="0"/></Track.IncreaseRepeatButton>
-                            <Track.Thumb><Thumb Focusable="False" IsTabStop="False"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border CornerRadius="5" Margin="2,1" Background="#55FFFFFF" Opacity="0.5"/></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                            <Track.Thumb><Thumb Focusable="False" IsTabStop="False"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border CornerRadius="5" Margin="2,1" Background="#3A3A40" Opacity="0.9"/></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
                         </Track>
                     </Grid>
                 </ControlTemplate>
@@ -89,9 +96,9 @@
         </Setter>
     </Style>
 
-    <!-- ListBoxItem — Fluent selection (left accent + hover) like Bridge -->
+    <!-- ListBoxItem — Fluent selection con animación sutil -->
     <Style TargetType="ListBoxItem">
-        <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/><Setter Property="Padding" Value="16,12"/><Setter Property="BorderThickness" Value="3,0,0,0"/><Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/><Setter Property="Padding" Value="0"/><Setter Property="BorderThickness" Value="0"/><Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
