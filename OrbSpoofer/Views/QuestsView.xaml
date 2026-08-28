@@ -5,7 +5,7 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
-        <!-- Header vivo -->
+        <!-- Live header -->
         <Grid Grid.Row="0" Margin="0,0,0,6">
             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0">
@@ -42,42 +42,63 @@
         </Border>
 
         <Grid Grid.Row="2">
-            <ui:ProgressRing IsIndeterminate="True" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasNoQuests, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Width="64" Height="64" CornerRadius="18" Background="#1A1A1E" HorizontalAlignment="Center" BorderBrush="#23232A" BorderThickness="1">
-                    <ui:SymbolIcon Symbol="Trophy24" FontSize="28" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <TextBlock Text="{Binding EmptyText}" FontSize="14" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,14,0,0" TextAlignment="Center"/>
-            </StackPanel>
-            <ListBox x:Name="QuestsList" Padding="0,0,8,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
-                     ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True" ScrollViewer.IsDeferredScrollingEnabled="True">
+            <!-- List always visible; IsLoading only lowers opacity (no Collapse -> no black flash) -->
+            <ListBox x:Name="QuestsList" Padding="4,4,8,6" ClipToBounds="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
+                     ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="False" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel">
                 <ListBox.Style>
                     <Style TargetType="ListBox">
                         <Setter Property="Visibility" Value="{Binding HasNoQuests, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                        <Setter Property="Opacity" Value="1"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsLoading}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                            <DataTrigger Binding="{Binding IsLoading}" Value="True"><Setter Property="Opacity" Value="0.45"/><Setter Property="IsHitTestVisible" Value="False"/></DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </ListBox.Style>
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Padding" Value="0"/>
-                        <Setter Property="Margin" Value="0,0,0,2"/>
+                        <Setter Property="Margin" Value="0,1,0,1"/>
+                        <Setter Property="ClipToBounds" Value="False"/>
+                        <Setter Property="Panel.ZIndex" Value="0"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
-                                    <Border x:Name="border" Background="Transparent" Padding="0"><ContentPresenter/></Border>
+                                    <Border x:Name="border" Background="Transparent" Padding="0" ClipToBounds="False"><ContentPresenter/></Border>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Panel.ZIndex" Value="10"/></Trigger>
+                        </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="0,0,10,6" ToolTip="Double-click to spoof">
+                        <Border Margin="4,2,12,6" ClipToBounds="False" ToolTip="Double-click to spoof">
                             <Border.Style>
                                 <Style TargetType="Border" BasedOn="{StaticResource Orb.CardHover}">
-                                    <Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Opacity" Value="0.48"/></DataTrigger></Style.Triggers>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.48" Duration="0:0:0.32">
+                                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.26">
+                                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </Border.Style>
                             <Grid>
@@ -143,6 +164,17 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <!-- Centered overlay: spinner over dimmed list, without hiding list -->
+            <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" IsHitTestVisible="True" Background="#00000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ui:ProgressRing IsIndeterminate="True" Width="36" Height="36" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+            <!-- Empty state on top -->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasNoQuests, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border Width="64" Height="64" CornerRadius="18" Background="#1A1A1E" HorizontalAlignment="Center" BorderBrush="#23232A" BorderThickness="1">
+                    <ui:SymbolIcon Symbol="Trophy24" FontSize="28" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="{Binding EmptyText}" FontSize="14" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,14,0,0" TextAlignment="Center"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

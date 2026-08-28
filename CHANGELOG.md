@@ -2,21 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.1.1] — 2026-08-28
+
+### Fixed
+- **Quests — double black flash + stutter when marking done/reloading:** `QuestItem` now fully implements `INotifyPropertyChanged` (avoids `Clear+Add` for opacity), `ToggleCompleted` triggers only `INPC` + `0.32s` fade without `Move`/`Refresh`/`Reset` (no disappearance or jump), `LoadAsync` uses in-place patch with incremental `Move` and staggers only on initial load; reloads via `FileSystemWatcher` diff without `Clear` or `OnQuestsLoaded`, `ListBox` no longer collapses on `IsLoading` (now `Opacity 0.45` + centered `ProgressRing` overlay), `Virtualizing=False + CanContentScroll=False + ScrollUnit Pixel` to avoid black recycling; hover `Orb.CardHover` `Scale 1.012->1.006` + `ZIndex 10` + `ClipToBounds False + bleed 4,2,12,6` on `Quests/Unified/Steam/Database/Credits` so elevated cards no longer clip at the edges
+- **TaskCanceledException in `QuestsView.AnimateListAsync` (line 50):** `Task.Delay(15,token).ContinueWith` threw an unhandled `TaskCanceledException` when cancelling the `CTS`; now `try/catch TaskCanceledException/OperationCanceledException` in `Animate()` and `AnimateListAsync`
+
 ## [2.1.0] — 2026-08-28
 
 ### Added
-- **Aurora redesign — vivo + suave sin perder seriedad:** fondo con glows radiales (`#5865F2`/`#7B83FF`), cards `Orb.CardHover` con elevacion `-1.5px + Scale 1.012` y sombra dinamica, transiciones de vistas `Fade + SlideY` (320ms `EaseOutCubic`), sidebar animada `280ms` en vez de snap, popups con `Scale 0.92->1.0` y sombra premium
-- **Motion system:** tokens `Orb.Motion.{Fast,Normal,Slow}` + `Orb.Easing.EaseOut/Emphasized` + `Orb.ViewHost` para todas las vistas, `Badge` con bounce en notificaciones y `ProgressRing` con pulse
-- **Views pulidas:** headers con icono gradient (Trophy/Search/Database/Games/Wrench/Info), search boxes unificados `Corner 12 + Search icon + placeholder animado` + boton `Gradient + DropShadow`, todas las cards con `Border 12 + ClipToBounds + hover accent`
-- **Status bar vivo:** dot pulsante con halo, heart `Hover -> #1A1A1E`, version pill con borde `#1E1E22`
+- **Aurora redesign — vivid yet smooth while keeping a serious tone:** radial glow background (`#5865F2`/`#7B83FF`), `Orb.CardHover` cards with `-1.5px` lift + `Scale 1.012` and dynamic shadow, view transitions `Fade + SlideY` (320ms `EaseOutCubic`), animated sidebar `280ms` instead of snap, popups with `Scale 0.92->1.0` and premium shadow
+- **Motion system:** `Orb.Motion.{Fast,Normal,Slow}` tokens + `Orb.Easing.EaseOut/Emphasized` + `Orb.ViewHost` for all views, `Badge` with bounce on notifications and `ProgressRing` pulse
+- **Polished views:** headers with gradient icons (Trophy/Search/Database/Games/Wrench/Info), unified search boxes `Corner 12 + Search icon + animated placeholder` + `Gradient + DropShadow` button, all cards with `Border 12 + ClipToBounds + hover accent`
+- **Live status bar:** pulsating dot with halo, heart `Hover -> #1A1A1E`, version pill with `#1E1E22` border
 
 ### Changed
-- `Styles/Theme.xaml` — nueva paleta `Orb.Accent.Gradient`, `Orb.Glow.Radial`, `Orb.Header/Sidebar.Gradient`, `CornerRadius Card 8->12`, `Motion 0.12->0.18/0.28/0.40s` y 4 estilos animados nuevos (`Orb.CardHover`, `Orb.CardAnimated`, `Orb.ViewHost`, `Orb.PlayButton`)
-- `Themes/DarkTheme.xaml` — scrollbar `Hover #5865F2` animado, `Border #222228->#1E1E22`
-- `MainWindow.xaml` — shell con aurora `220L->483L`, contenido con glow interno `420x320 Opacity 0.04`, header/sidebar con gradient + shadow, icon original `OS.png 34x34` preservado a pedido del usuario
+- `Styles/Theme.xaml` — new palette `Orb.Accent.Gradient`, `Orb.Glow.Radial`, `Orb.Header/Sidebar.Gradient`, `CornerRadius Card 8->12`, `Motion 0.12->0.18/0.28/0.40s` and 4 new animated styles (`Orb.CardHover`, `Orb.CardAnimated`, `Orb.ViewHost`, `Orb.PlayButton`)
+- `Themes/DarkTheme.xaml` — animated scrollbar `Hover #5865F2`, `Border #222228->#1E1E22`
+- `MainWindow.xaml` — shell with aurora `220L->483L`, content with inner glow `420x320 Opacity 0.04`, header/sidebar with gradient + shadow, original `OS.png 34x34` icon preserved as requested
 
 ### Fixed
-- Build errors tras aurora: `LetterSpacing` invalido en `ManualView`, `Border.Style` duplicado en `QuestsView`, y `ListBoxItem` template order en `DarkTheme`
+- Build errors after Aurora: invalid `LetterSpacing` in `ManualView`, duplicate `Border.Style` in `QuestsView`, and `ListBoxItem` template order in `DarkTheme`
 
 ## [2.0.2] — 2026-08-28
 

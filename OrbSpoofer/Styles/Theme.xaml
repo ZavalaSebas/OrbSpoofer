@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- OrbSpoofer Fluent Theme — V2 Aurora. Dark, vivo pero serio. -->
+    <!-- OrbSpoofer Fluent Theme — V2 Aurora. Dark, vivid but serious. -->
     <Color x:Key="Orb.Accent.Primary.Color">#5865F2</Color>
     <Color x:Key="Orb.Accent.Secondary.Color">#7B83FF</Color>
     <Color x:Key="Orb.Accent.Tertiary.Color">#3A44D0</Color>
@@ -13,7 +13,7 @@
     <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="{StaticResource SystemAccentColorSecondary}" />
     <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="{StaticResource SystemAccentColorTertiary}" />
     <SolidColorBrush x:Key="Orb.SystemAccentBrush" Color="{StaticResource SystemAccentColorPrimary}" />
-    <!-- Gradient brushes — sutiles, no neon -->
+    <!-- Gradient brushes — subtle, no neon -->
     <LinearGradientBrush x:Key="Orb.Accent.Gradient" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#5865F2" Offset="0"/>
         <GradientStop Color="#7B83FF" Offset="1"/>
@@ -72,7 +72,7 @@
     <CornerRadius x:Key="Orb.CornerRadius.Card">12</CornerRadius>
     <CornerRadius x:Key="Orb.CornerRadius.Control">8</CornerRadius>
 
-    <!-- Motion — profesional, suave -->
+    <!-- Motion — professional, smooth -->
     <Duration x:Key="Orb.Motion.Fast">0:0:0.18</Duration>
     <Duration x:Key="Orb.Motion.Normal">0:0:0.28</Duration>
     <Duration x:Key="Orb.Motion.Slow">0:0:0.40</Duration>
@@ -128,22 +128,24 @@
         </Setter>
     </Style>
 
-    <!-- Card animada — hover eleva + borde accent + sombra -->
+    <!-- Animated card — hover lift + accent border + shadow (no overflow) -->
     <Style x:Key="Orb.CardHover" TargetType="Border" BasedOn="{StaticResource Orb.Card}">
+        <Setter Property="Panel.ZIndex" Value="0"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Panel.ZIndex" Value="10"/>
                 <Trigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
                             <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#2A2E6A" Duration="{StaticResource Orb.Motion.Fast}"/>
                             <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#18181C" Duration="{StaticResource Orb.Motion.Fast}"/>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.012" Duration="{StaticResource Orb.Motion.Fast}">
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.006" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.012" Duration="{StaticResource Orb.Motion.Fast}">
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.006" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-1.5" Duration="{StaticResource Orb.Motion.Fast}">
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-2" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
@@ -257,7 +259,7 @@
         </Style.Triggers>
     </Style>
 
-    <!-- ContextMenu polish — más compacto, menos plástico -->
+    <!-- ContextMenu polish — more compact, less plastic -->
     <Style TargetType="ContextMenu">
         <Setter Property="Background" Value="#E01A1A1E" />
         <Setter Property="BorderBrush" Value="#401A1A1E" />

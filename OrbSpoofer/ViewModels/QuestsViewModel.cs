@@ -39,8 +39,9 @@ public partial class QuestsViewModel : ObservableObject
         _steamVm = steamVm;
         _dialogs = dialogs;
         QuestsView = CollectionViewSource.GetDefaultView(Quests);
-        QuestsView.SortDescriptions.Add(new SortDescription(nameof(QuestItem.IsCompleted), ListSortDirection.Ascending));
-        QuestsView.SortDescriptions.Add(new SortDescription(nameof(QuestItem.ExpiresAt), ListSortDirection.Ascending));
+        // No SortDescriptions to avoid Refresh/Reset black flash.
+        // Order is maintained manually in Quests (smooth Move) and completion
+        // opacity is animated via DataTrigger (0.32s) in the view.
     }
 
     public void StartWatcher()
@@ -85,8 +86,9 @@ public partial class QuestsViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        IsLoading = true;
-        HasNoQuests = false;
+        bool isInitial = Quests.Count == 0;
+        if (isInitial) IsLoading = true;
+        // don't touch HasNoQuests until we have data -> avoids black toggle
         try
         {
             var all = await QuestService.GetActivePlayQuestsAsync();
@@ -108,27 +110,74 @@ public partial class QuestsViewModel : ObservableObject
 
             var sorted = filtered.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
 
-            Quests.Clear();
-            foreach (var q in sorted) Quests.Add(q);
-            QuestsView.Refresh();
             if (sorted.Count == 0)
             {
+                // clear without animation if already empty
+                if (Quests.Count != 0) Quests.Clear();
                 EmptyText = "No active quests found. Try Search to spoof a game manually.";
                 HasNoQuests = true;
                 CanRunAll = false;
             }
             else
             {
-                HasNoQuests = false;
-                CanRunAll = !IsRunningAll && sorted.Any(q => !q.IsCompleted);
-                StatusMessage = $"{sorted.Count} active quest(s) loaded";
-                OnQuestsLoaded?.Invoke();
+                if (isInitial)
+                {
+                    Quests.Clear();
+                    foreach (var q in sorted) Quests.Add(q);
+                    HasNoQuests = false;
+                    CanRunAll = !IsRunningAll && sorted.Any(q => !q.IsCompleted);
+                    StatusMessage = $"{sorted.Count} active quest(s) loaded";
+                    OnQuestsLoaded?.Invoke();
+                }
+                else
+                {
+                    // In-place PATCH: no Clear/Reset -> no black flash
+                    var byId = Quests.ToDictionary(x => x.Id);
+                    var sortedIds = new HashSet<string>(sorted.Select(x => x.Id));
+
+                    // remove missing
+                    for (int i = Quests.Count - 1; i >= 0; i--)
+                        if (!sortedIds.Contains(Quests[i].Id))
+                            Quests.RemoveAt(i);
+
+                    // update existing + insert new in order without abrupt Move
+                    for (int i = 0; i < sorted.Count; i++)
+                    {
+                        var src = sorted[i];
+                        if (byId.TryGetValue(src.Id, out var existing))
+                        {
+                            // patch INPC properties (no container recreation)
+                            existing.GameName = src.GameName;
+                            existing.QuestName = src.QuestName;
+                            existing.Reward = src.Reward;
+                            existing.TaskMinutes = src.TaskMinutes;
+                            existing.ExpiresAt = src.ExpiresAt;
+                            existing.ImageUrl = src.ImageUrl;
+                            existing.ApplicationId = src.ApplicationId;
+                            existing.IsCompleted = src.IsCompleted;
+                            existing.NeedsSteamMode = src.NeedsSteamMode;
+                            int cur = Quests.IndexOf(existing);
+                            if (cur != i) Quests.Move(cur, i);
+                        }
+                        else
+                        {
+                            Quests.Insert(i, src);
+                        }
+                    }
+                    HasNoQuests = false;
+                    CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted);
+                    StatusMessage = $"{sorted.Count} active quest(s) loaded";
+                    // no OnQuestsLoaded on patch -> avoids stagger second flash
+                }
             }
         }
         catch
         {
-            EmptyText = "No active quests found. The API may be unavailable — use Search to spoof a game.";
-            HasNoQuests = true;
+            if (Quests.Count == 0)
+            {
+                EmptyText = "No active quests found. The API may be unavailable — use Search to spoof a game.";
+                HasNoQuests = true;
+            }
             CanRunAll = false;
             StatusMessage = EmptyText;
         }
@@ -203,22 +252,21 @@ public partial class QuestsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ToggleCompletedAsync(QuestItem? quest)
+    private Task ToggleCompletedAsync(QuestItem? quest)
     {
-        if (quest == null) return;
-        quest.IsCompleted = !quest.IsCompleted;
+        if (quest == null) return Task.CompletedTask;
+        var newValue = !quest.IsCompleted;
+        quest.IsCompleted = newValue;
         var ids = Config.LoadCompletedQuestIds();
-        if (quest.IsCompleted) ids.Add(quest.Id); else ids.Remove(quest.Id);
+        if (newValue) ids.Add(quest.Id); else ids.Remove(quest.Id);
         Config.SaveCompletedQuestIds(ids);
 
-        // keep backing collection sorted for RunAll order, then refresh view
-        var sorted = Quests.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
-        Quests.Clear();
-        foreach (var q in sorted) Quests.Add(q);
-        QuestsView.Refresh();
-        StatusMessage = quest.IsCompleted ? $"Marked \"{quest.GameName}\" as completed" : $"Marked \"{quest.GameName}\" as not completed";
-        OnQuestsLoaded?.Invoke();
-        await Task.CompletedTask;
+        // Smooth fade only (DataTrigger 0.32s). No Move/Refresh/Reset -> no
+        // disappearance or black flash. Reorder is deferred to next
+        // LoadAsync (patch with Move) if needed, not instant.
+        CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted);
+        StatusMessage = newValue ? $"Marked \"{quest.GameName}\" as completed" : $"Marked \"{quest.GameName}\" as not completed";
+        return Task.CompletedTask;
     }
 
     // Run All — AllowConcurrentExecutions so the same button can be used to Stop while running

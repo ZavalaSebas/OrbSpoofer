@@ -1,4 +1,4 @@
-Aurora redesign — glows, cards con elevacion y transiciones suaves
-Sidebar animada 280ms + popups con scale y sombras premium
-Search boxes unificados + headers con icono gradient en todas las vistas
-Status bar vivo con dot pulsante y motion system completo
+Aurora redesign — glows, elevated cards and smooth transitions
+Animated sidebar 280ms + popups with scale and premium shadows
+Unified search boxes + gradient icon headers across all views
+Live status bar with pulsating dot and full motion system

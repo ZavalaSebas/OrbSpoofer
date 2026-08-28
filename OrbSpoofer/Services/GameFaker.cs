@@ -176,8 +176,8 @@ public class GameFaker
         return LaunchExecutable(exePath, out _, gameName, questId, discordAppId);
     }
 
-    // Overload que devuelve el Process del timer lanzado — permite esperar a
-    // que termine (secuencia Run-all) en vez de sondear por título de ventana.
+    // Overload that returns the launched timer Process — allows waiting for
+    // it to finish (Run-all sequence) instead of polling by window title.
     public bool LaunchExecutable(string exePath, out Process? launchedProcess, string? gameName = null, string? questId = null, string? discordAppId = null)
     {
         launchedProcess = null;

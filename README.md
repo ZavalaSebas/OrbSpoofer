@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.1.1-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -20,7 +20,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.1.0 — Aurora redesign.** Vivo + suave sin perder seriedad: glows, cards con elevacion, transiciones suaves, sidebar animada y toda la UI pulida. [See changelog](./CHANGELOG.md#210--2026-08-28).
+> **✨ New in 2.1.1 — Stutter-free quests.** Fixed double black flash when marking done/reloading, smooth `0.32s` fade, hover without clipping, and `TaskCanceledException` in animation. [See changelog](./CHANGELOG.md#211--2026-08-28).
 
 <br/>
 
@@ -203,7 +203,7 @@ OrbSpoofer/
 │   │   └── FreeGamesViewModel      GamerPower + Claim
 │   ├── Views/                      UserControls (virtualized)
 │   ├── Infrastructure/             SettingsStoreBase, SingleInstance, CacheStore, AppDataMigrator
-│   ├── Security/PathContainment    Sanitiza bin/helldivers2.exe y :
+│   ├── Security/PathContainment    Sanitizes bin/helldivers2.exe and :
 │   ├── Services/                   DiscordDatabase, SteamService (DLC parent), GameFaker, Updater
 │   ├── Styles/Theme.xaml           Tokens Orb.*  +  Themes/DarkTheme.xaml
 │   └── UI/Windows/                 Welcome, Timer (ExitCode), Update

@@ -22,7 +22,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Fondo aurora: gradient oscuro + glows radiales sutiles -->
+        <!-- Aurora background: dark gradient + subtle radial glows -->
         <Border Grid.RowSpan="4" Opacity="1">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -32,7 +32,7 @@
                 </LinearGradientBrush>
             </Border.Background>
         </Border>
-        <!-- Glow superior — accent muy sutil -->
+        <!-- Top glow — very subtle accent -->
         <Ellipse Grid.RowSpan="4" Width="900" Height="520" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-220,0,0" IsHitTestVisible="False" Opacity="0.09">
             <Ellipse.Fill>
                 <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
@@ -49,12 +49,12 @@
                 </RadialGradientBrush>
             </Ellipse.Fill>
         </Ellipse>
-        <!-- Velo Mica suave -->
+        <!-- Soft Mica veil -->
         <Border Grid.RowSpan="4" Background="#0A0A0A" Opacity="0.45" IsHitTestVisible="False"/>
 
         <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Icon="OS.png" Height="48" Padding="12,0" Background="Transparent"/>
 
-        <!-- Header — gradient + borde sutil + glow bottom -->
+        <!-- Header — gradient + subtle border + glow bottom -->
         <Border Grid.Row="1" BorderBrush="{StaticResource Orb.SeparatorBrush}" BorderThickness="0,0,0,1" Padding="22,14">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -143,7 +143,7 @@
             </Grid>
         </Border>
 
-        <!-- Accent picker popup — con scale -->
+        <!-- Accent picker popup — with scale -->
         <Popup x:Name="AccentPopup" AllowsTransparency="True" PopupAnimation="Fade" Focusable="False" StaysOpen="False" Placement="Relative">
             <Border CornerRadius="14" Background="#F5141418" BorderBrush="#28282E" BorderThickness="1" Padding="14" Width="236" RenderTransformOrigin="0.85,0">
                 <Border.Effect><DropShadowEffect BlurRadius="24" ShadowDepth="8" Opacity="0.45" Color="#000000"/></Border.Effect>
@@ -179,7 +179,7 @@
             </Border>
         </Popup>
 
-        <!-- Free games popup — con scale + sombra premium -->
+        <!-- Free games popup — with scale + premium shadow -->
         <Popup x:Name="NotificationsPopup" AllowsTransparency="True" PopupAnimation="Fade" Focusable="False" StaysOpen="False" Placement="Relative" Closed="NotificationsPopup_Closed">
             <Border CornerRadius="14" Background="#F7141418" BorderBrush="#28282E" BorderThickness="1" Width="370" MaxHeight="500" RenderTransformOrigin="0.85,0">
                 <Border.Effect><DropShadowEffect BlurRadius="28" ShadowDepth="10" Opacity="0.50" Color="#000000"/></Border.Effect>
@@ -357,7 +357,7 @@
 
             <!-- Content Area — con glow interno + transiciones -->
             <Grid Grid.Column="1" Margin="24,20" Background="Transparent">
-                <!-- Glow sutil detrás del contenido -->
+                <!-- Subtle glow behind content -->
                 <Ellipse Width="420" Height="320" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-20,-40,0" IsHitTestVisible="False" Opacity="0.04">
                     <Ellipse.Fill>
                         <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">

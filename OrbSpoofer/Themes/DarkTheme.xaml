@@ -96,7 +96,7 @@
         </Setter>
     </Style>
 
-    <!-- ListBoxItem — Fluent selection con animación sutil -->
+    <!-- ListBoxItem — Fluent selection with subtle animation -->
     <Style TargetType="ListBoxItem">
         <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/><Setter Property="Padding" Value="0"/><Setter Property="BorderThickness" Value="0"/><Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Template">
