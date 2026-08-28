@@ -79,7 +79,7 @@ jobs:
           }
           $msg | Out-File -FilePath $env:RUNNER_TEMP/release_body.md -Encoding utf8NoBOM
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.build.outputs.new_version }}
           body_path: ${{ runner.temp }}/release_body.md
