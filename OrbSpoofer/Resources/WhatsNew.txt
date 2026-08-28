@@ -1,5 +1,4 @@
-Revamped Fluent UI with Mica and new navigation
-More stable spoofing with MVVM architecture and lifecycle fixes
-Free Games section — auto-detects free games on Steam & Epic
-Centralized search with badges and accent color personalization
-Stability fixes for HELLDIVERS 2, DLCs and GamerPower
+Darker & sharper polish — compact cards, filled icons, better spacing
+Improved readability on Active Quests (larger fonts, green orbs)
+Unified compact style across Search / Database / Steam / Manual
+More spacious window (1060×740) with flatter dark theme

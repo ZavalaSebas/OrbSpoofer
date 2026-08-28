@@ -5,24 +5,24 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
-            <TextBlock Text="Manual Mode" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
-            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="Enter the exact process name Discord expects"/>
+            <TextBlock Text="Manual Mode" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="Enter the exact process name Discord expects"/>
         </StackPanel>
-        <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,20,0,0">
+        <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,12,0,0" Padding="13">
             <StackPanel>
-                <TextBlock Text="Examples:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
-                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4" Text="• TslGame.exe (PUBG)"/>
-                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,4" Text="• League of Legends.exe (LoL)"/>
-                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="• Overwatch.exe"/>
+                <TextBlock Text="Examples:" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,3" Text="• TslGame.exe (PUBG)"/>
+                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,3" Text="• League of Legends.exe (LoL)"/>
+                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="• Overwatch.exe"/>
             </StackPanel>
         </Border>
-        <Grid Grid.Row="2" Margin="0,20,0,0">
+        <Grid Grid.Row="2" Margin="0,12,0,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <ui:TextBox Grid.Column="0" PlaceholderText="e.g. TslGame.exe" Text="{Binding ExeName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
-            <ui:Button Grid.Column="1" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Margin="10,0,0,0" Padding="8" Width="60" Height="60" FontSize="24" ToolTip="Spoof" Command="{Binding SpoofCommand}"><ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/></ui:Button>
+            <ui:Button Grid.Column="1" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Margin="8,0,0,0" Padding="0" Width="44" Height="44" ToolTip="Spoof" Command="{Binding SpoofCommand}"><ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15"/></ui:Button>
         </Grid>
-        <Border Grid.Row="3" Style="{StaticResource Orb.Card}" Margin="0,16,0,0" Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibilityConverter}}">
-            <TextBlock FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" Text="{Binding ResultText}"/>
+        <Border Grid.Row="3" Style="{StaticResource Orb.Card}" Margin="0,12,0,0" Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibilityConverter}}">
+            <TextBlock FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="{Binding ResultText}"/>
         </Border>
     </Grid>
 </UserControl>

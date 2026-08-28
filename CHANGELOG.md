@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.0.2] — 2026-08-28
+
+### Changed
+
+- **UI polish — darker, sharper, more spacious:** window `1000×700 → 1060×740`, header/sidebar darker (`#0A0A0A`/`#0F0F11`/`#18181C`), card `CornerRadius 10→8` + tighter `Margin 0,0,16,4` + `Padding 13`, compact rows (`52×52` image, `44×44` play) across Quests/Search/Database/Steam/Manual
+- **Icons filled:** `Play24` + `Heart24` now `Filled="True"` for solid look
+- **Readability:** Active Quests `GameName 13→15 / QuestName 11→13 / Reward 10→12` in `SuccessBrush` (`#57F287`), unified Search/DB/Steam to `14/11` — less dense, easier to scan
+- **Background:** content area `Transparent → #08080A` overlay `0.85` to remove Mica gray wash on cards
+
 ## [2.0.1] — 2026-08-25
 
 ### Fixed

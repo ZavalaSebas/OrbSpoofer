@@ -5,13 +5,13 @@
     <!-- Colors -->
     <Color x:Key="PrimaryColor">#5865F2</Color>
     <Color x:Key="SecondaryColor">#4752C4</Color>
-    <Color x:Key="BackgroundColor">#0a0a0a</Color>
-    <Color x:Key="SurfaceColor">#1a1a1a</Color>
-    <Color x:Key="CardColor">#141414</Color>
-    <Color x:Key="BorderColor">#2a2a2a</Color>
-    <Color x:Key="TextPrimaryColor">#e0e0e0</Color>
-    <Color x:Key="TextSecondaryColor">#888888</Color>
-    <Color x:Key="TextMutedColor">#555555</Color>
+    <Color x:Key="BackgroundColor">#08080A</Color>
+    <Color x:Key="SurfaceColor">#0F0F11</Color>
+    <Color x:Key="CardColor">#0F0F11</Color>
+    <Color x:Key="BorderColor">#222228</Color>
+    <Color x:Key="TextPrimaryColor">#EDEDF0</Color>
+    <Color x:Key="TextSecondaryColor">#9A9AA0</Color>
+    <Color x:Key="TextMutedColor">#5E5E66</Color>
     <Color x:Key="ErrorColor">#ED4245</Color>
     <Color x:Key="WarningColor">#FEE75C</Color>
     <Color x:Key="SuccessColor">#57F287</Color>

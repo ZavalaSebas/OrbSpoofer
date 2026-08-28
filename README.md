@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.0.1-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.0.2-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -20,7 +20,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.0 — Revamped Fluent UI, more stable and customizable.** Fluent + Mica, MVVM architecture, **Free Games** section (Steam/Epic auto-detect), centralized search and accent picker. Fixes for `HELLDIVERS 2`, DLCs and GamerPower. [See changelog](./CHANGELOG.md#200--2026-08-25).
+> **✨ New in 2.0.2 — Darker & sharper polish.** Same Fluent + Mica core, now darker (`#08080A`/`#0F0F11`), filled icons, compact cards and better spacing/readability. [See changelog](./CHANGELOG.md#202--2026-08-28).
 
 <br/>
 
@@ -101,11 +101,11 @@ dotnet publish -c Release -r win-x64 \
 <table>
 <tr>
 <td align="center">
-<img width="996" height="699" alt="image" src="https://github.com/user-attachments/assets/f51cb071-6df2-4e0a-ac40-54d14acdc023" />
+<img width="996" height="699" alt="Active Quests" src="docs/assets/screenshot-1.png" />
 <br/><sub><i>Active Quest</i></sub>
 </td>
 <td align="center">
-<img width="994" height="701" alt="image" src="https://github.com/user-attachments/assets/ea687e60-735e-4f67-aa19-b3eb372f10a6" />
+<img width="994" height="701" alt="Timer" src="docs/assets/screenshot-2.png" />
 <br/><sub><i>Let 15 Mins pass</i></sub>
 </td>
 </tr>

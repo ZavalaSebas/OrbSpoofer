@@ -5,32 +5,32 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
-            <TextBlock Text="Search" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
-            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="One result per game. Badge shows Discord, Steam, or Both. Use Advanced to pick a source."/>
+            <TextBlock Text="Search" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,4"/>
+            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="One result per game. Badge shows Discord, Steam, or Both. Use Advanced to pick a source."/>
         </StackPanel>
-        <Grid Grid.Row="1" Margin="0,16,0,12">
+        <Grid Grid.Row="1" Margin="0,12,0,10">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <ui:TextBox Grid.Column="0" PlaceholderText="Search games..." Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
-            <ui:Button Grid.Column="1" Content="Search" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Margin="10,0,0,0" Command="{Binding SearchCommand}"/>
+            <ui:Button Grid.Column="1" Content="Search" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Margin="8,0,0,0" Command="{Binding SearchCommand}"/>
         </Grid>
         <Grid Grid.Row="2">
-            <ListBox x:Name="UnifiedResultsList" Padding="0,0,20,0" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
+            <ListBox x:Name="UnifiedResultsList" Padding="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding Results}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True" ScrollViewer.IsDeferredScrollingEnabled="True" MouseDoubleClick="List_MouseDoubleClick">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource Orb.Card}" Margin="0,16,0,6" ToolTip="Double-click to spoof">
+                        <Border Style="{StaticResource Orb.Card}" Margin="0,0,16,4" ToolTip="Double-click to spoof">
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Width="92" Height="48" CornerRadius="8" Background="{StaticResource SurfaceBrush}" Margin="0,0,14,0">
+                                <Border Grid.Column="0" Width="78" Height="42" CornerRadius="8" Background="{StaticResource SurfaceBrush}" Margin="0,0,12,0">
                                     <Grid>
-                                        <TextBlock Text="??" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        <Image Source="{Binding ImageUrl}" Width="92" Height="48" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                        <TextBlock Text="??" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Image Source="{Binding ImageUrl}" Width="78" Height="42" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                                     </Grid>
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="360"/>
-                                        <Border Margin="10,0,0,0" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="360"/>
+                                        <Border Margin="8,0,0,0" CornerRadius="4" Padding="7,2" VerticalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#2a2a2a"/>
@@ -45,11 +45,11 @@
                                             <TextBlock Text="{Binding Badge}" FontSize="10" FontWeight="SemiBold" Foreground="#ffffff"/>
                                         </Border>
                                     </StackPanel>
-                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0" Text="{Binding Subtitle}"/>
+                                    <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,3,0,0" Text="{Binding Subtitle}"/>
                                 </StackPanel>
-                                <ui:Button Grid.Column="2" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="8" Width="60" Height="60" FontSize="24" ToolTip="Spoof"
+                                <ui:Button Grid.Column="2" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="0" Width="44" Height="44" ToolTip="Spoof"
                                            Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
-                                    <ui:SymbolIcon Symbol="Play24" Foreground="White" FontSize="20"/>
+                                    <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="15"/>
                                 </ui:Button>
                             </Grid>
                         </Border>

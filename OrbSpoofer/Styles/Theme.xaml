@@ -20,33 +20,33 @@
     <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
     <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
 
-    <Color x:Key="Orb.Background.Primary.Color">#0A0A0A</Color>
-    <Color x:Key="Orb.Background.Secondary.Color">#141414</Color>
-    <Color x:Key="Orb.Background.Tertiary.Color">#1E1E1E</Color>
-    <Color x:Key="Orb.Background.Quaternary.Color">#252525</Color>
-    <Color x:Key="Orb.Text.Primary.Color">#E6E6E6</Color>
-    <Color x:Key="Orb.Text.Secondary.Color">#9A9A9F</Color>
-    <Color x:Key="Orb.Text.Muted.Color">#6B6B70</Color>
+    <Color x:Key="Orb.Background.Primary.Color">#08080A</Color>
+    <Color x:Key="Orb.Background.Secondary.Color">#0F0F11</Color>
+    <Color x:Key="Orb.Background.Tertiary.Color">#18181C</Color>
+    <Color x:Key="Orb.Background.Quaternary.Color">#1E1E22</Color>
+    <Color x:Key="Orb.Text.Primary.Color">#EDEDF0</Color>
+    <Color x:Key="Orb.Text.Secondary.Color">#9A9AA0</Color>
+    <Color x:Key="Orb.Text.Muted.Color">#5E5E66</Color>
 
-    <!-- WPF-UI overrides -->
-    <Color x:Key="ApplicationBackgroundColor">#0F0F12</Color>
+    <!-- WPF-UI overrides — más oscuro, menos gris -->
+    <Color x:Key="ApplicationBackgroundColor">#08080A</Color>
     <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="{StaticResource Orb.Background.Primary.Color}" />
-    <Color x:Key="SolidBackgroundFillColorBase">#0F0F12</Color>
+    <Color x:Key="SolidBackgroundFillColorBase">#08080A</Color>
     <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="{StaticResource Orb.Background.Primary.Color}" />
     <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="{StaticResource Orb.Background.Secondary.Color}" />
     <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="{StaticResource Orb.Background.Tertiary.Color}" />
 
-    <Color x:Key="TextFillColorPrimary">#E6E6E6</Color>
+    <Color x:Key="TextFillColorPrimary">#EDEDF0</Color>
     <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{StaticResource Orb.Text.Primary.Color}" />
-    <Color x:Key="TextFillColorSecondary">#9A9A9F</Color>
+    <Color x:Key="TextFillColorSecondary">#9A9AA0</Color>
     <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{StaticResource Orb.Text.Secondary.Color}" />
-    <Color x:Key="TextFillColorTertiary">#6B6B70</Color>
+    <Color x:Key="TextFillColorTertiary">#5E5E66</Color>
     <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="{StaticResource Orb.Text.Muted.Color}" />
 
-    <Color x:Key="ControlFillColorDefault">#232326</Color>
+    <Color x:Key="ControlFillColorDefault">#18181C</Color>
     <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{StaticResource Orb.Background.Tertiary.Color}" />
-    <Color x:Key="ControlStrokeColorDefault">#2A2A2E</Color>
-    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#2A2A2E" />
+    <Color x:Key="ControlStrokeColorDefault">#222228</Color>
+    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#222228" />
 
     <FontFamily x:Key="Orb.FontFamily">Segoe UI Variable, Segoe UI</FontFamily>
     <sys:Double x:Key="Orb.FontSize.Caption">11</sys:Double>
@@ -68,19 +68,19 @@
     <SolidColorBrush x:Key="Orb.Sidebar.Background" Color="{StaticResource Orb.Background.Secondary.Color}" />
     <SolidColorBrush x:Key="Orb.Card.Background" Color="{StaticResource Orb.Background.Secondary.Color}" />
     <SolidColorBrush x:Key="Orb.Card.Hover" Color="{StaticResource Orb.Background.Tertiary.Color}" />
-    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#2A2A2E" />
+    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#222228" />
 
-    <!-- Card + ContextMenu polish matching Bridge (elevation + hover) -->
+    <!-- Card + ContextMenu polish — más compacto, menos plástico -->
     <Style x:Key="Orb.Card" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource Orb.Card.Background}" />
         <Setter Property="BorderBrush" Value="{StaticResource Orb.SeparatorBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{StaticResource Orb.CornerRadius.Card}" />
-        <Setter Property="Padding" Value="16" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="13" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.18" Color="#000000"/>
+                <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.14" Color="#000000"/>
             </Setter.Value>
         </Setter>
     </Style>

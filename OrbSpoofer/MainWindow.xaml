@@ -4,8 +4,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:views="clr-namespace:OrbSpoofer.Views"
-        Title="OrbSpoofer" Height="700" Width="1000"
-        MinHeight="600" MinWidth="850"
+        Title="OrbSpoofer" Height="740" Width="1060"
+        MinHeight="640" MinWidth="920"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         Foreground="{StaticResource TextPrimaryBrush}"
@@ -21,17 +21,17 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Border Grid.RowSpan="4" Background="#66000000"/>
+        <Border Grid.RowSpan="4" Background="#0A0A0A" Opacity="0.85"/>
         <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Icon="OS.png" Height="48" Padding="12,0" Background="Transparent"/>
 
-        <!-- Header -->
-        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="28,20">
+        <!-- Header — más oscuro ya viene de SurfaceBrush #0F0F11 -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="22,14">
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Image Source="OS.png" Width="32" Height="32" Margin="0,0,12,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="OS.png" Width="34" Height="34" Margin="0,0,11,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="OrbSpoofer" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" FontFamily="{StaticResource HeaderFont}"/>
-                        <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" FontFamily="{StaticResource BodyFont}">
+                        <TextBlock Text="OrbSpoofer" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" FontFamily="{StaticResource HeaderFont}"/>
+                        <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" FontFamily="{StaticResource BodyFont}">
                             <Run Text="Discord Orb Quest Spoofer"/><Run Text=" · " Foreground="{StaticResource TextMutedBrush}"/><Run Text="{Binding HeaderStatus, Mode=OneWay}" Foreground="{StaticResource WarningBrush}"/>
                         </TextBlock>
                     </StackPanel>
@@ -214,8 +214,8 @@
                 </StackPanel>
             </Border>
 
-            <!-- Content Area -->
-            <Grid Grid.Column="1" Margin="28,24">
+            <!-- Content Area — fondo más oscuro, sin gris del Mica -->
+            <Grid Grid.Column="1" Margin="24,20" Background="#08080A">
                 <!-- Loading -->
                 <StackPanel Visibility="{Binding CurrentView, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Loading}" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48" Margin="0,0,0,16"/>
@@ -249,7 +249,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Text="{Binding GameCountText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
-                    <ui:SymbolIcon Symbol="Heart24" FontSize="16" Foreground="{StaticResource ErrorBrush}" VerticalAlignment="Center" Margin="14,0,0,0" Cursor="Hand" ToolTip="Enjoying OrbSpoofer? Buy me a coffee!" MouseLeftButtonDown="Kofi_HeartClick"/>
+                    <ui:SymbolIcon Symbol="Heart24" Filled="True" FontSize="16" Foreground="{StaticResource ErrorBrush}" VerticalAlignment="Center" Margin="14,0,0,0" Cursor="Hand" ToolTip="Enjoying OrbSpoofer? Buy me a coffee!" MouseLeftButtonDown="Kofi_HeartClick"/>
                 </StackPanel>
             </Grid>
         </Border>
