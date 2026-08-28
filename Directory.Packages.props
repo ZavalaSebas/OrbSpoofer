@@ -17,3 +17,5 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
   </ItemGroup>
 </Project>
+
+<!-- verify-build: Microsoft.Extensions 10.0.11 + Test.Sdk 18.9.0 -->
