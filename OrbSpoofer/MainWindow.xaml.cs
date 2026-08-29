@@ -176,4 +176,34 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     }
 
     private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => Helpers.UrlLauncher.Open(Config.KofiUrl);
+
+    private void ShareButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var url = $"{Config.RepoUrl}/releases/latest";
+            System.Windows.Clipboard.SetText(url);
+            _vm.StatusMessage = $"Share link copied — {url}";
+            try
+            {
+                var host = DialogHostControl;
+                var dialog = new Wpf.Ui.Controls.ContentDialog(host)
+                {
+                    Title = "Link copied",
+                    Content = new System.Windows.Controls.TextBlock
+                    {
+                        Text = $"Copied to clipboard:\n{url}\n\nPaste it in your Discord server to share OrbSpoofer.",
+                        TextWrapping = System.Windows.TextWrapping.Wrap,
+                        Margin = new Thickness(0, 8, 0, 0)
+                    },
+                    CloseButtonText = "OK",
+                    IsPrimaryButtonEnabled = false,
+                    IsSecondaryButtonEnabled = false
+                };
+                _ = dialog.ShowAsync();
+            }
+            catch { }
+        }
+        catch (Exception ex) { Debug.WriteLine($"Share copy failed: {ex.Message}"); }
+    }
 }

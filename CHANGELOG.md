@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.1.2] — 2026-08-28
+
+### Fixed
+- **Timer grace period extended:** `Config.TimerExtraSeconds` `30 → 60` — countdown stays at `00:00` for an extra 30s before marking the quest as completed, ensuring missions close reliably even with Discord detection lag
+
+### Added
+- **Share button:** copies the latest release link (`https://github.com/ZavalaSebas/OrbSpoofer/releases/latest`) to the clipboard — header button (next to accent picker) + `Credits & Info` card button, with confirmation dialog for easy pasting in Discord servers
+
 ## [2.1.1] — 2026-08-28
 
 ### Fixed

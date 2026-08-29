@@ -133,6 +133,18 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
+                    <Button x:Name="ShareButton" Width="40" Height="40" Padding="0" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="ShareButton_Click" ToolTip="Copy latest release link — share on Discord">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="BgShare" Background="Transparent" CornerRadius="10">
+                                    <ui:SymbolIcon Symbol="Share24" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="BgShare" Property="Background" Value="#1A1A1E"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                     <ui:Button Appearance="Secondary" Padding="8,6" Margin="6,0,10,0" ToolTip="Toggle sidebar" Command="{Binding ToggleSidebarCommand}">
                         <ui:SymbolIcon Symbol="Navigation24" FontSize="16"/>
                     </ui:Button>

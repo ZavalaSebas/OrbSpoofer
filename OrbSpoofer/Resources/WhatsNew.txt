@@ -1,4 +1,4 @@
-Aurora redesign — glows, elevated cards and smooth transitions
-Animated sidebar 280ms + popups with scale and premium shadows
-Unified search boxes + gradient icon headers across all views
-Live status bar with pulsating dot and full motion system
+Timer grace 30s → 60s for reliable mission completion
+New Share button copies latest release link for Discord
+Stutter-free quests: no black flash, smooth fade on done
+Aurora redesign with elevated cards and full motion system

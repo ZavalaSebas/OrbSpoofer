@@ -55,7 +55,7 @@ public static class Config
     public const int MaxSearchResults = 20;
     public const int MaxDisplayedAliases = 3;
     public const int TimerDurationMinutes = 15;
-    public const int TimerExtraSeconds = 30;
+    public const int TimerExtraSeconds = 60;
     public const string TimerCompleteColor = "#ff6b6b";
     public const int MaxProjectRootDepth = 10;
     public const int PublishTimeoutSeconds = 300;

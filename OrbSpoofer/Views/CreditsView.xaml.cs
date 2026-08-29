@@ -14,5 +14,40 @@ public partial class CreditsView : UserControl
     private void Strykey_Click(object sender, MouseButtonEventArgs e) => Open("https://github.com/Strykey");
     private void Orbshacker_Click(object sender, MouseButtonEventArgs e) => Open("https://github.com/strykey/orbshacker");
     private void GitHubProfile_Click(object sender, MouseButtonEventArgs e) => Open(Config.RepoUrl);
+    private void Share_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        try
+        {
+            var url = $"{Config.RepoUrl}/releases/latest";
+            System.Windows.Clipboard.SetText(url);
+            // Light feedback via clipboard + open fallback if needed
+            try
+            {
+                var win = System.Windows.Window.GetWindow(this) as MainWindow ?? System.Windows.Application.Current?.MainWindow as MainWindow;
+                var host = win?.DialogHostControl;
+                if (host != null)
+                {
+                    var dialog = new Wpf.Ui.Controls.ContentDialog(host)
+                    {
+                        Title = "Link copied",
+                        Content = new System.Windows.Controls.TextBlock
+                        {
+                            Text = $"Copied to clipboard:\n{url}\n\nPaste it in your Discord server to share OrbSpoofer.",
+                            TextWrapping = System.Windows.TextWrapping.Wrap,
+                            Margin = new System.Windows.Thickness(0, 8, 0, 0)
+                        },
+                        CloseButtonText = "OK",
+                        IsPrimaryButtonEnabled = false,
+                        IsSecondaryButtonEnabled = false
+                    };
+                    _ = dialog.ShowAsync();
+                    return;
+                }
+            }
+            catch { }
+            System.Windows.MessageBox.Show($"Copied to clipboard:\n{url}", "OrbSpoofer — Share", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex) { Debug.WriteLine($"Share copy failed: {ex.Message}"); }
+    }
     private static void Open(string url) { try { Process.Start(new ProcessStartInfo(url){UseShellExecute=true}); } catch {} }
 }
