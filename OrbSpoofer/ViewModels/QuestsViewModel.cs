@@ -92,20 +92,20 @@ public partial class QuestsViewModel : ObservableObject
         try
         {
             var all = await QuestService.GetActivePlayQuestsAsync();
-            var spoofableIds = new HashSet<string>(_db.Games.Where(g => DiscordDatabase.GetWin32Executable(g) != null).Select(g => g.Id));
             var completedIds = Config.LoadCompletedQuestIds();
 
-            var filtered = all.Where(q =>
-            {
-                if (spoofableIds.Contains(q.ApplicationId ?? "")) return true;
-                return _db.Games.Any(g => g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) || q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
-            }).ToList();
+            // Keep all API quests visible - don't hide those not in DB (DB may be stale)
+            // Instead annotate with NeedsSteamMode so user knows to use Steam/Manual mode
+            var filtered = all;
 
             foreach (var q in filtered)
             {
                 q.IsCompleted = completedIds.Contains(q.Id);
                 var matching = _db.Games.FirstOrDefault(g => g.Id == q.ApplicationId || g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) || q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
-                q.NeedsSteamMode = matching != null && DiscordDatabase.GetWin32Executable(matching) == null;
+                if (matching == null)
+                    q.NeedsSteamMode = true; // unknown game -> likely needs Steam/manual
+                else
+                    q.NeedsSteamMode = DiscordDatabase.GetWin32Executable(matching) == null;
             }
 
             var sorted = filtered.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
