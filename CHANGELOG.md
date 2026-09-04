@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.1.3] — 2026-09-04
+
+### Fixed
+- **Bug fixes and stability improvements** — general polish and reliability improvements
+
+### Added
+- **Hall of Fame / Special Thanks** — new `Credits & Info` card honoring supporters who buy a coffee. First honored: **Trang** ([view coffee](https://ko-fi.com/home/coffeeshop?ReturnUrl=/&txid=a305e485-d6ed-4d27-9f32-8504df66f072)) — *infinite thanks! :D I will always remember you for being my first ever coffee :)*
+- **Status bar — Thanks Trang!** — pill next to heart (`MainWindow.xaml:473`) linking directly to Trang's Ko-fi transaction
+- **Welcome — What's New** — now highlights `Special thanks to Trang for buying my first coffee :D` + CTA `If you want to support and have your name appear here, consider buying me a coffee instead of the Nitro subscription :)` via `Resources/WhatsNew.txt`
+
 ## [2.1.2] — 2026-08-28
 
 ### Fixed

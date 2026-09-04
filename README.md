@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.2-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.1.3-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -20,7 +20,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.1.2 — Timer + Share.** Extra 30s grace period (60s total) for reliable quest completion, plus header and Credits Share button that copies the latest release link for Discord. [See changelog](./CHANGELOG.md#212--2026-08-28).
+> **✨ New in 2.1.3 — Hall of Fame + Thanks Trang!.** Special Thanks section honoring Trang's first coffee, status bar pill linking to Ko-fi, landing page overhaul, plus bug fixes. [See changelog](./CHANGELOG.md#213--2026-09-04).
 
 <br/>
 
@@ -221,6 +221,20 @@ MVVM + DI (`CommunityToolkit.Mvvm` + `Microsoft.Extensions.DependencyInjection` 
 - **CacheStore**: Atomic JSON + 30d TTL for `db_cache`, `steam_search`, `image_urls`/`steam_ids` persisted.
 - **Security**: `PathContainment` validates `Desktop/Win64` and `steamapps/common`, sanitizes `:` in DLCs.
 - **Theme**: `ThemeManager` with `DynamicResource` + `RefreshWindow` and persisted `Accent`.
+
+<br/>
+
+## ☕ Special Thanks / Hall of Fame
+
+Huge thanks to everyone who supports OrbSpoofer by buying a coffee — every contribution keeps the project alive and evolving 🙏
+
+### 🥇 Supporters
+
+| # | Supporter | Date | Message |
+|---|-----------|------|---------|
+| 1 | [**Trang** ☕](https://ko-fi.com/home/coffeeshop?ReturnUrl=/&txid=a305e485-d6ed-4d27-9f32-8504df66f072) | Sep 2026 | infinite thanks! :D I will always remember you for being my first ever coffee :) 💛 |
+
+> Want to appear here? [Buy me a coffee on Ko-fi](https://ko-fi.com/sebastianzavala82573) and I'll add you to this list with love. Every donation, no matter how small, is deeply appreciated.
 
 <br/>
 

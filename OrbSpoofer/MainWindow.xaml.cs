@@ -176,6 +176,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     }
 
     private void Kofi_HeartClick(object sender, MouseButtonEventArgs e) => Helpers.UrlLauncher.Open(Config.KofiUrl);
+    private void ThanksTrang_Click(object sender, MouseButtonEventArgs e) => Helpers.UrlLauncher.Open("https://ko-fi.com/home/coffeeshop?ReturnUrl=/&txid=a305e485-d6ed-4d27-9f32-8504df66f072");
 
     private void ShareButton_Click(object sender, RoutedEventArgs e)
     {

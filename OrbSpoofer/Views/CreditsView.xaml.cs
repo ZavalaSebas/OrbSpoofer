@@ -10,6 +10,8 @@ public partial class CreditsView : UserControl
     public CreditsView() => InitializeComponent();
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e) { try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri){UseShellExecute=true}); } catch {} e.Handled=true; }
     private void Kofi_Click(object sender, System.Windows.RoutedEventArgs e) => Open(Config.KofiUrl);
+    private void Kofi_Click(object sender, MouseButtonEventArgs e) => Open(Config.KofiUrl);
+    private void Trang_Click(object sender, MouseButtonEventArgs e) => Open("https://ko-fi.com/home/coffeeshop?ReturnUrl=/&txid=a305e485-d6ed-4d27-9f32-8504df66f072");
     private void Sponsor_Click(object sender, System.Windows.RoutedEventArgs e) => Open(Config.GitHubSponsorUrl);
     private void Strykey_Click(object sender, MouseButtonEventArgs e) => Open("https://github.com/Strykey");
     private void Orbshacker_Click(object sender, MouseButtonEventArgs e) => Open("https://github.com/strykey/orbshacker");

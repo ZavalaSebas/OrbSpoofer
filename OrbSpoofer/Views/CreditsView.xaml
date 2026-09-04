@@ -116,6 +116,79 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
+
+            <!-- Hall of Fame — Special Thanks -->
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False" CornerRadius="12" BorderThickness="1">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#1C1610" Offset="0"/>
+                        <GradientStop Color="#1A1408" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.BorderBrush>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#3D3418" Offset="0"/>
+                        <GradientStop Color="#3D2A12" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="#2A2210" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Trophy24" FontSize="16" Foreground="#FDB813" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"><Run Text="Special Thanks"/><Run Text="  ·  Hall of Fame" Foreground="#FDB813" FontSize="12" FontWeight="Normal"/></TextBlock>
+                            <TextBlock Text="Thanks to everyone who buys a coffee ☕" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" LineHeight="18" Margin="0,8,0,14" Opacity="0.9">Every coffee keeps OrbSpoofer alive. Huge thanks to everyone that support the project, makes me extremely happy :)</TextBlock>
+
+                    <!-- Supporter #1 — Trang — clickable to Ko-fi transaction -->
+                    <Border Background="#141418" CornerRadius="10" Padding="14" BorderBrush="#25252C" BorderThickness="1" Margin="0,0,0,12" Cursor="Hand" ToolTip="View coffee on Ko-fi" MouseLeftButtonDown="Trang_Click">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10" Margin="0,0,12,0" VerticalAlignment="Center">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#FDB813" Offset="0"/>
+                                        <GradientStop Color="#FF8A00" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <TextBlock Text="T" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Trang" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                    <Border Background="#2A2110" CornerRadius="6" Padding="6,2" Margin="8,0,0,0" BorderBrush="#3D3418" BorderThickness="1" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="☕" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                            <TextBlock Text="First Supporter" FontSize="10" Foreground="#FDB813" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ui:SymbolIcon Symbol="Open24" FontSize="10" Foreground="{StaticResource TextMutedBrush}" Margin="6,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                </StackPanel>
+                                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,3,0,0"><Run Text="First person to buy a coffee"/><Run Text=" · Sep 2026" Foreground="{StaticResource TextMutedBrush}"/></TextBlock>
+                                <TextBlock Text="“infinite thanks! :D I will always remember you for being my first ever coffee :)”" FontSize="11" Foreground="#FDB813" FontStyle="Italic" Margin="0,4,0,0" TextWrapping="Wrap" Opacity="0.9"/>
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#FDB813" CornerRadius="7" Padding="8,5" VerticalAlignment="Center" Margin="12,0,0,0">
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="🥇" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="#1" FontSize="11" FontWeight="Bold" Foreground="#1A1200" VerticalAlignment="Center"/></StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- CTA — want to appear here? -->
+                    <Border Background="#0F0F11" CornerRadius="8" Padding="12,10" BorderBrush="#1E1E22" BorderThickness="1" Cursor="Hand" MouseLeftButtonDown="Kofi_Click">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Heart24" FontSize="12" Foreground="#ED4245" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"><Run Text="Want to appear here?"/><Run Text="  Buy a coffee →" Foreground="#7B83FF" FontWeight="SemiBold"/></TextBlock>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="ko-fi.com/sebastianzavala82573" FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,4">
                 <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}"><Run Text="Original concept by "/></TextBlock>
                 <TextBlock FontSize="12" Foreground="#7B83FF" Cursor="Hand" MouseLeftButtonDown="Strykey_Click" Text="Strykey"/>

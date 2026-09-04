@@ -470,7 +470,18 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Text="{Binding GameCountText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
-                    <Border Width="28" Height="28" CornerRadius="14" Background="#1A1A1E" Margin="12,0,0,0" BorderBrush="#26262C" BorderThickness="1" Cursor="Hand" ToolTip="Enjoying OrbSpoofer? Buy me a coffee!">
+                    <Border CornerRadius="14" Background="#1A1A1E" Margin="12,0,0,0" BorderBrush="#26262C" BorderThickness="1" Cursor="Hand" ToolTip="Thanks Trang — view coffee on Ko-fi" Padding="8,5" MouseLeftButtonDown="ThanksTrang_Click">
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="MouseDown">
+                                <BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.7" Duration="0:0:0.1" AutoReverse="True"/></Storyboard></BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <ui:SymbolIcon Symbol="Heart24" Filled="True" FontSize="13" Foreground="{StaticResource ErrorBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="Thanks Trang!" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Width="28" Height="28" CornerRadius="14" Background="#1A1A1E" Margin="8,0,0,0" BorderBrush="#26262C" BorderThickness="1" Cursor="Hand" ToolTip="Enjoying OrbSpoofer? Buy me a coffee!">
                         <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{x:Static ApplicationCommands.NotACommand}"/></Border.InputBindings>
                         <Border.Triggers>
                             <EventTrigger RoutedEvent="MouseDown">

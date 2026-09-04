@@ -1,4 +1,4 @@
-Timer grace 30s → 60s for reliable mission completion
-New Share button copies latest release link for Discord
-Stutter-free quests: no black flash, smooth fade on done
-Aurora redesign with elevated cards and full motion system
+Bug fixes and stability improvements
+Special thanks to Trang for buying my first coffee :D
+If you want to support and have your name appear here, consider buying me a coffee instead of the Nitro subscription :)
+Hall of Fame added to Credits & Info

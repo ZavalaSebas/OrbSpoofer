@@ -51,7 +51,7 @@
       "name": "ZavalaSebas",
       "url": "https://github.com/ZavalaSebas"
     },
-    "softwareVersion": "2.1.2",
+    "softwareVersion": "2.1.3",
     "fileSize": "66MB",
     "downloadUrl": "https://github.com/ZavalaSebas/OrbSpoofer/releases/latest",
     "screenshot": "https://zavalasebas.github.io/OrbSpoofer/assets/screenshot-1.png",
@@ -88,7 +88,7 @@
   <link rel="apple-touch-icon" href="assets/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1044,6 +1044,188 @@
       opacity: 0.4;
     }
 
+    /* ─── Hall of Fame ─── */
+    .thanks-corner-card {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #1C1610, #1A1408);
+      border: 1px solid #3D3418;
+      border-radius: 12px;
+      padding: 10px 14px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(253,184,19,0.08);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .thanks-corner-card:hover {
+      transform: translateY(-2px);
+      border-color: #FDB813;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 16px rgba(253,184,19,0.15);
+    }
+    .thanks-corner-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #2A2210;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .thanks-corner-text strong {
+      display: block;
+      color: #FDB813;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .thanks-corner-text span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 10.5px;
+      line-height: 1.3;
+    }
+
+    .hall-of-fame {
+      background: rgba(88,101,242,0.02);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .hall-card {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s ease, transform 0.25s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .hall-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(253,184,19,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+    .hall-card:hover {
+      border-color: rgba(253,184,19,0.35);
+      transform: translateY(-2px);
+    }
+    .hall-card:hover::before { opacity: 1; }
+    .hall-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #FDB813, #FF8A00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .hall-info strong {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .hall-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #2A2110;
+      border: 1px solid #3D3418;
+      color: #FDB813;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 100px;
+    }
+    .hall-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .hall-quote {
+      font-size: 11px;
+      font-style: italic;
+      color: #FDB813;
+      opacity: 0.9;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .hall-rank {
+      background: #FDB813;
+      color: #1A1200;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .hall-grid {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .hall-cta {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .hall-cta a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--red);
+      color: #fff !important;
+      padding: 0.55rem 1.3rem;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none !important;
+      transition: transform 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+    .hall-cta a:hover { background: #c93a3c; transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+      .thanks-corner-card { position: relative; top: auto; right: auto; margin: 0 auto 1.5rem; justify-content: center; }
+      .hero { padding-top: 1.5rem; }
+      .hall-card { grid-template-columns: 42px 1fr; }
+      .hall-rank { grid-column: 1 / -1; justify-self: start; margin-top: 6px; }
+    }
+
     /* ─── Responsive ─── */
     @media (max-width: 768px) {
       .safety-card {
@@ -1072,6 +1254,128 @@
       .hero { min-height: 90vh; }
       .page-decor { display: none; }
       section { padding: 4rem 1.5rem; }
+    }
+    /* ─── 2026 visual system ─── */
+    :root {
+      --bg: #08090c;
+      --bg-card: #11141a;
+      --bg-card-hover: #171b24;
+      --text: #f5f6fa;
+      --text-muted: #858b9b;
+      --border: rgba(255,255,255,0.1);
+      --blurple: #6875f5;
+      --blurple-light: #9da5ff;
+      --lime: #c5f36a;
+      --gold: #fdb813;
+    }
+
+    body { font-family: 'Manrope', sans-serif; background: var(--bg); }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: .28;
+      background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, black, transparent 72%);
+    }
+    .page-decor { opacity: .45; }
+    .hero {
+      min-height: 780px;
+      justify-content: center;
+      padding: 7rem 2rem 5rem;
+      background: radial-gradient(ellipse 70% 55% at 50% 20%, rgba(104,117,245,.16), transparent 70%);
+    }
+    .hero::before { background: radial-gradient(ellipse at 50% 15%, rgba(197,243,106,.055), transparent 42%); }
+    .hero-nav {
+      position: absolute;
+      top: 24px;
+      left: max(24px, calc(50% - 550px));
+      right: max(24px, calc(50% - 550px));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -.04em;
+    }
+    .brand img { width: 30px; height: 30px; filter: drop-shadow(0 0 12px rgba(104,117,245,.55)); }
+    .brand small { color: var(--text-muted); font: 500 10px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 1.4rem; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: .76rem; font-weight: 700; transition: color .2s ease; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .nav-cta { color: #0b0d10; background: var(--lime); padding: .55rem .9rem; border-radius: 8px; }
+    .nav-links .nav-cta:hover { color: #0b0d10; filter: brightness(1.08); }
+    .thanks-corner-card { top: 82px; right: max(24px, calc(50% - 550px)); padding: 8px 11px; background: rgba(17,20,26,.78); backdrop-filter: blur(12px); }
+    .hero-badge { margin-bottom: 1.5rem; border-color: rgba(197,243,106,.25); color: var(--lime); background: rgba(197,243,106,.06); font: 500 .68rem 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .hero-badge .dot { background: var(--lime); }
+    .hero-logo { width: 92px; height: 92px; margin-bottom: 1.8rem; }
+    .hero h1 { font-size: clamp(3.8rem, 10vw, 8.2rem); letter-spacing: -.085em; margin-bottom: 1rem; }
+    .hero h1 .gradient { background: linear-gradient(110deg, #fff 10%, var(--blurple-light) 52%, var(--lime) 110%); -webkit-background-clip: text; background-clip: text; }
+    .hero-sub { max-width: 680px; font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.8; margin-bottom: 2rem; }
+    .hero-buttons { gap: .7rem; }
+    .btn { border-radius: 9px; padding: .85rem 1.25rem; font-size: .84rem; }
+    .btn-primary { background: var(--lime); color: #0b0d10; box-shadow: 0 8px 28px rgba(197,243,106,.14); }
+    .btn-primary:hover { background: #d8fa8a; box-shadow: 0 12px 32px rgba(197,243,106,.2); }
+    .btn-secondary { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.14); }
+    .hero-proof { display: flex; gap: 2rem; justify-content: center; margin-top: 3.5rem; padding-top: 1.4rem; border-top: 1px solid rgba(255,255,255,.1); }
+    .hero-proof-item { text-align: left; }
+    .hero-proof-item strong { display: block; color: var(--text); font-size: 1.05rem; }
+    .hero-proof-item span { color: var(--text-muted); font: 500 .62rem 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+    section { padding: 7.5rem 2rem; }
+    section:nth-of-type(even) { background: linear-gradient(180deg, transparent, rgba(255,255,255,.018), transparent); }
+    .container { max-width: 1120px; }
+    .section-label { color: var(--lime); font: 500 .68rem 'DM Mono', monospace; letter-spacing: .13em; }
+    .section-title { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.065em; line-height: 1.05; }
+    .section-desc { max-width: 630px; line-height: 1.8; }
+    .steps-track { padding-top: 54px; }
+    .steps-line { background: linear-gradient(90deg, var(--blurple), rgba(197,243,106,.55)); opacity: .42; }
+    .step-dot { background: var(--bg); border: 2px solid rgba(104,117,245,.5); }
+    .step:hover .step-dot, .step.active .step-dot { background: var(--lime); border-color: var(--lime); box-shadow: 0 0 0 5px rgba(197,243,106,.12), 0 0 22px rgba(197,243,106,.35); }
+    .step-num { font: 500 2.8rem 'DM Mono', monospace; color: rgba(255,255,255,.07); }
+    .step-label { color: var(--lime); font-family: 'DM Mono', monospace; }
+    .screenshots-row { gap: 1rem; }
+    .screenshot-card { border-radius: 12px; box-shadow: 0 24px 60px rgba(0,0,0,.28); }
+    .bento { gap: .8rem; }
+    .bento-item { border-radius: 12px; padding: 1.6rem; }
+    .bento-giant { background: linear-gradient(145deg, #12172b, #11141a 70%); }
+    .bento-giant .giant-word { font-size: clamp(3.5rem, 7vw, 6.8rem); letter-spacing: -.09em; }
+    .bento-stat { background: var(--blurple); }
+    .bento-border { border-left-color: var(--lime); }
+    .bento-dark { background: rgba(197,243,106,.07); border-color: rgba(197,243,106,.16); }
+    .bento-dark .bento-icon { filter: grayscale(1); }
+    .bento-stripe-pill { color: var(--lime); background: rgba(197,243,106,.07); border-color: rgba(197,243,106,.17); }
+    .safety { border-radius: 12px; }
+    .verdict { color: var(--lime) !important; background: rgba(197,243,106,.08) !important; border-color: rgba(197,243,106,.22) !important; }
+    .hall-of-fame { background: linear-gradient(135deg, rgba(253,184,19,.045), rgba(104,117,245,.035)); }
+    .hall-card { border-radius: 12px; }
+    .hall-cta { border-radius: 12px; }
+    .cta { padding: 9rem 2rem; background: radial-gradient(ellipse at 50% 60%, rgba(104,117,245,.13), transparent 60%); }
+    .cta h2 { letter-spacing: -.07em; }
+    footer { background: #06070a; }
+    .footer-support-link { color: var(--lime) !important; background: rgba(197,243,106,.06); border-color: rgba(197,243,106,.2); }
+    .footer-support-link:hover { background: rgba(197,243,106,.13); border-color: rgba(197,243,106,.4); color: var(--lime) !important; }
+    @media (max-width: 768px) {
+      .hero { min-height: 760px; padding-top: 8rem; }
+      .hero-nav { top: 18px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .thanks-corner-card { top: 70px; right: 50%; transform: translateX(50%); white-space: nowrap; }
+      .thanks-corner-card:hover { transform: translate(50%, -2px); }
+      .hero-proof { gap: 1.1rem; }
+      .hero-proof-item strong { font-size: .9rem; }
+      .hero-proof-item span { font-size: .55rem; }
+      section { padding: 5rem 1.25rem; }
+      .section-desc { font-size: .92rem; }
+      .hall-cta { align-items: flex-start; }
     }
   </style>
 </head>
@@ -1106,7 +1410,27 @@
   </div>
 
   <!-- Hero -->
-  <header class="hero">
+  <header class="hero" id="top">
+    <nav class="hero-nav" aria-label="Primary navigation">
+      <a class="brand" href="#top">
+        <img src="assets/logo.png" alt="" />
+        <span>OrbSpoofer</span>
+        <small>v2.1.3</small>
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#hall-of-fame">Supporters</a>
+        <a class="nav-cta" href="https://github.com/ZavalaSebas/OrbSpoofer/releases/latest">Download <span aria-hidden="true">↗</span></a>
+      </div>
+    </nav>
+    <a href="https://ko-fi.com/home/coffeeshop?ReturnUrl=/&txid=a305e485-d6ed-4d27-9f32-8504df66f072" target="_blank" class="thanks-corner-card" title="View coffee on Ko-fi">
+      <div class="thanks-corner-icon">🏆</div>
+      <div class="thanks-corner-text">
+        <strong>Thanks Trang! ☕</strong>
+        <span>First ever coffee — Hall of Fame #1</span>
+      </div>
+    </a>
     <div class="hero-badge">
       <span class="dot"></span>
       Free &amp; Open Source
@@ -1125,11 +1449,16 @@
         View on GitHub →
       </a>
     </div>
+    <div class="hero-proof" aria-label="Project highlights">
+      <div class="hero-proof-item"><strong>0 GB</strong><span>Game downloads</span></div>
+      <div class="hero-proof-item"><strong>15 min</strong><span>Quest timer</span></div>
+      <div class="hero-proof-item"><strong>1 file</strong><span>Zero setup</span></div>
+    </div>
   </header>
 
   <main>
   <!-- How It Works -->
-  <section>
+  <section id="how-it-works">
     <div class="container">
       <p class="section-label">How it works</p>
       <h2 class="section-title">4 steps. Zero downloads.</h2>
@@ -1174,7 +1503,7 @@
   </section>
 
   <!-- Screenshots -->
-  <section>
+  <section id="screenshots">
     <div class="container">
       <p class="section-label">Screenshots</p>
       <h2 class="section-title">See it in action</h2>
@@ -1193,7 +1522,7 @@
   </section>
 
   <!-- Features -->
-  <section>
+  <section id="features">
     <div class="container">
       <p class="section-label">Features</p>
       <h2 class="section-title">Everything you need</h2>
@@ -1353,6 +1682,32 @@
     </div>
   </section>
 
+  <!-- Hall of Fame — Special Thanks -->
+  <section class="hall-of-fame" id="hall-of-fame">
+    <div class="container">
+      <p class="section-label">Hall of Fame</p>
+      <h2 class="section-title">Special Thanks ☕</h2>
+      <p class="section-desc">
+        Every coffee keeps OrbSpoofer alive. Huge thanks to everyone that support the project, makes me extremely happy :)
+      </p>
+      <div class="hall-grid">
+        <a href="https://ko-fi.com/home/coffeeshop?ReturnUrl=/&txid=a305e485-d6ed-4d27-9f32-8504df66f072" target="_blank" class="hall-card" title="View coffee on Ko-fi">
+          <div class="hall-avatar">T</div>
+          <div class="hall-info">
+            <strong>Trang <span class="hall-badge">☕ First Supporter</span> <span style="font-weight:400; color:var(--text-muted); font-size:10px;">↗</span></strong>
+            <div class="hall-meta">First person to buy a coffee · Sep 2026</div>
+            <div class="hall-quote">“infinite thanks! :D I will always remember you for being my first ever coffee :)” 💛</div>
+          </div>
+          <div class="hall-rank">🥇 #1</div>
+        </a>
+      </div>
+      <div class="hall-cta">
+        <span>💛 If you want to support and have your name appear here, consider buying me a coffee instead of the Nitro subscription :)</span>
+        <a href="https://ko-fi.com/sebastianzavala82573" target="_blank">☕ Buy me a coffee →</a>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta">
     <div class="container">
@@ -1360,7 +1715,7 @@
       <p>Free, open source, and built by the community.</p>
       <div class="hero-buttons" style="justify-content: center;">
         <a href="https://github.com/ZavalaSebas/OrbSpoofer/releases/latest" class="btn btn-primary">
-          ⬇ Download v2.1.0
+          ⬇ Download v2.1.3
         </a>
         <a href="https://github.com/ZavalaSebas/OrbSpoofer" class="btn btn-secondary" target="_blank">
           View Source Code →
