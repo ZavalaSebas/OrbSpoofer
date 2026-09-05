@@ -42,6 +42,57 @@ public class QuestItem : INotifyPropertyChanged
         set { if (_needsSteamMode != value) { _needsSteamMode = value; OnPropertyChanged(); } }
     }
 
+    private string _taskType = "PLAY_ON_DESKTOP";
+    public string TaskType
+    {
+        get => _taskType;
+        set { if (_taskType != value) { _taskType = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsVideoQuest)); OnPropertyChanged(nameof(TaskLabel)); } }
+    }
+
+    public bool IsVideoQuest => TaskType is "WATCH_VIDEO" or "WATCH_VIDEO_ON_MOBILE";
+
+    // Only desktop play quests can be spoofed with a fake process.
+    // Stream / video / activity / console quests open Discord quest home instead.
+    public bool IsSpoofable => TaskType == "PLAY_ON_DESKTOP";
+
+    private int _taskSeconds;
+    public int TaskSeconds
+    {
+        get => _taskSeconds;
+        set { if (_taskSeconds != value) { _taskSeconds = value; OnPropertyChanged(); OnPropertyChanged(nameof(TaskDurationLabel)); } }
+    }
+
+    public string TaskDurationLabel => TaskMinutes > 0 ? $"{TaskMinutes} min" : $"{TaskSeconds} sec";
+
+    public string TaskLabel => TaskType switch
+    {
+        "PLAY_ON_DESKTOP" => "🎮 Play",
+        "STREAM_ON_DESKTOP" => "📡 Stream",
+        "WATCH_VIDEO" => "📺 Video",
+        "WATCH_VIDEO_ON_MOBILE" => "📱 Mobile video",
+        "PLAY_ON_XBOX" => "🎮 Xbox",
+        "PLAY_ON_PLAYSTATION" => "🎮 PlayStation",
+        "PLAY_ACTIVITY" => "🎯 Activity",
+        _ => "🎮 " + TaskType,
+    };
+
+    private string _regionText = "🌍 Global";
+    public string RegionText
+    {
+        get => _regionText;
+        set { if (_regionText != value) { _regionText = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsRegionSpecific)); } }
+    }
+
+    public bool IsRegionSpecific => RegionKind != "Global";
+
+    private string _regionKind = "Global";
+    /// <summary>Global | Include (region-locked) | Exclude (blocked in listed regions).</summary>
+    public string RegionKind
+    {
+        get => _regionKind;
+        set { if (_regionKind != value) { _regionKind = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsRegionSpecific)); } }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

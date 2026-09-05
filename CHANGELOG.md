@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- **All quest types in Active Quests:** `QuestService` no longer filters to `PLAY_ON_DESKTOP` — video, stream, activity and console quests are listed too, with a type badge (`🎮 Play`, `📡 Stream`, `📺 Video`, `📱 Mobile video`, `🎮 Xbox/PlayStation`, `🎯 Activity`). Playable quests sort first, `Run All` only runs spoofable ones
+- **Region badges:** quest regions loaded from `api.discordquest.com/api/regions` — `🌍 Global` (green), `📍 US only` (amber), `🚫 Not in AU, UK` (red). Best-effort: falls back to Global when the endpoint is unreachable
+- **Video quests open Discord:** non-spoofable quests open quest home directly in the **Discord desktop app** via deep link (`discord://-/quest-home`), with browser fallback (`https://discord.com/quest-home`). New `Claim in Discord ↗` link on each card + `OpenQuestHomeCommand`
+- **Duration label:** sub-minute quests (e.g. 14s videos) show `14 sec` instead of `0 min` (`TaskSeconds`/`TaskDurationLabel`)
+
+### Changed
+- `Config` gains `QuestRegionsUrl`, `QuestHomeUrl`, `QuestHomeDeepLink`; `UrlLauncher.OpenDiscordQuestHome()` tries the app first, browser second
+- Status bar shows `N active quest(s) loaded (M playable)` when any quest is spoofable
+
 ## [2.1.3] — 2026-09-04
 
 ### Fixed

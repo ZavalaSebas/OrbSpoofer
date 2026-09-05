@@ -139,17 +139,16 @@ Select a game, hit Spoof, go back to the menu, pick another one, repeat. All pro
 
 ## Active Quests
 
-When OrbSpoofer launches, it automatically fetches your active Discord quests from `api.discordquest.com`. If you have any quests in progress, they appear right away — no searching needed.
+When OrbSpoofer launches, it automatically fetches all active Discord quests from `api.discordquest.com` (plus regions from `api/regions`). If you have any quests in progress, they appear right away — no searching needed.
 
 1. Open OrbSpoofer — Active Quests are shown by default
-2. **Double-click** a quest card (or click the ▶ button) to start spoofing
-3. A timer window opens — keep it running until the quest is done
+2. **Play quests:** double-click a quest card (or click ▶) to start spoofing — a timer window opens, keep it running until the quest is done
+3. **Video / stream quests:** click ↗ (or `Claim in Discord ↗`) to open them directly in the **Discord desktop app** (`discord://-/quest-home`) — they must be accepted and watched inside Discord to earn the reward
 
 **A few things to know:**
 
-- Quests are filtered to **PLAY_ON_DESKTOP** only (the type OrbSpoofer handles)
-- Quests may vary depending on your **region** — not all quests are available everywhere
-- Only games in Discord's detectable games list are shown
+- Every quest shows a **type badge** (🎮 Play, 📡 Stream, 📺 Video…) and a **region badge** (🌍 Global, 📍 US only, 🚫 Not in …)
+- Only **PLAY_ON_DESKTOP** quests can be spoofed; the rest open in Discord. `Run All` skips non-spoofable quests automatically
 - Promotional quests (published by Discord) are filtered out
 
 **If Active Quests don't load** (API down, no internet, etc.), the app automatically falls back to **Search**. You can also switch modes manually from the sidebar at any time.

@@ -101,6 +101,11 @@ public partial class QuestsViewModel : ObservableObject
             foreach (var q in filtered)
             {
                 q.IsCompleted = completedIds.Contains(q.Id);
+                if (!q.IsSpoofable)
+                {
+                    q.NeedsSteamMode = false; // video/stream/activity open Discord instead
+                    continue;
+                }
                 var matching = _db.Games.FirstOrDefault(g => g.Id == q.ApplicationId || g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) || q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
                 if (matching == null)
                     q.NeedsSteamMode = true; // unknown game -> likely needs Steam/manual
@@ -108,7 +113,8 @@ public partial class QuestsViewModel : ObservableObject
                     q.NeedsSteamMode = DiscordDatabase.GetWin32Executable(matching) == null;
             }
 
-            var sorted = filtered.OrderBy(q => q.IsCompleted).ThenBy(q => q.ExpiresAt).ToList();
+            // Playable first (actionable in-app), then video/stream (open Discord), completed last
+            var sorted = filtered.OrderBy(q => q.IsCompleted).ThenBy(q => !q.IsSpoofable).ThenBy(q => q.ExpiresAt).ToList();
 
             if (sorted.Count == 0)
             {
@@ -120,13 +126,16 @@ public partial class QuestsViewModel : ObservableObject
             }
             else
             {
+                var playable = sorted.Count(q => !q.IsCompleted && q.IsSpoofable);
                 if (isInitial)
                 {
                     Quests.Clear();
                     foreach (var q in sorted) Quests.Add(q);
                     HasNoQuests = false;
-                    CanRunAll = !IsRunningAll && sorted.Any(q => !q.IsCompleted);
-                    StatusMessage = $"{sorted.Count} active quest(s) loaded";
+                    CanRunAll = !IsRunningAll && playable > 0;
+                    StatusMessage = playable > 0
+                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable)"
+                        : $"{sorted.Count} active quest(s) loaded";
                     OnQuestsLoaded?.Invoke();
                 }
                 else
@@ -156,6 +165,11 @@ public partial class QuestsViewModel : ObservableObject
                             existing.ApplicationId = src.ApplicationId;
                             existing.IsCompleted = src.IsCompleted;
                             existing.NeedsSteamMode = src.NeedsSteamMode;
+                            existing.TaskType = src.TaskType;
+                            existing.TaskMinutes = src.TaskMinutes;
+                            existing.TaskSeconds = src.TaskSeconds;
+                            existing.RegionText = src.RegionText;
+                            existing.RegionKind = src.RegionKind;
                             int cur = Quests.IndexOf(existing);
                             if (cur != i) Quests.Move(cur, i);
                         }
@@ -165,8 +179,10 @@ public partial class QuestsViewModel : ObservableObject
                         }
                     }
                     HasNoQuests = false;
-                    CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted);
-                    StatusMessage = $"{sorted.Count} active quest(s) loaded";
+                    CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted && q.IsSpoofable);
+                    StatusMessage = playable > 0
+                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable)"
+                        : $"{sorted.Count} active quest(s) loaded";
                     // no OnQuestsLoaded on patch -> avoids stagger second flash
                 }
             }
@@ -187,9 +203,25 @@ public partial class QuestsViewModel : ObservableObject
     public event Action? OnQuestsLoaded;
 
     [RelayCommand]
+    private void OpenQuestHome()
+    {
+        UrlLauncher.OpenDiscordQuestHome();
+        StatusMessage = "Opened Discord quest home — accept the quest there to earn the reward";
+    }
+
+    [RelayCommand]
     private async Task SpoofAsync(QuestItem? quest)
     {
         if (quest == null) return;
+        // Only desktop play is spoofable. Video / stream / activity quests
+        // must be accepted and watched inside Discord (progress is reported
+        // by the client to your account) — open quest home for those.
+        if (!quest.IsSpoofable)
+        {
+            UrlLauncher.OpenDiscordQuestHome();
+            StatusMessage = $"Opened Discord quests for: {quest.GameName} — accept & watch it there to earn the reward";
+            return;
+        }
         StatusMessage = $"Looking up game: {quest.GameName}...";
         var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
         if (matches.Count == 0)
@@ -264,7 +296,7 @@ public partial class QuestsViewModel : ObservableObject
         // Smooth fade only (DataTrigger 0.32s). No Move/Refresh/Reset -> no
         // disappearance or black flash. Reorder is deferred to next
         // LoadAsync (patch with Move) if needed, not instant.
-        CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted);
+        CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted && q.IsSpoofable);
         StatusMessage = newValue ? $"Marked \"{quest.GameName}\" as completed" : $"Marked \"{quest.GameName}\" as not completed";
         return Task.CompletedTask;
     }
@@ -279,7 +311,7 @@ public partial class QuestsViewModel : ObservableObject
             StatusMessage = "Stopping quest sequence after the current one...";
             return;
         }
-        var pending = Quests.Where(q => !q.IsCompleted).ToList();
+        var pending = Quests.Where(q => !q.IsCompleted && q.IsSpoofable).ToList();
         if (pending.Count == 0) { StatusMessage = "All quests are already completed."; return; }
 
         IsRunningAll = true;
@@ -352,7 +384,7 @@ public partial class QuestsViewModel : ObservableObject
             _runAllCts?.Dispose();
             _runAllCts = null;
             RunAllText = "Run all quests";
-            CanRunAll = Quests.Any(q => !q.IsCompleted);
+            CanRunAll = Quests.Any(q => !q.IsCompleted && q.IsSpoofable);
             StatusMessage = "Quest sequence finished.";
             if (anyCompleted) await LoadAsync();
         }

@@ -19,7 +19,7 @@
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock Text="Active Quests" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                <TextBlock Text="Your live Discord quests — double-click to spoof" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+                <TextBlock Text="Play, stream &amp; video quests — ▶ spoofs, 📺 opens Discord" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
             </StackPanel>
             <ui:Button Grid.Column="2" HorizontalAlignment="Right" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="14,7" FontSize="12" Cursor="Hand" VerticalAlignment="Center"
                        Visibility="{Binding CanRunAll, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RunAllCommand}">
@@ -37,7 +37,7 @@
                 <Border Width="28" Height="28" CornerRadius="8" Background="#1E2230" Margin="0,0,10,0">
                     <ui:SymbolIcon Symbol="Info24" FontSize="14" Foreground="#7B83FF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
-                <TextBlock Grid.Column="1" Text="Quests vary by region and availability. If there's nothing here, open Search and type the game name." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                <TextBlock Grid.Column="1" Text="Video quests can't be spoofed — hit 📺 to open them in Discord. Region badges show availability." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap"/>
             </Grid>
         </Border>
 
@@ -74,7 +74,7 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="4,2,12,6" ClipToBounds="False" ToolTip="Double-click to spoof">
+                        <Border Margin="4,2,12,6" ClipToBounds="False" ToolTip="Double-click: spoof play quests, open video quests in Discord">
                             <Border.Style>
                                 <Style TargetType="Border" BasedOn="{StaticResource Orb.CardHover}">
                                     <Style.Triggers>
@@ -118,10 +118,43 @@
                                             <TextBlock FontSize="11" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"><Run Text="{Binding Reward, Mode=OneWay}"/></TextBlock>
                                         </Border>
                                         <Border Background="#1A1A1E" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#23232A" BorderThickness="1">
-                                            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="{Binding TaskMinutes, Mode=OneWay}"/><Run Text=" min"/></TextBlock>
+                                            <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Text="{Binding TaskDurationLabel, Mode=OneWay}"/>
                                         </Border>
                                         <Border Background="#2A2210" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#3D3214" BorderThickness="1">
                                             <TextBlock FontSize="11" Foreground="{StaticResource WarningBrush}"><Run Text="Ends "/><Run Text="{Binding ExpiresAt, Mode=OneWay, StringFormat={}{0:MMM d}}"/></TextBlock>
+                                        </Border>
+                                        <Border Background="#1E2230" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#2A2E6A" BorderThickness="1" ToolTip="Quest type">
+                                            <TextBlock FontSize="11" Foreground="#7B83FF" FontWeight="SemiBold" Text="{Binding TaskLabel, Mode=OneWay}"/>
+                                        </Border>
+                                        <Border CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderThickness="1" ToolTip="Region availability" Background="#1E2A22" BorderBrush="#2A4A32">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RegionKind}" Value="Include">
+                                                            <Setter Property="Background" Value="#2A2210"/>
+                                                            <Setter Property="BorderBrush" Value="#6B5320"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RegionKind}" Value="Exclude">
+                                                            <Setter Property="Background" Value="#2A1A1A"/>
+                                                            <Setter Property="BorderBrush" Value="#6B2A2A"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="11" FontWeight="SemiBold" Text="{Binding RegionText, Mode=OneWay}" Foreground="{StaticResource SuccessBrush}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RegionKind}" Value="Include">
+                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding RegionKind}" Value="Exclude">
+                                                                <Setter Property="Foreground" Value="#FF8A8A"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </Border>
                                         <Border Background="#2A1A1A" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="#3D2222" BorderThickness="1">
                                             <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding NeedsSteamMode}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
@@ -135,7 +168,26 @@
                                         <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Hidden"/><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
                                 </Border>
-                                <Button Grid.Column="3" Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Spoof" Cursor="Hand" Padding="0" Width="44" Height="44" BorderThickness="0" Background="Transparent">
+                                <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                    <TextBlock FontSize="10" Foreground="#7B83FF" Cursor="Hand" HorizontalAlignment="Center" Margin="0,0,0,4"
+                                               Text="Claim in Discord ↗"
+                                               ToolTip="Open Discord quest home to accept &amp; claim"
+                                               Visibility="{Binding IsSpoofable, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
+                                        <TextBlock.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.OpenQuestHomeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                <Button Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Cursor="Hand" Padding="0" Width="44" Height="44" BorderThickness="0" Background="Transparent">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="ToolTip" Value="Spoof"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSpoofable}" Value="False">
+                                                    <Setter Property="ToolTip" Value="Open in Discord to watch"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="Bg" CornerRadius="11" Width="44" Height="44">
@@ -146,7 +198,17 @@
                                                     </LinearGradientBrush>
                                                 </Border.Background>
                                                 <Border.Effect><DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.30" Color="#5865F2"/></Border.Effect>
-                                                <ui:SymbolIcon Symbol="Play24" Filled="True" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <ui:SymbolIcon Filled="True" Foreground="White" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Symbol="Play24">
+                                                    <ui:SymbolIcon.Style>
+                                                        <Style TargetType="ui:SymbolIcon">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSpoofable}" Value="False">
+                                                                    <Setter Property="Symbol" Value="Open24"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ui:SymbolIcon.Style>
+                                                </ui:SymbolIcon>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
@@ -159,6 +221,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </DataTemplate>
