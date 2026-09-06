@@ -165,7 +165,7 @@ When OrbSpoofer launches, it automatically fetches all active Discord quests fro
 
 **Centralized search** — Single `UnifiedSearch` for Discord + Steam, one row per game with badges `Discord`/`Steam`/`Both`/`DLC`/`Manual`, 150ms debounce and `Parallel` for images. `DLC` at the end or hidden.
 
-**Personalization** — Change accent (Blurple, Red, Green...) from the header, saved to `theme.json` and applied live with `DynamicResource`.
+**Personalization** — Change accent (Blurple, Red, Green...) or toggle Light/Dark (☀️/🌙) from the header, saved to `theme.json` and applied live with `DynamicResource`.
 
 **More stable** — `GameFaker` preserves `bin/helldivers2.exe`, sanitizes `:` for `Call of Duty: Modern Warfare 4`, `Timer` with `ExitCode` and robust `bat`, `Run All` with `AllowConcurrentExecutions` and cancellation without marking as completed.
 

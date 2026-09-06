@@ -20,7 +20,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         try { Infrastructure.AppData.AppDataMigrator.MigrateToLatest(); } catch { }
-        try { Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark); } catch { }
+        global::OrbSpoofer.Services.ThemeManager.ApplyTheme();
         global::OrbSpoofer.Services.ThemeManager.ApplyAccent();
         base.OnStartup(e);
 

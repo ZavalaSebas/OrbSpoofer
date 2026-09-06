@@ -2,62 +2,31 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- OrbSpoofer Fluent Theme — V2 Aurora. Dark, vivid but serious. -->
-    <Color x:Key="Orb.Accent.Primary.Color">#5865F2</Color>
-    <Color x:Key="Orb.Accent.Secondary.Color">#7B83FF</Color>
-    <Color x:Key="Orb.Accent.Tertiary.Color">#3A44D0</Color>
-    <Color x:Key="SystemAccentColorPrimary">#5865F2</Color>
-    <Color x:Key="SystemAccentColorSecondary">#7B83FF</Color>
-    <Color x:Key="SystemAccentColorTertiary">#3A44D0</Color>
-    <SolidColorBrush x:Key="SystemAccentColorPrimaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
-    <SolidColorBrush x:Key="SystemAccentColorSecondaryBrush" Color="{StaticResource SystemAccentColorSecondary}" />
-    <SolidColorBrush x:Key="SystemAccentColorTertiaryBrush" Color="{StaticResource SystemAccentColorTertiary}" />
-    <SolidColorBrush x:Key="Orb.SystemAccentBrush" Color="{StaticResource SystemAccentColorPrimary}" />
-    <!-- Gradient brushes — subtle, no neon -->
-    <LinearGradientBrush x:Key="Orb.Accent.Gradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#5865F2" Offset="0"/>
-        <GradientStop Color="#7B83FF" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Orb.Accent.GradientHover" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#6A75F5" Offset="0"/>
-        <GradientStop Color="#8E96FF" Offset="1"/>
-    </LinearGradientBrush>
+    <!-- OrbSpoofer Fluent Theme — structure + semantic colors only.
+         Palette lives in Themes/DarkTheme.xaml + LightTheme.xaml (same keys).
+         NOTE: never share accent Freezables here — a shared brush freezes on first
+         StaticResource use and its DynamicResource stops go deaf. Inline accent
+         gradients per element instead. -->
     <LinearGradientBrush x:Key="Orb.Play.Gradient" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#57F287" Offset="0"/>
         <GradientStop Color="#3DD67A" Offset="1"/>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="Orb.PlayBrush" Color="#57F287" />
     <SolidColorBrush x:Key="Orb.StopBrush" Color="#ED4245" />
-    <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="{StaticResource SystemAccentColorPrimary}" />
-    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
-    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{StaticResource SystemAccentColorPrimary}" />
 
-    <Color x:Key="Orb.Background.Primary.Color">#08080A</Color>
-    <Color x:Key="Orb.Background.Secondary.Color">#0F0F11</Color>
-    <Color x:Key="Orb.Background.Tertiary.Color">#18181C</Color>
-    <Color x:Key="Orb.Background.Quaternary.Color">#1E1E22</Color>
-    <Color x:Key="Orb.Text.Primary.Color">#EDEDF0</Color>
-    <Color x:Key="Orb.Text.Secondary.Color">#9A9AA0</Color>
-    <Color x:Key="Orb.Text.Muted.Color">#5E5E66</Color>
-
-    <Color x:Key="ApplicationBackgroundColor">#08080A</Color>
-    <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="{StaticResource Orb.Background.Primary.Color}" />
-    <Color x:Key="SolidBackgroundFillColorBase">#08080A</Color>
-    <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="{StaticResource Orb.Background.Primary.Color}" />
-    <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="{StaticResource Orb.Background.Secondary.Color}" />
-    <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="{StaticResource Orb.Background.Tertiary.Color}" />
-
-    <Color x:Key="TextFillColorPrimary">#EDEDF0</Color>
-    <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{StaticResource Orb.Text.Primary.Color}" />
-    <Color x:Key="TextFillColorSecondary">#9A9AA0</Color>
-    <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{StaticResource Orb.Text.Secondary.Color}" />
-    <Color x:Key="TextFillColorTertiary">#5E5E66</Color>
-    <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="{StaticResource Orb.Text.Muted.Color}" />
-
-    <Color x:Key="ControlFillColorDefault">#18181C</Color>
-    <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{StaticResource Orb.Background.Tertiary.Color}" />
-    <Color x:Key="ControlStrokeColorDefault">#222228</Color>
-    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#222228" />
+    <!-- WPF-UI compat brushes — DynamicResource so they follow theme + accent live -->
+    <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="{DynamicResource Orb.Background.Primary.Color}" />
+    <SolidColorBrush x:Key="SolidBackgroundFillColorBaseBrush" Color="{DynamicResource Orb.Background.Primary.Color}" />
+    <SolidColorBrush x:Key="SolidBackgroundFillColorSecondaryBrush" Color="{DynamicResource Orb.Background.Secondary.Color}" />
+    <SolidColorBrush x:Key="SolidBackgroundFillColorTertiaryBrush" Color="{DynamicResource Orb.Background.Tertiary.Color}" />
+    <SolidColorBrush x:Key="TextFillColorPrimaryBrush" Color="{DynamicResource Orb.Text.Primary.Color}" />
+    <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{DynamicResource Orb.Text.Secondary.Color}" />
+    <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="{DynamicResource Orb.Text.Muted.Color}" />
+    <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{DynamicResource Orb.Background.Tertiary.Color}" />
+    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{DynamicResource Orb.SeparatorBrush}" />
+    <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="{DynamicResource SystemAccentColorPrimary}" />
+    <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColorPrimary}" />
+    <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColorPrimary}" />
 
     <FontFamily x:Key="Orb.FontFamily">Segoe UI Variable, Segoe UI</FontFamily>
     <sys:Double x:Key="Orb.FontSize.Caption">11</sys:Double>
@@ -83,31 +52,13 @@
     <KeySpline x:Key="Orb.Easing.Emphasized">0.2,0,0,1</KeySpline>
     <KeySpline x:Key="Orb.Easing.Standard">0.4,0,0.2,1</KeySpline>
 
-    <!-- Brushes base -->
-    <SolidColorBrush x:Key="Orb.Sidebar.Background" Color="{StaticResource Orb.Background.Secondary.Color}" />
-    <SolidColorBrush x:Key="Orb.Card.Background" Color="#0F0F11" />
-    <SolidColorBrush x:Key="Orb.Card.Hover" Color="#18181C" />
-    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#1E1E22" />
-    <SolidColorBrush x:Key="Orb.SeparatorSubtleBrush" Color="#16161A" />
-    <!-- Glass / glow -->
-    <SolidColorBrush x:Key="Orb.Glow.Accent" Color="#5865F2" Opacity="0.08"/>
-    <RadialGradientBrush x:Key="Orb.Glow.Radial" GradientOrigin="0.5,0.15" Center="0.5,0.15" RadiusX="0.9" RadiusY="0.7">
-        <GradientStop Color="#185865F2" Offset="0"/>
-        <GradientStop Color="#005865F2" Offset="1"/>
-    </RadialGradientBrush>
-    <LinearGradientBrush x:Key="Orb.Header.Gradient" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#0F0F11" Offset="0"/>
-        <GradientStop Color="#0A0A0C" Offset="1"/>
-    </LinearGradientBrush>
-    <LinearGradientBrush x:Key="Orb.Sidebar.Gradient" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="#0F0F11" Offset="0"/>
-        <GradientStop Color="#0C0C0E" Offset="1"/>
-    </LinearGradientBrush>
+    <!-- NOTE: palette brushes (Orb.Card.*, Orb.SeparatorBrush, glows, header/sidebar
+         gradients) live in the theme dictionaries so Light/Dark can differ. -->
 
     <!-- ===== Cards ===== -->
     <Style x:Key="Orb.Card" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource Orb.Card.Background}" />
-        <Setter Property="BorderBrush" Value="{StaticResource Orb.SeparatorBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Orb.Card.Background}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Orb.SeparatorBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Orb.CornerRadius.Card}" />
         <Setter Property="Padding" Value="14" />
@@ -128,17 +79,19 @@
         </Setter>
     </Style>
 
-    <!-- Animated card — hover lift + accent border + shadow (no overflow) -->
+    <!-- Animated card — hover lift + accent border + shadow (no overflow).
+         Colors are instant Setters (not ColorAnimations) because animation targets
+         can't bind DynamicResource — this keeps hover theme-aware in Light/Dark. -->
     <Style x:Key="Orb.CardHover" TargetType="Border" BasedOn="{StaticResource Orb.Card}">
         <Setter Property="Panel.ZIndex" Value="0"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Panel.ZIndex" Value="10"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColorSecondaryBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource Orb.Card.Hover}"/>
                 <Trigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#2A2E6A" Duration="{StaticResource Orb.Motion.Fast}"/>
-                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#18181C" Duration="{StaticResource Orb.Motion.Fast}"/>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.006" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
@@ -154,8 +107,6 @@
                 <Trigger.ExitActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#1E1E22" Duration="{StaticResource Orb.Motion.Fast}"/>
-                            <ColorAnimation Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#0F0F11" Duration="{StaticResource Orb.Motion.Fast}"/>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="{StaticResource Orb.Motion.Fast}"/>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="{StaticResource Orb.Motion.Fast}"/>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="0" Duration="{StaticResource Orb.Motion.Fast}"/>
@@ -232,7 +183,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#18181C"/>
+                <Setter Property="Background" Value="{DynamicResource Orb.Card.Hover}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -259,12 +210,94 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Scrollbar — thin thumb, accent hover. Thumb colors are theme tokens. -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Width" Value="10"/>
+        <Setter Property="MinWidth" Value="10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True" VerticalAlignment="Stretch">
+                            <Track.DecreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Focusable="False" IsTabStop="False" Opacity="0"/></Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Focusable="False" IsTabStop="False" Opacity="0"/></Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Focusable="False" IsTabStop="False">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <!-- Accent thumb (follows theme) over neutral base; hover fades it in.
+                                                 Opacity animation is used because ColorAnimation.To can't bind DynamicResource. -->
+                                            <Grid>
+                                                <Border CornerRadius="5" Margin="2,1" Background="{DynamicResource Orb.Scrollbar.ThumbBrush}" Opacity="0.9"/>
+                                                <Border x:Name="ThumbAccent" CornerRadius="5" Margin="2,1" Background="{DynamicResource Orb.SystemAccentBrush}" Opacity="0">
+                                                    <Border.Triggers>
+                                                        <EventTrigger RoutedEvent="MouseEnter">
+                                                            <BeginStoryboard><Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18"/>
+                                                            </Storyboard></BeginStoryboard>
+                                                        </EventTrigger>
+                                                        <EventTrigger RoutedEvent="MouseLeave">
+                                                            <BeginStoryboard><Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                                                            </Storyboard></BeginStoryboard>
+                                                        </EventTrigger>
+                                                    </Border.Triggers>
+                                                </Border>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="HorizontalScrollBar" TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent"/><Setter Property="Height" Value="10"/><Setter Property="MinHeight" Value="10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track" VerticalAlignment="Stretch">
+                            <Track.DecreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Focusable="False" IsTabStop="False" Opacity="0"/></Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Focusable="False" IsTabStop="False" Opacity="0"/></Track.IncreaseRepeatButton>
+                            <Track.Thumb><Thumb Focusable="False" IsTabStop="False"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border CornerRadius="5" Margin="2,1" Background="{DynamicResource Orb.Scrollbar.ThumbBrush}" Opacity="0.9"/></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ListBoxItem — Fluent selection with subtle animation -->
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Setter Property="Padding" Value="0"/><Setter Property="BorderThickness" Value="0"/><Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}" Margin="0,0,0,4">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="border" Property="Background" Value="{DynamicResource Orb.Card.Hover}"/></Trigger>
+                        <Trigger Property="IsSelected" Value="True"><Setter TargetName="border" Property="Background" Value="Transparent"/><Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SystemAccentColorPrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/></Trigger>
+                        <MultiTrigger><MultiTrigger.Conditions><Condition Property="IsSelected" Value="True"/><Condition Property="IsMouseOver" Value="True"/></MultiTrigger.Conditions><Setter TargetName="border" Property="Background" Value="{DynamicResource Orb.Card.Hover}"/></MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ContextMenu polish — more compact, less plastic -->
     <Style TargetType="ContextMenu">
-        <Setter Property="Background" Value="#E01A1A1E" />
-        <Setter Property="BorderBrush" Value="#401A1A1E" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="{StaticResource TextFillColorPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="Padding" Value="6" />
         <Setter Property="HasDropShadow" Value="False" />
         <Setter Property="Template">
@@ -279,7 +312,7 @@
         </Setter>
     </Style>
     <Style TargetType="MenuItem">
-        <Setter Property="Foreground" Value="{StaticResource TextFillColorPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="Padding" Value="10,7" />
         <Setter Property="Template">
             <Setter.Value>
@@ -292,11 +325,11 @@
                             <ContentPresenter Grid.Column="1" ContentSource="Header" Margin="6,0,12,0"/>
                         </Grid>
                         <Popup x:Name="PART_Popup" Placement="Right" AllowsTransparency="True" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="Fade">
-                            <Border Background="#E01A1A1E" BorderBrush="#401A1A1E" BorderThickness="1" CornerRadius="12" Padding="6"><ItemsPresenter/></Border>
+                            <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="6"><ItemsPresenter/></Border>
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Bd" Property="Background" Value="#232326"/></Trigger>
+                        <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/></Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

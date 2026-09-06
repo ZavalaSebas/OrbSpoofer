@@ -33,6 +33,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _hasUpdate;
     [ObservableProperty] private string? _pendingUpdateTag;
     [ObservableProperty] private string? _pendingUpdateUrl;
+    [ObservableProperty] private string _appTheme = ThemeManager.LoadSavedTheme();
 
     public QuestsViewModel Quests { get; }
     public UnifiedSearchViewModel UnifiedSearch { get; }
@@ -82,6 +83,13 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void ToggleAdvanced() => IsAdvancedExpanded = !IsAdvancedExpanded;
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        AppTheme = AppTheme == "Dark" ? "Light" : "Dark";
+        ThemeManager.ApplyTheme(AppTheme);
+    }
 
     [RelayCommand]
     private void OpenUrl(string url) => UrlLauncher.Open(url);

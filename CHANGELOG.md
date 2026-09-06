@@ -10,6 +10,18 @@ All notable changes to this project are documented in this file.
 - **Video quests open Discord:** non-spoofable quests open quest home directly in the **Discord desktop app** via deep link (`discord://-/quest-home`), with browser fallback (`https://discord.com/quest-home`). New `Claim in Discord ↗` link on each card + `OpenQuestHomeCommand`
 - **Duration label:** sub-minute quests (e.g. 14s videos) show `14 sec` instead of `0 min` (`TaskSeconds`/`TaskDurationLabel`)
 
+### Fixed
+- **Accent color now applies app-wide:** previously only `Run All` followed the picker. Root causes: hardcoded `#5865F2`/`#7B83FF` in XAML, `StaticResource` snapshots of accent brushes, `PrimaryBrush` never updated by `ThemeManager`, and a fake `R+30` secondary. Now gradients/glows/icons/badges/scrollbar all bind `DynamicResource` accent keys; `ThemeManager` computes a real lighten/darken secondary + tertiary and refreshes every derived brush (`PrimaryBrush`, `Orb.SystemAccentBrush`, …) including new alpha variants for glows
+- **Crash fix:** `Foreground` bindings pointed at `Color` resources instead of `Brush` resources (`InvalidOperationException: '#FFFEED89' is not a valid value for property 'Foreground'` with the Yellow accent, breaking quest type badges). All foregrounds now use `*Brush` keys
+- **Live accent without restart:** `ThemeManager` writes app-level entries unconditionally (`ResourceDictionary.Contains` can't see merged-dictionary keys, so guarded writes silently skipped and some elements only picked the accent up on restart)
+- **Shared accent gradient was freezing:** `Orb.Accent.Gradient` froze on first `StaticResource` use, so play/search buttons and header icons never followed live accent changes (only restart) — all 7 usages are now inline gradients with `DynamicResource` stops. Quest card `Claim in Discord ↗` link now reserves space via opacity instead of collapsing, so play buttons align across play/video cards
+
+### Added
+- **Light / Dark theme toggle (☀️/🌙):** header button next to the accent picker swaps the full palette (`Themes/LightTheme.xaml`, persisted in `theme.json`, WPF-UI theme synced). New semantic tokens (`Orb.ElevatedBrush`, `Orb.VeilBrush`, `Orb.Scrollbar.ThumbBrush`, theme-aware Warning/Success/Error) and card-hover reworked to theme-aware setters so both modes stay coherent
+- **Light-mode polish:** tint tokens (`Orb.Tint.Success/Warning/Danger/InfoBg+Border`) for quest reward/ends/region badges and Search chips (badge text adapts too); Support + Hall of Fame cards follow the theme instead of staying dark; game thumbnails keep fixed dark tiles (art has transparency tuned for dark) with real rounded `RectangleGeometry` clips (`Border.ClipToBounds` ignores `CornerRadius`, square corners bled through)
+- **Light-mode polish 2:** heart/trophy tiles and First Supporter badge use tint tokens; Steam Path card and Manual examples/result use theme surfaces; Search badge text fixed (local value shadowed the Discord→White trigger) with vivid per-type colors (`InfoText`, `SuccessBrush`); thumbnail borders theme-aware so no black frame in light
+- **Light-mode polish 3:** How-it-works header + step 4 tiles to Success tint; Steam header/folder/empty tiles to Info tint, Search + play buttons unified to the accent gradient (no more navy/black buttons); Manual header tile + lightbulb to Warning tint; Search badge text per-type (Discord white, Steam vivid blue, Both green)
+
 ### Changed
 - `Config` gains `QuestRegionsUrl`, `QuestHomeUrl`, `QuestHomeDeepLink`; `UrlLauncher.OpenDiscordQuestHome()` tries the app first, browser second
 - Status bar shows `N active quest(s) loaded (M playable)` when any quest is spoofable

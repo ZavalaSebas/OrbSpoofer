@@ -6,7 +6,7 @@
         WindowStartupLocation="Manual"
         ResizeMode="NoResize"
         Background="Transparent"
-        Foreground="{StaticResource TextPrimaryBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
         ShowInTaskbar="True"
         Icon="/OrbSpoofer;component/OS.png"
         ExtendsContentIntoTitleBar="True"
@@ -22,31 +22,31 @@
         </Grid.RowDefinitions>
 
         <Border Grid.RowSpan="4" Background="#22000000"/>
-        <ui:TitleBar Grid.Row="0" Title="Timer" Height="32" Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}"/>
+        <ui:TitleBar Grid.Row="0" Title="Timer" Height="32" Background="Transparent" Foreground="{DynamicResource TextPrimaryBrush}"/>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock x:Name="GameNameText" Text="Unknown"
                        FontSize="14" FontWeight="SemiBold"
-                       Foreground="{StaticResource PrimaryBrush}"
+                       Foreground="{DynamicResource PrimaryBrush}"
                        HorizontalAlignment="Center" Margin="0,0,0,4"/>
             <TextBlock x:Name="TimerText" Text="15:00"
                        FontSize="56" FontWeight="Bold"
                        FontFamily="Cascadia Code, Consolas, Courier New"
-                       Foreground="{StaticResource TextPrimaryBrush}"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
                        HorizontalAlignment="Center"/>
         </StackPanel>
 
         <ProgressBar x:Name="TimerProgress" Grid.Row="2"
                      Height="4" Minimum="0" Maximum="100" Value="100"
-                     Foreground="{StaticResource PrimaryBrush}"
-                     Background="{StaticResource BorderBrush}"
+                     Foreground="{DynamicResource PrimaryBrush}"
+                     Background="{DynamicResource BorderBrush}"
                      BorderThickness="0" Margin="24,0,24,8"/>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
                     Margin="0,0,0,16">
-            <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0"/>
+            <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{DynamicResource SuccessBrush}" Margin="0,0,8,0"/>
             <TextBlock x:Name="StatusText" Text="Running"
-                       FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                       FontSize="12" Foreground="{DynamicResource TextMutedBrush}"/>
         </StackPanel>
     </Grid>
 </ui:FluentWindow>
