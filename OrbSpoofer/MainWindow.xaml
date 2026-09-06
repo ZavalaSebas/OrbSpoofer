@@ -308,8 +308,8 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Sidebar — gradient + sombra -->
-            <Border x:Name="SidebarBorder" Grid.Column="0" Width="220" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,1,0">
+            <!-- Sidebar — stretches with its column; the column is the single animated value -->
+            <Border x:Name="SidebarBorder" Grid.Column="0" HorizontalAlignment="Stretch" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,1,0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                         <GradientStop Color="{DynamicResource SurfaceColor}" Offset="0"/>

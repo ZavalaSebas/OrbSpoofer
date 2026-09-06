@@ -50,34 +50,48 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         }
     }
 
+    private AnimationClock? _sidebarClock;
+
     private void AnimateSidebar(bool collapsed)
     {
-        var target = collapsed ? 48 : 220;
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        double target = collapsed ? 48 : 220;
 
-        // Animate ColumnDefinition.Width via animation on Width property workaround
-        // We animate the Border width and sync column via storyboard completing
-        var widthAnim = new DoubleAnimation
+        // Stop any in-flight animation first — rapid toggles otherwise race and stick.
+        try { _sidebarClock?.Controller?.Stop(); } catch { }
+        _sidebarClock = null;
+
+        // Read the RENDERED width, not the base value: mid-flight restarts stay smooth.
+        double from;
+        try { from = SidebarBorder.ActualWidth; } catch { from = double.NaN; }
+        if (double.IsNaN(from) || from <= 0) from = SidebarColumn.Width.Value;
+        if (Math.Abs(from - target) < 0.5) { SidebarColumn.Width = new GridLength(target); return; }
+
+        // Single source of truth: only the column animates (the Border stretches with it).
+        // Animating both used to fight — border shrank to center while the column lagged.
+        var anim = new DoubleAnimation(from, target, new Duration(TimeSpan.FromMilliseconds(240)))
         {
-            To = target,
-            Duration = TimeSpan.FromMilliseconds(280),
-            EasingFunction = ease
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
         };
-        SidebarBorder.BeginAnimation(FrameworkElement.WidthProperty, widthAnim);
-
-        // Animate GridLength via timer — smooth interpolation
-        var from = SidebarColumn.Width.Value;
-        var anim = new DoubleAnimation(from, target, new Duration(TimeSpan.FromMilliseconds(280))) { EasingFunction = ease };
         var clock = anim.CreateClock();
+        _sidebarClock = clock;
         clock.CurrentTimeInvalidated += (_, _) =>
         {
+            if (!ReferenceEquals(_sidebarClock, clock)) return;
             if (clock.CurrentProgress is double p && !double.IsNaN(p))
             {
                 var v = from + (target - from) * p;
-                Dispatcher.Invoke(() => SidebarColumn.Width = new GridLength(v));
+                Dispatcher.Invoke(() => { if (ReferenceEquals(_sidebarClock, clock)) SidebarColumn.Width = new GridLength(v); });
             }
         };
-        clock.Completed += (_, _) => SidebarColumn.Width = new GridLength(target);
+        clock.Completed += (_, _) =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (!ReferenceEquals(_sidebarClock, clock)) return;
+                SidebarColumn.Width = new GridLength(target);
+                _sidebarClock = null;
+            });
+        };
         clock.Controller?.Begin();
     }
 
