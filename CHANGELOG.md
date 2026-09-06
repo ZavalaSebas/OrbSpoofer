@@ -22,6 +22,9 @@ All notable changes to this project are documented in this file.
 - **Light-mode polish 2:** heart/trophy tiles and First Supporter badge use tint tokens; Steam Path card and Manual examples/result use theme surfaces; Search badge text fixed (local value shadowed the Discord→White trigger) with vivid per-type colors (`InfoText`, `SuccessBrush`); thumbnail borders theme-aware so no black frame in light
 - **Light-mode polish 3:** How-it-works header + step 4 tiles to Success tint; Steam header/folder/empty tiles to Info tint, Search + play buttons unified to the accent gradient (no more navy/black buttons); Manual header tile + lightbulb to Warning tint; Search badge text per-type (Discord white, Steam vivid blue, Both green)
 
+### Fixed
+- **Light theme didn't survive restart:** `ApplyTheme()` with no args defaulted to Dark without reading `theme.json`, wiping a saved Light choice on every startup. Now it loads the saved value first (`theme ??= LoadSavedTheme()`), covered by a `ThemePersistenceTests` round-trip regression test
+
 ### Changed
 - `Config` gains `QuestRegionsUrl`, `QuestHomeUrl`, `QuestHomeDeepLink`; `UrlLauncher.OpenDiscordQuestHome()` tries the app first, browser second
 - Status bar shows `N active quest(s) loaded (M playable)` when any quest is spoofable

@@ -35,6 +35,7 @@ public static class ThemeManager
     /// <summary>Swaps the Dark/Light palette dictionary, syncs the WPF-UI theme, and re-applies the accent.</summary>
     public static void ApplyTheme(string? theme = null)
     {
+        theme ??= LoadSavedTheme();
         theme = string.Equals(theme, "Light", StringComparison.OrdinalIgnoreCase) ? "Light" : "Dark";
         try
         {

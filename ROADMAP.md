@@ -9,6 +9,7 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 - [x] All quest types (play/stream/video/activity) + region badges + Discord deep link
 - [x] Accent color applies app-wide (theme token migration)
 - [x] **Light / Dark theme toggle (☀️/🌙)** — full palette swap, persisted, all views migrated
+- [x] Sidebar collapse fix (single-source column animation, no jumps or stuck states)
 
 ## Planned
 
