@@ -14,7 +14,8 @@ public enum NavigationView
     Database,
     Steam,
     Manual,
-    Credits
+    Credits,
+    Settings
 }
 
 public partial class MainViewModel : ObservableObject
@@ -33,6 +34,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _hasUpdate;
     [ObservableProperty] private string? _pendingUpdateTag;
     [ObservableProperty] private string? _pendingUpdateUrl;
+    [ObservableProperty] private string _appTheme = ThemeManager.LoadSavedTheme();
 
     public QuestsViewModel Quests { get; }
     public UnifiedSearchViewModel UnifiedSearch { get; }
@@ -40,6 +42,7 @@ public partial class MainViewModel : ObservableObject
     public SteamSearchViewModel Steam { get; }
     public ManualViewModel Manual { get; }
     public FreeGamesViewModel FreeGames { get; }
+    public SettingsViewModel Settings { get; }
 
     public MainViewModel(
         DiscordDatabase db,
@@ -49,7 +52,8 @@ public partial class MainViewModel : ObservableObject
         DatabaseSearchViewModel database,
         SteamSearchViewModel steam,
         ManualViewModel manual,
-        FreeGamesViewModel freeGames)
+        FreeGamesViewModel freeGames,
+        SettingsViewModel settings)
     {
         _db = db;
         _faker = faker;
@@ -59,6 +63,7 @@ public partial class MainViewModel : ObservableObject
         Steam = steam;
         Manual = manual;
         FreeGames = freeGames;
+        Settings = settings;
 
         // propagate status messages upward
         Quests.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(Quests.StatusMessage) && !string.IsNullOrEmpty(Quests.StatusMessage)) StatusMessage = Quests.StatusMessage; };
@@ -82,6 +87,13 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void ToggleAdvanced() => IsAdvancedExpanded = !IsAdvancedExpanded;
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        AppTheme = AppTheme == "Dark" ? "Light" : "Dark";
+        ThemeManager.ApplyTheme(AppTheme);
+    }
 
     [RelayCommand]
     private void OpenUrl(string url) => UrlLauncher.Open(url);

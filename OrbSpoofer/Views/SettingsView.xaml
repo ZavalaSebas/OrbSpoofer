@@ -1,0 +1,106 @@
+<UserControl x:Class="OrbSpoofer.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
+        <StackPanel Margin="4,4,12,6">
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Width="44" Height="44" CornerRadius="11" VerticalAlignment="Center" Margin="0,0,14,0" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1">
+                    <ui:SymbolIcon Symbol="Settings24" FontSize="22" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Settings" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Region, quest links, official API &amp; notifications" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Region -->
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource Orb.Tint.WarningBg}" BorderBrush="{DynamicResource Orb.Tint.WarningBorder}" BorderThickness="1" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Globe24" FontSize="16" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="My region" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Filters Active Quests to your region" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <ComboBox IsEditable="True" Width="220" HorizontalAlignment="Left" Padding="10,7" FontSize="12"
+                              ItemsSource="{Binding RegionOptions}" Text="{Binding PreferredRegion, UpdateSourceTrigger=PropertyChanged}"
+                              ToolTip="2-letter region code"/>
+                    <TextBlock Text="Empty = all regions. Hidden quests stay out of Run All too." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Quest links -->
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource Orb.ElevatedBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Open24" FontSize="16" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Quest links" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Where video &amp; stream quests open" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <CheckBox Content="Open quests in the Discord desktop app" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" IsChecked="{Binding UseDiscordAppLink}"/>
+                    <TextBlock Text="Off = always use the browser. Applies on next open." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Official API (coming soon) -->
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Key24" FontSize="16" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Official Discord API" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="6" Padding="6,2" Margin="8,0,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Coming soon" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Personalized quest list, straight from your account" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="Discord token" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding DiscordToken, UpdateSourceTrigger=PropertyChanged}" Padding="10,7" FontSize="12"
+                             Background="{DynamicResource Orb.ElevatedBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}" ToolTip="Stored locally in settings.json — only ever sent to Discord"/>
+                    <TextBlock Text="{Binding TokenStatus}" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,8,0,0"
+                               Visibility="{Binding HasToken, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <CheckBox Content="Use official API instead of the community mirror" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0"
+                              IsChecked="{Binding UseOfficialApi}" IsEnabled="False"/>
+                    <TextBlock Text="You can save your token now — the personalized list arrives in the next update." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Notifications -->
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource Orb.Tint.SuccessBg}" BorderBrush="{DynamicResource Orb.Tint.SuccessBorder}" BorderThickness="1" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Alert24" FontSize="16" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="New quest alerts" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Get notified when fresh quests drop" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <CheckBox Content="Notify me about new quests" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" IsChecked="{Binding NotifyNewQuests}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <TextBlock Text="Check every" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox Width="110" Padding="8,5" FontSize="12" ItemsSource="{Binding PollOptions}" SelectedItem="{Binding PollIntervalMinutes}"/>
+                        <TextBlock Text="minutes" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock Text="Watcher coming soon — your preferences are already saved." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

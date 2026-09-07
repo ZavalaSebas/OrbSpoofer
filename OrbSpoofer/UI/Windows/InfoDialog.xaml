@@ -6,13 +6,13 @@
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         Background="Transparent"
-        Foreground="{StaticResource TextPrimaryBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
         WindowCornerPreference="Round">
-    <Grid Background="{StaticResource BackgroundBrush}" Margin="24">
+    <Grid Background="{DynamicResource BackgroundBrush}" Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -20,13 +20,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Height="32" Margin="-24,-24,-24,12" Background="{StaticResource SurfaceBrush}"/>
+        <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Height="32" Margin="-24,-24,-24,12" Background="{DynamicResource SurfaceBrush}"/>
 
         <TextBlock x:Name="TitleText" Grid.Row="1" FontSize="18" FontWeight="SemiBold"
-                   Foreground="{StaticResource WarningBrush}" Margin="0,0,0,12"/>
+                   Foreground="{DynamicResource WarningBrush}" Margin="0,0,0,12"/>
 
         <TextBlock x:Name="MessageText" Grid.Row="2" FontSize="13"
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    TextWrapping="Wrap" LineHeight="22" Margin="0,0,0,4"/>
 
         <ui:Button x:Name="OkButton" Grid.Row="3" Content="OK"

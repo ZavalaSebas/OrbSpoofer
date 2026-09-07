@@ -173,18 +173,19 @@ Steam mode is inconsistent — Discord detects the spoofed process for some game
 
 ## Quest System
 
-Quests are fetched from `api.discordquest.com/api/quests` (public, no auth required). Images are served from `cdn.discordapp.com`.
+Quests are fetched from `api.discordquest.com/api/quests` plus regions from `api.discordquest.com/api/regions` (both public, no auth required). Images are served from `cdn.discordapp.com`.
 
 ### Flow
-1. `BtnQuests_Click` calls `LoadQuestsAsync()` which invokes `QuestService.GetActivePlayQuestsAsync()`
-2. Response is filtered to `PLAY_ON_DESKTOP` type only; expired quests are excluded
-3. Duplicates are removed by `GameName|QuestName` key
-4. Each quest is cross-referenced against `DiscordDatabase.Games` by `application.id` or by fuzzy name match (game name contains quest name or vice versa) — only spoofable games (those with a win32 executable) are kept
+1. `QuestsViewModel.LoadAsync()` invokes `QuestService.GetActiveQuestsAsync()` (`GetActivePlayQuestsAsync()` is kept as a wrapper)
+2. Expired quests are excluded; **all task types are kept** — `task_config_v2` + `task_config` keys are merged and the preferred task wins (`PLAY_ON_DESKTOP` > `STREAM_ON_DESKTOP` > `PLAY_ACTIVITY` > `WATCH_VIDEO` > `WATCH_VIDEO_ON_MOBILE` > `PLAY_ON_XBOX` > `PLAY_ON_PLAYSTATION`), stored as `QuestItem.TaskType` with `TaskLabel` badge and `IsSpoofable` (`PLAY_ON_DESKTOP` only)
+3. Duplicates are removed by Id first, then by `GameName|QuestName|ExpiresAt|TaskMinutes` content key (keeps distinct quests like 2x Marvel Tokon)
+4. Regions are loaded best-effort from `/api/regions` into `RegionText`/`RegionKind`: `🌍 Global`, `📍 US only`, `🚫 Not in AU, UK`. On failure everything falls back to Global — the quest load never fails for regions
 5. Promotional quests (`game_publisher = "Discord"`) are filtered out
 6. Completed quest IDs are loaded from `completed_quests.json` and matched against loaded quests
-7. Quests are sorted: active first (by expiry), completed last
-8. Quests whose matching game has no win32 executable in the Discord DB are flagged with `NeedsSteamMode = true`
-9. `QuestsSpoof_Click` calls `DiscordDatabase.NeedsSteamSpoof()` — if the game has a Steam SKU and no win32 exe, it auto-routes to `SteamSpoof` instead of showing `InfoDialog`. The dialog is only shown when neither path exists.
+7. Quests are sorted: active first, playable before video/stream, then by expiry; completed last
+8. Spoofable quests are cross-referenced against `DiscordDatabase.Games` by `application.id` or fuzzy name match — those with no win32 executable are flagged `NeedsSteamMode = true`. Non-spoofable quests (video/stream/activity) skip this and open Discord instead
+9. `SpoofAsync` spoofs `PLAY_ON_DESKTOP` via `GameFaker` (auto-routing to Steam mode when there is a Steam SKU but no win32 exe); anything else opens quest home in the **Discord desktop app** via deep link (`discord://-/quest-home`) with browser fallback (`https://discord.com/quest-home`) through `UrlLauncher.OpenDiscordQuestHome()`. Watching a video outside Discord grants no progress — the client reports `video-progress` to your account, so enrollment + watching must happen inside Discord
+10. `Run All` only queues spoofable, non-completed quests; video/stream quests are never auto-run
 
 ### Completed Quests
 - Toggle via circular button (32×32, `CornerRadius="16"`) next to the spoof button
@@ -197,13 +198,16 @@ Quests are fetched from `api.discordquest.com/api/quests` (public, no auth requi
 - If the quest API fails on first launch, the app silently falls back to **Unified Search** (since v1.2.4)
 - If the user manually clicks Active Quests later and it fails, a "no quests found" message is shown
 - Sidebar: **Active Quests** + **Search** at the top; Database / Steam / Manual live under a collapsed **▸ Advanced** panel
-- Each quest card shows: game image (64×64), game name, quest name, reward, task minutes, expiry date, spoof button, completion toggle, and **"⚠ Steam required"** label (when `NeedsSteamMode` is true)
+- Each quest card shows: game image (54×54), game name, quest name, reward, duration (`15 min` or `14 sec` via `TaskDurationLabel`), expiry date, **task type badge** (`TaskLabel`), **region badge** (green Global / amber `US only` / red `Not in …`), action button (▶ spoof for play, ↗ open-in-Discord otherwise), **"Claim in Discord ↗"** link (non-spoofable only, `OpenQuestHomeCommand`), completion toggle, and **"⚠ Steam required"** label (when `NeedsSteamMode` is true)
 - Completed quests: card opacity 0.45, strikethrough on game/quest names, green filled circle with ✓
 - Toggle animation: fade out → re-sort → staggered fade in
 - `ListBoxItem` style for quests list overrides default selection/hover colors (no blue highlight)
 
 ### Config keys
 - `QuestApiUrl` — `https://api.discordquest.com/api/quests`
+- `QuestRegionsUrl` — `https://api.discordquest.com/api/regions`
+- `QuestHomeUrl` — `https://discord.com/quest-home` (browser fallback)
+- `QuestHomeDeepLink` — `discord://-/quest-home` (desktop app, via `UrlLauncher.OpenDiscordQuestHome()`)
 - `DiscordCdnBase` — `https://cdn.discordapp.com/`
 - `CompletedQuestsFile` — `"completed_quests.json"` (in `AppDataPath`)
 
@@ -221,6 +225,16 @@ Primary search path since v1.2.4. `PerformUnifiedSearch()` queries Discord DB an
 `SpoofUnified()` still prefers Discord exe when present; Steam is the fallback. Database / Steam / Manual remain under Advanced for forcing a source.
 
 ## UI Components
+
+### Theming (`Services/ThemeManager.cs`, `Styles/Theme.xaml`, `Themes/DarkTheme.xaml`, `Themes/LightTheme.xaml`)
+Palette lives in the theme dictionaries (identical keys, `Dark` default); `Styles/Theme.xaml` holds structure/styles/semantic colors only. `ApplyTheme()` swaps the merged-dictionary slot, syncs the WPF-UI theme, then re-applies the accent; choice persists in `theme.json` (`ThemeSettings.Theme`). Toggled from the header ☀️/🌙 button (`MainViewModel.ToggleThemeCommand`, `AppTheme` + `EnumToVisibilityConverter`).
+The accent picker (8 presets, same file) applies app-wide via `ApplyAccent()`, which replaces the `SystemAccentColorPrimary/Secondary/Tertiary` colors plus every derived brush (`Orb.SystemAccentBrush`, `PrimaryBrush`, `SecondaryBrush`, `AccentFillColor*`, glow alpha variants). Rules for XAML authors:
+- Never hardcode surface/text hexes — use tokens (`BackgroundBrush`, `SurfaceBrush`, `Orb.ElevatedBrush`, `BorderBrush`, `Text*Brush`, `Orb.VeilBrush`, `Orb.Scrollbar.ThumbBrush`); tinted chips use `Orb.Tint.{Success,Warning,Danger,Info}Bg/Border` (+ `InfoText`) so both themes stay readable
+- Never hardcode `#5865F2`/`#7B83FF` except preset swatches and default resource values — use `{DynamicResource SystemAccentColorPrimary/Secondary}` (works on `GradientStop.Color` and `DropShadowEffect.Color` too)
+- Never `StaticResource` a theme brush — snapshots don't follow theme/accent swaps; always `DynamicResource` (note: `GradientStop.Color` needs `*Color` keys, `Foreground`/`Background` need `*Brush` keys — mixing them crashes at render; note 2: a local value beats a Style trigger setter, so trigger-driven defaults belong in the Style)
+- Do NOT share accent `Freezables`: a shared brush freezes on first `StaticResource` use and its `DynamicResource` stops go deaf — inline the gradient per element instead. Same for any shared glow brush
+- No `ColorAnimation.To` with theme colors (can't bind `DynamicResource`) — use instant `Setter`s + transform animations (see `Orb.CardHover`), or opacity overlays (scrollbar thumb)
+- Game thumbnails keep fixed dark tiles (art transparency is tuned for dark) with theme-aware borders, and every tile image needs a rounded `RectangleGeometry` clip — `Border.ClipToBounds` ignores `CornerRadius` and square corners bleed through
 
 ### InfoDialog (`UI/Windows/InfoDialog.xaml`)
 Custom themed WPF dialog window for non-critical warnings. Used when a game has no Discord executable **and** no Steam SKU — tells the user process spoofing won't work and suggests Advanced → Steam Quest or Manual. Shown as a modal (`ShowDialog()`). Styled with the same dark theme (`BackgroundBrush`, `TextPrimaryBrush`, `PrimaryBrush` accent).
@@ -324,7 +338,7 @@ Ready — 30,412 games loaded from Discord Official API
 
 ### What is NOT cached
 
-- **Quest API** (`api.discordquest.com`) — quests are time-sensitive and change frequently, caching would show stale data
+- **Quest API** (`api.discordquest.com/api/quests` + `/api/regions`) — quests are time-sensitive and change frequently, caching would show stale data
 - **Image URLs** — Discord CDN URLs are deterministic (constructed from icon hash), no benefit from caching
 - **Game images themselves** — only the URL strings are cached (in SteamIdCache), not the actual image files
 - **Completed quests** — persisted permanently (never expires), not subject to cache TTL

@@ -22,6 +22,9 @@ public static class Config
         "https://gist.githubusercontent.com/Cynosphere/"
         + "c1e77f77f0e565ddaac2822977961e76/raw/gameslist.json";
     public const string QuestApiUrl = "https://api.discordquest.com/api/quests";
+    public const string QuestRegionsUrl = "https://api.discordquest.com/api/regions";
+    public const string QuestHomeUrl = "https://discord.com/quest-home";
+    public const string QuestHomeDeepLink = "discord://-/quest-home";
     public const string DiscordCdnBase = "https://cdn.discordapp.com/";
 
     // Steam

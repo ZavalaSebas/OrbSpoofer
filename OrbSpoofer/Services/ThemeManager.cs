@@ -17,7 +17,52 @@ public static class ThemeManager
 
     public static void SaveAccent(string hex)
     {
-        try { Store.Save(new Infrastructure.Settings.ThemeSettings { AccentHex = hex }); } catch { }
+        try { var s = Store.Load(); s.AccentHex = hex; Store.Save(s); } catch { }
+    }
+
+    public static string CurrentTheme { get; private set; } = "Dark";
+
+    public static string LoadSavedTheme()
+    {
+        try
+        {
+            var t = Store.Load().Theme;
+            return string.Equals(t, "Light", StringComparison.OrdinalIgnoreCase) ? "Light" : "Dark";
+        }
+        catch { return "Dark"; }
+    }
+
+    /// <summary>Swaps the Dark/Light palette dictionary, syncs the WPF-UI theme, and re-applies the accent.</summary>
+    public static void ApplyTheme(string? theme = null)
+    {
+        theme ??= LoadSavedTheme();
+        theme = string.Equals(theme, "Light", StringComparison.OrdinalIgnoreCase) ? "Light" : "Dark";
+        try
+        {
+            var app = Application.Current;
+            if (app == null) return;
+            var merged = app.Resources.MergedDictionaries;
+            ResourceDictionary? slot = null;
+            foreach (var d in merged)
+            {
+                var src = d.Source?.OriginalString ?? "";
+                if (src.Contains("DarkTheme.xaml", StringComparison.OrdinalIgnoreCase) ||
+                    src.Contains("LightTheme.xaml", StringComparison.OrdinalIgnoreCase))
+                {
+                    slot = d;
+                    break;
+                }
+            }
+            var next = new ResourceDictionary { Source = new Uri($"/OrbSpoofer;component/Themes/{theme}Theme.xaml", UriKind.Relative) };
+            if (slot != null) merged[merged.IndexOf(slot)] = next;
+            else merged.Add(next);
+            try { Wpf.Ui.Appearance.ApplicationThemeManager.Apply(theme == "Light" ? Wpf.Ui.Appearance.ApplicationTheme.Light : Wpf.Ui.Appearance.ApplicationTheme.Dark); } catch { }
+            CurrentTheme = theme;
+            try { var s = Store.Load(); s.Theme = theme; Store.Save(s); } catch { }
+            ApplyAccent();
+            foreach (Window w in app.Windows) RefreshWindow(w);
+        }
+        catch { }
     }
 
     public static void ApplyAccent(string? hex = null)
@@ -29,39 +74,69 @@ public static class ThemeManager
             var color = (Color)ColorConverter.ConvertFromString(colorHex);
             var app = Application.Current;
             if (app == null) return;
+            // Unconditional indexer assignment: Application-level entries shadow the
+            // merged-dictionary defaults and always raise change notifications, so
+            // every DynamicResource binding updates live. (ResourceDictionary.Contains
+            // does not see merged-dictionary keys, so guarded updates silently skip.)
             void Replace(string key, Color c)
             {
-                if (app.Resources.Contains(key)) app.Resources[key] = c;
-                var brushKey = key + "Brush";
-                if (app.Resources.Contains(brushKey))
-                {
-                    var brush = new SolidColorBrush(c);
-                    if (brush.CanFreeze) brush.Freeze();
-                    app.Resources[brushKey] = brush;
-                }
+                app.Resources[key] = c;
+                SetBrush(key + "Brush", c);
             }
+            void SetBrush(string brushKey, Color c)
+            {
+                var brush = new SolidColorBrush(c);
+                if (brush.CanFreeze) brush.Freeze();
+                app.Resources[brushKey] = brush;
+            }
+            var secondary = Lighten(color, 0.28);
+            var tertiary = Darken(color, 0.30);
             Replace("SystemAccentColorPrimary", color);
+            Replace("SystemAccentColorSecondary", secondary);
+            Replace("SystemAccentColorTertiary", tertiary);
+            // Alpha variants for glow gradients (same RGB, fixed alpha)
+            app.Resources["SystemAccentColorPrimaryFaint"] = Color.FromArgb(0x18, color.R, color.G, color.B);
+            app.Resources["SystemAccentColorPrimaryTransparent"] = Color.FromArgb(0x00, color.R, color.G, color.B);
+            app.Resources["SystemAccentColorSecondaryFaint"] = Color.FromArgb(0x18, secondary.R, secondary.G, secondary.B);
+            app.Resources["SystemAccentColorSecondaryTransparent"] = Color.FromArgb(0x00, secondary.R, secondary.G, secondary.B);
             Replace("PrimaryColor", color);
-            if (app.Resources.Contains("Orb.Accent.Primary.Color")) app.Resources["Orb.Accent.Primary.Color"] = color;
-            if (app.Resources.Contains("Orb.SystemAccentBrush"))
-            {
-                var b = new SolidColorBrush(color);
-                if (b.CanFreeze) b.Freeze();
-                app.Resources["Orb.SystemAccentBrush"] = b;
-            }
-            // also update secondary derived
-            try
-            {
-                var secondary = Color.FromRgb((byte)Math.Min(255, color.R + 30), (byte)Math.Min(255, color.G + 20), (byte)Math.Min(255, color.B + 10));
-                if (app.Resources.Contains("SystemAccentColorSecondary")) app.Resources["SystemAccentColorSecondary"] = secondary;
-                if (app.Resources.Contains("Orb.Accent.Secondary.Color")) app.Resources["Orb.Accent.Secondary.Color"] = secondary;
-            }
-            catch { }
+            Replace("SecondaryColor", secondary);
+            app.Resources["Orb.Accent.Primary.Color"] = color;
+            app.Resources["Orb.Accent.Secondary.Color"] = secondary;
+            // Brushes are replaced (not mutated) so every DynamicResource binding picks the new accent.
+            // NOTE: this must cover every accent-derived brush key — Replace(key) only handles
+            // "<key>Brush", but DarkTheme names the main brush "PrimaryBrush", not "PrimaryColorBrush".
+            SetBrush("Orb.SystemAccentBrush", color);
+            SetBrush("PrimaryBrush", color);
+            SetBrush("SecondaryBrush", secondary);
+            SetBrush("SystemAccentColorPrimaryBrush", color);
+            SetBrush("SystemAccentColorSecondaryBrush", secondary);
+            SetBrush("SystemAccentColorTertiaryBrush", tertiary);
+            SetBrush("Orb.Accent.SecondaryBrush", secondary);
+            SetBrush("AccentFillColorDefaultBrush", color);
+            SetBrush("AccentFillColorSecondaryBrush", color);
+            SetBrush("AccentFillColorTertiaryBrush", color);
             foreach (Window w in app.Windows) RefreshWindow(w);
             // persist
             try { SaveAccent(colorHex); } catch { }
         }
         catch { }
+    }
+
+    public static Color Lighten(Color c, double amount)
+    {
+        return Color.FromRgb(
+            (byte)(c.R + (255 - c.R) * amount),
+            (byte)(c.G + (255 - c.G) * amount),
+            (byte)(c.B + (255 - c.B) * amount));
+    }
+
+    public static Color Darken(Color c, double amount)
+    {
+        return Color.FromRgb(
+            (byte)(c.R * (1 - amount)),
+            (byte)(c.G * (1 - amount)),
+            (byte)(c.B * (1 - amount)));
     }
 
     public static void RefreshWindow(Window window)

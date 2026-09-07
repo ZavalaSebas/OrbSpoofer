@@ -63,4 +63,23 @@ public static class UrlLauncher
     {
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch (Exception ex) { Debug.WriteLine($"OpenUrl failed: {ex.Message}"); }
     }
+
+    /// <summary>
+    /// Opens Discord quest home in the desktop app via deep link
+    /// (<c>discord://-/quest-home</c>), falling back to the browser when
+    /// the desktop client or its protocol handler isn't available.
+    /// Honors the "use Discord app link" setting (false = browser always).
+    /// </summary>
+    public static void OpenDiscordQuestHome()
+    {
+        bool useAppLink = true;
+        try { useAppLink = new Infrastructure.Settings.AppSettingsStore().Load().UseDiscordAppLink; } catch { }
+        if (!useAppLink) { Open(Config.QuestHomeUrl); return; }
+        try { Process.Start(new ProcessStartInfo(Config.QuestHomeDeepLink) { UseShellExecute = true }); }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Deep link failed, falling back to browser: {ex.Message}");
+            Open(Config.QuestHomeUrl);
+        }
+    }
 }
