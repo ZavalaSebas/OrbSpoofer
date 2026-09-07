@@ -21,7 +21,12 @@ public static class QuestService
                 var questId = idProp.GetString();
                 if (string.IsNullOrEmpty(questId)) continue;
 
-                if (!element.TryGetProperty("config", out var config)) continue;
+                // API format changed (Sep 2026): entries are now flat
+                // ({id, expires_at, messages, ...}) instead of {id, config: {...}}.
+                // Accept both shapes.
+                var config = element;
+                if (element.TryGetProperty("config", out var wrapped) && wrapped.ValueKind == JsonValueKind.Object)
+                    config = wrapped;
 
                 if (!config.TryGetProperty("expires_at", out var expiresProp)) continue;
                 DateTime expiresAt;

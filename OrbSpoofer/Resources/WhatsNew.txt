@@ -1,4 +1,3 @@
+Active Quests fixed after the quest feed changed format
+Pending updates now pop up right when the app opens (Skip keeps the sidebar reminder)
 Bug fixes and stability improvements
-Special thanks to Trang for buying my first coffee :D
-If you want to support and have your name appear here, consider buying me a coffee instead of the Nitro subscription :)
-Hall of Fame added to Credits & Info

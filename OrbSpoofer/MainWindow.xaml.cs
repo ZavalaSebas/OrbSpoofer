@@ -35,6 +35,13 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         await _vm.InitializeAsync(msg => { /* progress handled via binding */ });
+        // Update available? Offer it up front. Skip/close leaves the reminder
+        // in the sidebar (HasUpdate stays true).
+        if (_vm.HasUpdate && _vm.PendingUpdateTag != null && _vm.PendingUpdateUrl != null)
+        {
+            var u = new UI.Windows.UpdateWindow(_vm.PendingUpdateTag, _vm.PendingUpdateUrl) { Owner = this };
+            u.ShowDialog();
+        }
         if (UI.Windows.WelcomeWindow.ShouldShow())
         {
             var w = new UI.Windows.WelcomeWindow { Owner = this };

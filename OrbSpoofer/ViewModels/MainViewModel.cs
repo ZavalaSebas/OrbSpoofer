@@ -147,7 +147,9 @@ public partial class MainViewModel : ObservableObject
 
             Quests.StartWatcher();
             _ = FreeGames.RefreshAsync();
-            _ = CheckForUpdateAsync();
+            // Awaited (not fire-and-forget) so the startup update dialog in
+            // MainWindow.OnLoaded reliably knows whether an update is pending.
+            await CheckForUpdateAsync();
         }
         catch (Exception ex)
         {

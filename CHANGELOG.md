@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.1.4] — 2026-09-07
+
+### Fixed
+- **Empty Active Quests — quest feed format change:** `api.discordquest.com/api/quests` now returns flat entries (`{id, expires_at, messages, …}`) instead of `{id, config: {…}}`, so every quest was silently skipped. The parser accepts both shapes
+
+### Added
+- **Update dialog on startup:** when an update is pending, the update window pops up right after launch (Skip/close keeps the sidebar reminder), instead of only showing the sidebar badge
+
 ## [2.1.3] — 2026-09-04
 
 ### Fixed

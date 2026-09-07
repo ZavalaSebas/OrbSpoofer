@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.3-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.1.4-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -20,7 +20,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.1.3 — Hall of Fame + Thanks Trang!.** Special Thanks section honoring Trang's first coffee, status bar pill linking to Ko-fi, landing page overhaul, plus bug fixes. [See changelog](./CHANGELOG.md#213--2026-09-04).
+> **✨ New in 2.1.4 — Quest API hotfix + update dialog on startup.** Active Quests work again after Discord's quest feed changed format, and pending updates now pop up as soon as the app opens (Skip keeps the sidebar reminder). [See changelog](./CHANGELOG.md#214--2026-09-07).
 
 <br/>
 
