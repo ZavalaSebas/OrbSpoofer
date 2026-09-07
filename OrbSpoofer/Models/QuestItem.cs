@@ -62,6 +62,24 @@ public class QuestItem : INotifyPropertyChanged
         set { if (_taskSeconds != value) { _taskSeconds = value; OnPropertyChanged(); OnPropertyChanged(nameof(TaskDurationLabel)); } }
     }
 
+    private bool _isAutomating;
+    public bool IsAutomating
+    {
+        get => _isAutomating;
+        set { if (_isAutomating != value) { _isAutomating = value; OnPropertyChanged(); OnPropertyChanged(nameof(AutoButtonText)); } }
+    }
+
+    private double _autoProgress;
+    /// <summary>Automation progress 0..1.</summary>
+    public double AutoProgress
+    {
+        get => _autoProgress;
+        set { if (_autoProgress != value) { _autoProgress = value; OnPropertyChanged(); OnPropertyChanged(nameof(AutoProgressText)); } }
+    }
+
+    public string AutoButtonText => IsAutomating ? "Stop ⏹" : "Auto ▶";
+    public string AutoProgressText => IsAutomating ? $"{(int)(AutoProgress * TaskSeconds)}/{TaskSeconds}s" : "";
+
     public string TaskDurationLabel => TaskMinutes > 0 ? $"{TaskMinutes} min" : $"{TaskSeconds} sec";
 
     public string TaskLabel => TaskType switch

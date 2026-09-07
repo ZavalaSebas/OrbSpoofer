@@ -21,14 +21,32 @@
                 <TextBlock Text="Active Quests" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                 <TextBlock Text="Play, stream &amp; video quests — ▶ spoofs, 📺 opens Discord" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
             </StackPanel>
-            <ui:Button Grid.Column="2" HorizontalAlignment="Right" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="14,7" FontSize="12" Cursor="Hand" VerticalAlignment="Center"
-                       Visibility="{Binding CanRunAll, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RunAllCommand}">
-                <ui:Button.Effect><DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.28" Color="{DynamicResource SystemAccentColorPrimary}"/></ui:Button.Effect>
-                <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="Play24" Filled="True" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                    <TextBlock Text="{Binding RunAllText}" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold"/>
-                </StackPanel>
-            </ui:Button>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <ui:Button Appearance="Secondary" Padding="14,7" FontSize="12" Cursor="Hand" Margin="0,0,8,0"
+                           Command="{Binding ClaimCommand}"
+                           ToolTip="Open Discord to claim finished quests">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Gift24" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ClaimText}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button Appearance="Secondary" Padding="14,7" FontSize="12" Cursor="Hand" Margin="0,0,8,0"
+                           Visibility="{Binding CanAutoVideos, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding AutoAllVideosCommand}"
+                           ToolTip="Enroll + auto-watch every video quest (needs token)">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Video24" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding AutoVideosText}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </ui:Button>
+                <ui:Button HorizontalAlignment="Right" Appearance="Primary" Background="{DynamicResource Orb.SystemAccentBrush}" Foreground="White" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" Padding="14,7" FontSize="12" Cursor="Hand" VerticalAlignment="Center"
+                           Visibility="{Binding CanRunAll, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RunAllCommand}">
+                    <ui:Button.Effect><DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.28" Color="{DynamicResource SystemAccentColorPrimary}"/></ui:Button.Effect>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Play24" Filled="True" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="{Binding RunAllText}" VerticalAlignment="Center" Foreground="White" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </ui:Button>
+            </StackPanel>
         </Grid>
 
         <Border Grid.Row="1" Margin="0,8,0,14" Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="10" Padding="12,10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
@@ -43,8 +61,22 @@
 
         <Grid Grid.Row="2">
             <!-- List always visible; IsLoading only lowers opacity (no Collapse -> no black flash) -->
-            <ListBox x:Name="QuestsList" Padding="4,4,8,6" ClipToBounds="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
-                     ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="False" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel">
+                <ListBox x:Name="QuestsList" Padding="4,4,8,6" ClipToBounds="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
+                         ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="False" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel">
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="4,12,12,8">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding ItemCount, StringFormat=({0})}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                        <Border Grid.Column="2" Height="1" Background="{DynamicResource Orb.SeparatorBrush}" VerticalAlignment="Center" Margin="10,0,0,0" Opacity="0.7"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
                 <ListBox.Style>
                     <Style TargetType="ListBox">
                         <Setter Property="Visibility" Value="{Binding HasNoQuests, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
@@ -130,6 +162,41 @@
                                         <Border Background="{DynamicResource Orb.Tint.InfoBg}" CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" ToolTip="Quest type">
                                             <TextBlock FontSize="11" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" FontWeight="SemiBold" Text="{Binding TaskLabel, Mode=OneWay}"/>
                                         </Border>
+                                        <Button Margin="6,0,0,0" Cursor="Hand" Padding="0" BorderThickness="0" Background="Transparent"
+                                                Command="{Binding DataContext.AutoVideoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+                                                ToolTip="Auto enroll + watch (needs token)">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsVideoQuest}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border CornerRadius="6" Padding="7,3" Background="{DynamicResource Orb.SystemAccentBrush}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Text="{Binding AutoButtonText, Mode=OneWay}"/>
+                                                            <TextBlock FontSize="11" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0" Opacity="0.85" Text="{Binding AutoProgressText, Mode=OneWay}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsAutomating}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
                                         <Border CornerRadius="6" Padding="6,3" Margin="6,0,0,0" BorderThickness="1" ToolTip="Region availability" Background="{DynamicResource Orb.Tint.SuccessBg}" BorderBrush="{DynamicResource Orb.Tint.SuccessBorder}">
                                             <Border.Style>
                                                 <Style TargetType="Border">

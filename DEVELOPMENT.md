@@ -173,7 +173,14 @@ Steam mode is inconsistent — Discord detects the spoofed process for some game
 
 ## Quest System
 
-Quests are fetched from `api.discordquest.com/api/quests` plus regions from `api.discordquest.com/api/regions` (both public, no auth required). Images are served from `cdn.discordapp.com`.
+Quests come from two sources (both parsed by `QuestService.ParseQuests`, which accepts the legacy `{id, config}` wrapper and the flat shape):
+- **Mirror (default):** `api.discordquest.com/api/quests` plus regions from `api.discordquest.com/api/regions` (public, no auth required)
+- **Official API (opt-in):** `GET discord.com/api/v9/quests/@me` with the user's token (`DiscordApiClient`, read-only). Returns the personalized list; region labels still come from the mirror endpoint. Any failure falls back to the mirror with an `(official API failed — using mirror)` status note
+
+Images are served from `cdn.discordapp.com`. Tokens live in `settings.json` and are only ever sent to Discord — never logged.
+
+### Video automation (`Services/VideoQuestAutomator.cs`, `DiscordApiClient.EnrollAsync/SendVideoProgressAsync`)
+Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllVideosCommand`, one stream at a time, re-click to stop). Flow per quest: `POST enroll` (tolerates already-enrolled) → loop `POST video-progress` with `NextTimestamp` pacing (7s cadence, never ahead of `enrolledAt + 10s`, small jitter, final exact-target post) → 60s backoff ×3 on 429 → mark completed locally. Progress surfaces on `QuestItem.AutoProgress/AutoProgressText`. **ToS note:** this completes quests artificially — higher ban risk than spoofing or read-only token use. Off by default, token required, failures never fake partial progress as done.
 
 ### Flow
 1. `QuestsViewModel.LoadAsync()` invokes `QuestService.GetActiveQuestsAsync()` (`GetActivePlayQuestsAsync()` is kept as a wrapper)

@@ -61,8 +61,8 @@
                         <StackPanel VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Official Discord API" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                                <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="6" Padding="6,2" Margin="8,0,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                    <TextBlock Text="Coming soon" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <Border Background="{DynamicResource Orb.Tint.SuccessBg}" CornerRadius="6" Padding="6,2" Margin="8,0,0,0" BorderBrush="{DynamicResource Orb.Tint.SuccessBorder}" BorderThickness="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Live" FontSize="10" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                 </Border>
                             </StackPanel>
                             <TextBlock Text="Personalized quest list, straight from your account" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
@@ -74,9 +74,32 @@
                              BorderBrush="{DynamicResource BorderBrush}" ToolTip="Stored locally in settings.json — only ever sent to Discord"/>
                     <TextBlock Text="{Binding TokenStatus}" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,8,0,0"
                                Visibility="{Binding HasToken, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Check token" Padding="14,6" FontSize="12" Cursor="Hand" Command="{Binding CheckTokenCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <TextBlock Text="{Binding TokenCheckResult}" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" TextWrapping="Wrap" MaxWidth="280">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TokenCheckOk}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
                     <CheckBox Content="Use official API instead of the community mirror" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0"
-                              IsChecked="{Binding UseOfficialApi}" IsEnabled="False"/>
-                    <TextBlock Text="You can save your token now — the personalized list arrives in the next update." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                              IsChecked="{Binding UseOfficialApi}"/>
+                    <TextBlock Text="Personalized list from your account (enrolled, region-exact). Falls back to the mirror on any failure." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
                 </StackPanel>
             </Border>
 
@@ -93,12 +116,13 @@
                         </StackPanel>
                     </StackPanel>
                     <CheckBox Content="Notify me about new quests" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" IsChecked="{Binding NotifyNewQuests}"/>
+                    <CheckBox Content="Orbs rewards only" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0" IsChecked="{Binding NotifyOrbsOnly}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                         <TextBlock Text="Check every" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <ComboBox Width="110" Padding="8,5" FontSize="12" ItemsSource="{Binding PollOptions}" SelectedItem="{Binding PollIntervalMinutes}"/>
                         <TextBlock Text="minutes" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,0,0,0"/>
                     </StackPanel>
-                    <TextBlock Text="Watcher coming soon — your preferences are already saved." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                    <TextBlock Text="New arrivals get a badge on Active Quests and load automatically. Minimum 5 minutes." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
                 </StackPanel>
             </Border>
         </StackPanel>

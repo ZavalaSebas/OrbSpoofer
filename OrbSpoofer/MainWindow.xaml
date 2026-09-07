@@ -337,7 +337,15 @@
                                 </Style.Triggers>
                             </Style>
                         </ui:Button.Style>
-                        <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Trophy24" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Active Quests" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Trophy24" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Active Quests" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
+                            <Border CornerRadius="8" Padding="6,1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                                    Background="{DynamicResource Orb.Tint.SuccessBg}" BorderBrush="{DynamicResource Orb.Tint.SuccessBorder}" BorderThickness="1"
+                                    Visibility="{Binding DataContext.HasNewQuests, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    ToolTip="New quests arrived">
+                                <TextBlock Text="{Binding DataContext.NewQuestsCount, RelativeSource={RelativeSource AncestorType=Window}}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                            </Border>
+                        </Grid>
                     </ui:Button>
                     <ui:Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="UnifiedSearch">
                         <ui:Button.Style>

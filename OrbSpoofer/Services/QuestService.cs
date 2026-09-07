@@ -28,6 +28,15 @@ public static class QuestService
         return ParseQuests(json, regions, DateTime.UtcNow);
     }
 
+    /// <summary>Personalized list via the official API (user token). Region labels
+    /// still come from the community regions endpoint (best-effort).</summary>
+    public static async Task<List<QuestItem>> GetOfficialQuestsAsync(string token)
+    {
+        var quests = await DiscordApiClient.GetMyQuestsAsync(token);
+        var regions = await TryLoadRegionsAsync();
+        return ParseQuests(quests, regions, DateTime.UtcNow);
+    }
+
     /// <summary>Pure quest parsing (network-independent) — supports both the legacy
     /// <c>{id, config: {...}}</c> shape and the flat <c>{id, expires_at, ...}</c> shape.</summary>
     public static List<QuestItem> ParseQuests(JsonElement json, Dictionary<string, QuestRegion> regions, DateTime now)

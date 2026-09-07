@@ -36,6 +36,11 @@ All notable changes to this project are documented in this file.
 
 ### Added
 - **Settings view:** new sidebar section with My region (filters Active Quests + Run All, `X of Y` status), quest-link target (Discord app vs browser, effective immediately), Discord token storage + official-API toggle (reserved, coming soon), and new-quest alert preferences (reserved for the watcher). Backed by `settings.json` (`AppSettingsStore`) with `RegionMatcher` unit tests
+- **Official Discord API mode:** paste your token in Settings, hit Check (validates via `/users/@me`), enable the toggle — Active Quests loads your personalized list from `GET /quests/@me` (enrolled, region-exact) with automatic mirror fallback and `(official API)` status suffix. Token is only ever sent to Discord
+- **Video auto-accept + auto-watch:** per-quest Auto chip (with live `12/115s` progress, re-click to stop) and header Auto videos bulk run. Enrolls via `POST enroll`, then reports increasing `video-progress` timestamps paced like a real viewer (7s cadence, enrollment-clock cap, jitter, 60s backoff on 429). Completed quests are marked locally; failures fall back gracefully. Requires token; use at your own risk
+- **New-quest watcher:** opt-in polling (Settings, 5–480 min) that learns the current list silently on first tick, then badges fresh arrivals on Active Quests, announces them in the status bar and auto-reloads the list. Orbs-only filter included; known IDs persist in `watcher_known.json`. Works with mirror or official API
+- **Claim button with counts:** completions accumulate quietly (no popups mid-flow) and the header always shows `Claim · N done, M left` for play quests — one click opens Discord when everything is ready
+- **Quest list grouped by type:** `🎮 Play`, `📺 Video`, … sections with dividers and counts (`ICollectionView` grouping over the manual order, no extra resets)
 
 ### Fixed
 - **Unknown task types** (e.g. `ACHIEVEMENT_*`) get a neutral label and open in Discord instead of being dropped

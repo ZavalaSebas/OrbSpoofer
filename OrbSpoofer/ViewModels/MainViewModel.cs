@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OrbSpoofer.Helpers;
+using OrbSpoofer.Models;
 using OrbSpoofer.Services;
 
 namespace OrbSpoofer.ViewModels;
@@ -35,6 +36,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string? _pendingUpdateTag;
     [ObservableProperty] private string? _pendingUpdateUrl;
     [ObservableProperty] private string _appTheme = ThemeManager.LoadSavedTheme();
+    [ObservableProperty] private int _newQuestsCount;
+    public bool HasNewQuests => NewQuestsCount > 0;
 
     public QuestsViewModel Quests { get; }
     public UnifiedSearchViewModel UnifiedSearch { get; }
@@ -73,11 +76,15 @@ public partial class MainViewModel : ObservableObject
         Manual.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(Manual.StatusMessage) && !string.IsNullOrEmpty(Manual.StatusMessage)) StatusMessage = Manual.StatusMessage; };
     }
 
+    partial void OnNewQuestsCountChanged(int value) => OnPropertyChanged(nameof(HasNewQuests));
+
     [RelayCommand]
     private void Navigate(string view)
     {
         if (Enum.TryParse<NavigationView>(view, out var v))
             CurrentView = v;
+        if (CurrentView == NavigationView.Quests)
+            NewQuestsCount = 0; // seen the new arrivals
         if (CurrentView == NavigationView.Database || CurrentView == NavigationView.Manual || CurrentView == NavigationView.Steam)
             IsAdvancedExpanded = true;
     }
@@ -162,6 +169,8 @@ public partial class MainViewModel : ObservableObject
             // Awaited (not fire-and-forget) so the startup update dialog in
             // MainWindow.OnLoaded reliably knows whether an update is pending.
             await CheckForUpdateAsync();
+            QuestWatcher.NewQuestsFound += OnNewQuestsFound;
+            QuestWatcher.Restart();
         }
         catch (Exception ex)
         {
@@ -176,8 +185,23 @@ public partial class MainViewModel : ObservableObject
         return !Quests.HasNoQuests || Quests.Quests.Count > 0;
     }
 
+    private void OnNewQuestsFound(List<QuestItem> fresh)
+    {
+        try
+        {
+            NewQuestsCount += fresh.Count;
+            var names = string.Join(", ", fresh.Take(3).Select(q => q.GameName));
+            if (fresh.Count > 3) names += $" +{fresh.Count - 3} more";
+            StatusMessage = $"🆕 {fresh.Count} new quest(s): {names}";
+            _ = Quests.LoadAsync(); // show them right away (smooth in-place patch)
+        }
+        catch { }
+    }
+
     public void Cleanup()
     {
+        try { QuestWatcher.NewQuestsFound -= OnNewQuestsFound; } catch { }
+        QuestWatcher.Stop();
         Quests.DisposeWatcher();
         // kill any lingering timer processes before deleting files (exe is locked while timer runs)
         try

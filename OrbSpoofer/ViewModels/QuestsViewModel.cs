@@ -25,10 +25,14 @@ public partial class QuestsViewModel : ObservableObject
     [ObservableProperty] private bool _canRunAll;
     [ObservableProperty] private string _runAllText = "Run all quests";
     [ObservableProperty] private bool _isRunningAll;
+    [ObservableProperty] private bool _canAutoVideos;
+    [ObservableProperty] private string _autoVideosText = "Auto videos";
+    [ObservableProperty] private bool _isAutoRunning;
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private string? _activeSpoofQuestName;
 
     private CancellationTokenSource? _runAllCts;
+    private CancellationTokenSource? _autoCts;
     private FileSystemWatcher? _watcher;
     private string _regionPref = "";
     public ICollectionView QuestsView { get; }
@@ -42,6 +46,9 @@ public partial class QuestsViewModel : ObservableObject
         QuestsView = CollectionViewSource.GetDefaultView(Quests);
         // Region filter only — inserts/removes filter live, no reset needed on load.
         QuestsView.Filter = o => o is not QuestItem q || q.IsRegionMatch;
+        // Group by quest type (play / video / …) with dividers in the view.
+        // No SortDescriptions: source order already puts playable first, completed last.
+        QuestsView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(QuestItem.TaskLabel)));
         // No SortDescriptions to avoid Refresh/Reset black flash.
         // Order is maintained manually in Quests (smooth Move) and completion
         // opacity is animated via DataTrigger (0.32s) in the view.
@@ -70,20 +77,33 @@ public partial class QuestsViewModel : ObservableObject
         {
             System.Windows.Application.Current?.Dispatcher.Invoke(() =>
             {
-                if (ActiveSpoofQuestName is not null)
-                {
-                    StatusMessage = $"Quest completed: {ActiveSpoofQuestName}";
-                    ActiveSpoofQuestName = null;
-                }
-                else StatusMessage = "Quest completed";
-
-                try { Services.SteamService.DeleteTrackedManifests(); } catch { }
-
-                // if currently visible, reload
-                _ = LoadAsync();
+                _ = HandleQuestCompletedAsync();
             });
         }
         catch (Exception ex) { Debug.WriteLine($"OnCompletedChanged failed: {ex.Message}"); }
+    }
+
+    private async Task HandleQuestCompletedAsync()
+    {
+        try
+        {
+            string? finishedName = ActiveSpoofQuestName;
+            if (finishedName is not null)
+            {
+                StatusMessage = $"Quest completed: {finishedName}";
+                ActiveSpoofQuestName = null;
+            }
+            else StatusMessage = "Quest completed";
+
+            try { Services.SteamService.DeleteTrackedManifests(); } catch { }
+
+            // if currently visible, reload
+            await LoadAsync();
+
+            // No popups here by design — completions accumulate quietly and the
+            // header Claim button (done/left counts) opens Discord when ready.
+        }
+        catch (Exception ex) { Debug.WriteLine($"HandleQuestCompleted failed: {ex.Message}"); }
     }
 
     [RelayCommand]
@@ -94,8 +114,26 @@ public partial class QuestsViewModel : ObservableObject
         // don't touch HasNoQuests until we have data -> avoids black toggle
         try
         {
-            var all = await QuestService.GetActivePlayQuestsAsync();
+            var appSettings = new Infrastructure.Settings.AppSettingsStore().Load();
+            List<QuestItem> all;
+            var officialFailed = false;
+            if (appSettings.UseOfficialApi && !string.IsNullOrWhiteSpace(appSettings.DiscordToken))
+            {
+                try { all = await QuestService.GetOfficialQuestsAsync(appSettings.DiscordToken.Trim()); }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Official API failed, falling back to mirror: {ex.Message}");
+                    officialFailed = true;
+                    all = await QuestService.GetActivePlayQuestsAsync();
+                }
+            }
+            else
+            {
+                all = await QuestService.GetActivePlayQuestsAsync();
+            }
             var completedIds = Config.LoadCompletedQuestIds();
+            var sourceSuffix = officialFailed ? " (official API failed — using mirror)"
+                : appSettings.UseOfficialApi && !string.IsNullOrWhiteSpace(appSettings.DiscordToken) ? " (official API)" : "";
 
             // Keep all API quests visible - don't hide those not in DB (DB may be stale)
             // Instead annotate with NeedsSteamMode so user knows to use Steam/Manual mode
@@ -130,6 +168,7 @@ public partial class QuestsViewModel : ObservableObject
                 EmptyText = "No active quests found. Try Search to spoof a game manually.";
                 HasNoQuests = true;
                 CanRunAll = false;
+                CanAutoVideos = false;
             }
             else
             {
@@ -139,10 +178,10 @@ public partial class QuestsViewModel : ObservableObject
                     Quests.Clear();
                     foreach (var q in sorted) Quests.Add(q);
                     HasNoQuests = false;
-                    CanRunAll = !IsRunningAll && playable > 0;
+                    RefreshActionButtons();
                     StatusMessage = playable > 0
-                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable){RegionSuffix(sorted.Count)}"
-                        : $"{sorted.Count} active quest(s) loaded{RegionSuffix(sorted.Count)}";
+                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable){RegionSuffix(sorted.Count)}{sourceSuffix}"
+                        : $"{sorted.Count} active quest(s) loaded{RegionSuffix(sorted.Count)}{sourceSuffix}";
                     OnQuestsLoaded?.Invoke();
                 }
                 else
@@ -189,10 +228,10 @@ public partial class QuestsViewModel : ObservableObject
                         }
                     }
                     HasNoQuests = false;
-                    CanRunAll = !IsRunningAll && VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
+                    RefreshActionButtons();
                     StatusMessage = playable > 0
-                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable){RegionSuffix(sorted.Count)}"
-                        : $"{sorted.Count} active quest(s) loaded{RegionSuffix(sorted.Count)}";
+                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable){RegionSuffix(sorted.Count)}{sourceSuffix}"
+                        : $"{sorted.Count} active quest(s) loaded{RegionSuffix(sorted.Count)}{sourceSuffix}";
                     // no OnQuestsLoaded on patch -> avoids stagger second flash
                 }
             }
@@ -205,6 +244,7 @@ public partial class QuestsViewModel : ObservableObject
                 HasNoQuests = true;
             }
             CanRunAll = false;
+            CanAutoVideos = false;
             StatusMessage = EmptyText;
         }
         finally { IsLoading = false; }
@@ -226,7 +266,7 @@ public partial class QuestsViewModel : ObservableObject
             foreach (var q in Quests)
                 q.IsRegionMatch = RegionMatcher.IsMatch(q.RegionKind, q.RegionInclude, q.RegionExclude, _regionPref);
             QuestsView.Refresh();
-            CanRunAll = !IsRunningAll && VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
+            RefreshActionButtons();
             if (Quests.Count > 0 && !HasNoQuests)
             {
                 var playable = VisibleQuests().Count(q => !q.IsCompleted && q.IsSpoofable);
@@ -239,6 +279,34 @@ public partial class QuestsViewModel : ObservableObject
     }
 
     private IEnumerable<QuestItem> VisibleQuests() => QuestsView.OfType<QuestItem>();
+
+    public int CompletedCount { get; private set; }
+    public int PendingCount { get; private set; }
+    public bool HasCompletedToClaim => CompletedCount > 0;
+    public string ClaimText => $"Claim · {CompletedCount} done, {PendingCount} left";
+
+    private void RefreshActionButtons()
+    {
+        var visible = VisibleQuests().ToList();
+        CanRunAll = !IsRunningAll && visible.Any(q => !q.IsCompleted && q.IsSpoofable);
+        CanAutoVideos = !IsAutoRunning && visible.Any(q => !q.IsCompleted && q.IsVideoQuest);
+        // Claim counts track play quests only (the spoofable ones).
+        CompletedCount = Quests.Count(q => q.IsCompleted && q.IsSpoofable);
+        PendingCount = Quests.Count(q => !q.IsCompleted && q.IsSpoofable);
+        OnPropertyChanged(nameof(CompletedCount));
+        OnPropertyChanged(nameof(PendingCount));
+        OnPropertyChanged(nameof(HasCompletedToClaim));
+        OnPropertyChanged(nameof(ClaimText));
+    }
+
+    [RelayCommand]
+    private void Claim()
+    {
+        UrlLauncher.OpenDiscordQuestHome();
+        StatusMessage = CompletedCount > 0
+            ? $"Opened Discord — claim your {CompletedCount} completed quest(s)"
+            : "Opened Discord quest home";
+    }
 
     public event Action? OnQuestsLoaded;
 
@@ -336,9 +404,149 @@ public partial class QuestsViewModel : ObservableObject
         // Smooth fade only (DataTrigger 0.32s). No Move/Refresh/Reset -> no
         // disappearance or black flash. Reorder is deferred to next
         // LoadAsync (patch with Move) if needed, not instant.
-        CanRunAll = !IsRunningAll && VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
+        RefreshActionButtons();
         StatusMessage = newValue ? $"Marked \"{quest.GameName}\" as completed" : $"Marked \"{quest.GameName}\" as not completed";
         return Task.CompletedTask;
+    }
+
+    private string? RequireToken()
+    {
+        string token;
+        try { token = new Infrastructure.Settings.AppSettingsStore().Load().DiscordToken?.Trim() ?? ""; }
+        catch { token = ""; }
+        if (string.IsNullOrEmpty(token))
+        {
+            _dialogs.ShowInfo("Token required",
+                "Automation needs your Discord token to report progress to your account.",
+                "Paste it in Settings → Official Discord API, then use Check token.");
+            StatusMessage = "Set your Discord token in Settings first.";
+            return null;
+        }
+        return token;
+    }
+
+    private CancellationTokenSource? _singleAutoCts;
+    private QuestItem? _singleAutoQuest;
+
+    [RelayCommand]
+    private async Task AutoVideoAsync(QuestItem? quest)
+    {
+        if (quest == null || !quest.IsVideoQuest) return;
+        // Re-click a running quest to stop it.
+        if (quest.IsAutomating && ReferenceEquals(_singleAutoQuest, quest))
+        {
+            try { _singleAutoCts?.Cancel(); } catch { }
+            return;
+        }
+        if (quest.IsAutomating) return;
+        var token = RequireToken();
+        if (token == null) return;
+        if (quest.TaskSeconds <= 0)
+        {
+            StatusMessage = $"Unknown video length for: {quest.GameName} — watch it in Discord instead";
+            return;
+        }
+        // One automation stream at a time — starting a single stops the bulk run.
+        try { _autoCts?.Cancel(); } catch { }
+        var cts = new CancellationTokenSource();
+        _singleAutoCts = cts;
+        _singleAutoQuest = quest;
+        quest.IsAutomating = true;
+        quest.AutoProgress = 0;
+        RefreshActionButtons();
+        try
+        {
+            var progress = new Progress<double>(done =>
+                quest.AutoProgress = quest.TaskSeconds > 0 ? Math.Min(1, done / quest.TaskSeconds) : 0);
+            var ok = await VideoQuestAutomator.RunAsync(token, quest.Id, quest.TaskType, quest.TaskSeconds, progress, cts.Token);
+            if (ok)
+            {
+                MarkCompleted(quest);
+                StatusMessage = $"Completed via automation: {quest.GameName} — claim it from the header Claim button when ready";
+            }
+            else StatusMessage = $"Stopped: {quest.GameName} — no progress was faked halfway";
+        }
+        catch (OperationCanceledException) { StatusMessage = $"Stopped: {quest.GameName}"; }
+        catch (Exception ex) { StatusMessage = $"Automation failed for {quest.GameName}: {ex.Message}"; }
+        finally
+        {
+            if (ReferenceEquals(_singleAutoCts, cts)) { _singleAutoCts = null; _singleAutoQuest = null; }
+            try { cts.Dispose(); } catch { }
+            quest.IsAutomating = false;
+            quest.AutoProgress = 0;
+            RefreshActionButtons();
+        }
+    }
+
+    // Auto videos — AllowConcurrentExecutions so the same button stops the run
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task AutoAllVideosAsync()
+    {
+        if (IsAutoRunning)
+        {
+            _autoCts?.Cancel();
+            StatusMessage = "Stopping video automation after the current post…";
+            return;
+        }
+        var token = RequireToken();
+        if (token == null) return;
+        var pending = VisibleQuests().Where(q => !q.IsCompleted && q.IsVideoQuest && q.TaskSeconds > 0).ToList();
+        if (pending.Count == 0) { StatusMessage = "No video quests to automate."; return; }
+
+        // Starting the bulk run stops any single run.
+        try { _singleAutoCts?.Cancel(); } catch { }
+        IsAutoRunning = true;
+        var cts = new CancellationTokenSource();
+        _autoCts = cts;
+        CanAutoVideos = true;
+        AutoVideosText = $"Running 0/{pending.Count} — click to stop";
+        try
+        {
+            for (int i = 0; i < pending.Count; i++)
+            {
+                var quest = pending[i];
+                if (cts.Token.IsCancellationRequested) break;
+                quest.IsAutomating = true;
+                quest.AutoProgress = 0;
+                StatusMessage = $"[{i + 1}/{pending.Count}] Auto-watching: {quest.GameName}…";
+                AutoVideosText = $"Running {i + 1}/{pending.Count} — click to stop";
+                var progress = new Progress<double>(done =>
+                    quest.AutoProgress = quest.TaskSeconds > 0 ? Math.Min(1, done / quest.TaskSeconds) : 0);
+                try
+                {
+                    if (await VideoQuestAutomator.RunAsync(token, quest.Id, quest.TaskType, quest.TaskSeconds, progress, cts.Token))
+                    {
+                        MarkCompleted(quest);
+                        StatusMessage = $"[{i + 1}/{pending.Count}] Completed: {quest.GameName}";
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    StatusMessage = $"[{i + 1}/{pending.Count}] Stopped: {quest.GameName}";
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"[{i + 1}/{pending.Count}] Failed: {quest.GameName} — {ex.Message}";
+                    continue;
+                }
+                finally
+                {
+                    quest.IsAutomating = false;
+                    quest.AutoProgress = 0;
+                }
+            }
+        }
+        finally
+        {
+            IsAutoRunning = false;
+            if (ReferenceEquals(_autoCts, cts)) _autoCts = null;
+            try { cts.Dispose(); } catch { }
+            AutoVideosText = "Auto videos";
+            RefreshActionButtons();
+            StatusMessage = "Video automation finished — claim from the header Claim button when ready.";
+            await LoadAsync();
+        }
     }
 
     // Run All — AllowConcurrentExecutions so the same button can be used to Stop while running
@@ -424,8 +632,10 @@ public partial class QuestsViewModel : ObservableObject
             _runAllCts?.Dispose();
             _runAllCts = null;
             RunAllText = "Run all quests";
-            CanRunAll = VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
-            StatusMessage = "Quest sequence finished.";
+            RefreshActionButtons();
+            StatusMessage = anyCompleted
+                ? "Quest sequence finished — claim from the header Claim button when ready."
+                : "Quest sequence finished.";
             if (anyCompleted) await LoadAsync();
         }
     }

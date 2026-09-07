@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OrbSpoofer.Infrastructure.Settings;
+using OrbSpoofer.Services;
 
 namespace OrbSpoofer.ViewModels;
 
@@ -13,6 +15,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _useOfficialApi;
     [ObservableProperty] private bool _notifyNewQuests;
     [ObservableProperty] private int _pollIntervalMinutes = 30;
+    [ObservableProperty] private bool _notifyOrbsOnly = true;
     [ObservableProperty] private bool _useDiscordAppLink = true;
 
     public List<string> RegionOptions { get; } =
@@ -21,6 +24,10 @@ public partial class SettingsViewModel : ObservableObject
 
     public bool HasToken => !string.IsNullOrWhiteSpace(DiscordToken);
     public string TokenStatus => HasToken ? "Token saved ✓" : "No token saved";
+
+    [ObservableProperty] private string _tokenCheckResult = "";
+    [ObservableProperty] private bool _tokenCheckOk;
+    [ObservableProperty] private bool _isCheckingToken;
 
     public SettingsViewModel(QuestsViewModel quests)
     {
@@ -33,6 +40,7 @@ public partial class SettingsViewModel : ObservableObject
             _useOfficialApi = s.UseOfficialApi;
             _notifyNewQuests = s.NotifyNewQuests;
             _pollIntervalMinutes = s.PollIntervalMinutes is >= 5 and <= 480 ? s.PollIntervalMinutes : 30;
+            _notifyOrbsOnly = s.NotifyOrbsOnly;
             _useDiscordAppLink = s.UseDiscordAppLink;
         }
         catch { }
@@ -49,6 +57,7 @@ public partial class SettingsViewModel : ObservableObject
                 UseOfficialApi = UseOfficialApi,
                 NotifyNewQuests = NotifyNewQuests,
                 PollIntervalMinutes = PollIntervalMinutes,
+                NotifyOrbsOnly = NotifyOrbsOnly,
                 UseDiscordAppLink = UseDiscordAppLink,
             });
         }
@@ -65,12 +74,39 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnDiscordTokenChanged(string value)
     {
         Save();
+        TokenCheckResult = "";
         OnPropertyChanged(nameof(HasToken));
         OnPropertyChanged(nameof(TokenStatus));
     }
 
+    [RelayCommand]
+    private async Task CheckTokenAsync()
+    {
+        if (string.IsNullOrWhiteSpace(DiscordToken))
+        {
+            TokenCheckOk = false;
+            TokenCheckResult = "Paste your token first.";
+            return;
+        }
+        IsCheckingToken = true;
+        TokenCheckResult = "Checking…";
+        try
+        {
+            var (username, display) = await DiscordApiClient.ValidateTokenAsync(DiscordToken.Trim());
+            TokenCheckOk = true;
+            TokenCheckResult = $"✓ Token works — @{username}" + (string.IsNullOrEmpty(display) ? "" : $" ({display})");
+        }
+        catch (Exception ex)
+        {
+            TokenCheckOk = false;
+            TokenCheckResult = "✗ " + ex.Message;
+        }
+        finally { IsCheckingToken = false; }
+    }
+
     partial void OnUseOfficialApiChanged(bool value) => Save();
-    partial void OnNotifyNewQuestsChanged(bool value) => Save();
-    partial void OnPollIntervalMinutesChanged(int value) => Save();
+    partial void OnNotifyNewQuestsChanged(bool value) { Save(); QuestWatcher.Restart(); }
+    partial void OnPollIntervalMinutesChanged(int value) { Save(); QuestWatcher.Restart(); }
+    partial void OnNotifyOrbsOnlyChanged(bool value) => Save();
     partial void OnUseDiscordAppLinkChanged(bool value) => Save();
 }

@@ -18,6 +18,7 @@ public static class Config
 
     // Discord API
     public const string DiscordApiUrl = "https://discord.com/api/v9/applications/detectable";
+    public const string DiscordApiBase = "https://discord.com/api/v9";
     public const string GitHubBackupUrl =
         "https://gist.githubusercontent.com/Cynosphere/"
         + "c1e77f77f0e565ddaac2822977961e76/raw/gameslist.json";

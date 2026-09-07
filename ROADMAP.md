@@ -18,7 +18,10 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 - [ ] Base for token / region / notification features below
 
 ### Quests
-- [ ] Token mode (official Discord API): personalized list via `GET /quests/@me` (fixes mirror lag like the Roblox / Dragon's Dogma 2 cases)
+- [x] Token mode (official Discord API): personalized list via `GET /quests/@me` (fixes mirror lag like the Roblox / Dragon's Dogma 2 cases), with token check + mirror fallback
+- [x] Video auto-accept + auto-watch (per-quest chip + bulk run, view-paced progress, 429 backoff, local completion marking)
+- [x] New-quest watcher (polling + sidebar badge + auto-reload + orbs-only filter)
+- [x] Claim button with done/left counts (no interrupting dialogs)
 - [ ] Auto-accept + auto-watch video quests (requires token mode; opt-in, off by default)
 - [ ] New-quest watcher: polling + in-app/toast alerts for fresh quests, `orbs-only` filter
 - [ ] Region explorer: browse/filter quests by region (data already available via `/api/regions`)

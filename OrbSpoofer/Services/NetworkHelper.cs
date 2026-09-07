@@ -59,6 +59,40 @@ public static class NetworkHelper
         }
     }
 
+    public static async Task<JsonElement> PostJsonAsync(
+        string url,
+        object body,
+        Dictionary<string, string>? headers = null)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(body),
+                System.Text.Encoding.UTF8,
+                "application/json");
+
+            if (headers != null)
+            {
+                foreach (var (key, value) in headers)
+                    request.Headers.TryAddWithoutValidation(key, value);
+            }
+
+            using var response = await Client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<JsonElement>(json);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new NetworkError($"POST to {url} failed: {ex.Message}", ex);
+        }
+        catch (TaskCanceledException ex)
+        {
+            throw new NetworkError($"POST to {url} timed out: {ex.Message}", ex);
+        }
+    }
+
     public static async Task DownloadFileAsync(string url, string destPath, IProgress<double>? progress = null)
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
