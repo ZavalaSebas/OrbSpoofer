@@ -32,6 +32,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 - **Light theme didn't survive restart:** `ApplyTheme()` with no args defaulted to Dark without reading `theme.json`, wiping a saved Light choice on every startup. Now it loads the saved value first (`theme ??= LoadSavedTheme()`), covered by a `ThemePersistenceTests` round-trip regression test
+- **Startup crash on theme load:** `ControlStrokeColorDefaultBrush` bound `Color` to the `Orb.SeparatorBrush` brush (`'#FF1E1E22' is not a valid value for 'Color'`). Added `Orb.Separator.Color` key and `XamlResourceAuditTests` that statically fail the build on any Color↔Brush `DynamicResource` mismatch
 
 ### Added
 - **Settings view:** new sidebar section with My region (filters Active Quests + Run All, `X of Y` status), quest-link target (Discord app vs browser, effective immediately), Discord token storage + official-API toggle (reserved, coming soon), and new-quest alert preferences (reserved for the watcher). Backed by `settings.json` (`AppSettingsStore`) with `RegionMatcher` unit tests

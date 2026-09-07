@@ -23,7 +23,7 @@
     <SolidColorBrush x:Key="TextFillColorSecondaryBrush" Color="{DynamicResource Orb.Text.Secondary.Color}" />
     <SolidColorBrush x:Key="TextFillColorTertiaryBrush" Color="{DynamicResource Orb.Text.Muted.Color}" />
     <SolidColorBrush x:Key="ControlFillColorDefaultBrush" Color="{DynamicResource Orb.Background.Tertiary.Color}" />
-    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{DynamicResource Orb.SeparatorBrush}" />
+    <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="{DynamicResource Orb.Separator.Color}" />
     <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="{DynamicResource SystemAccentColorPrimary}" />
     <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColorPrimary}" />
     <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColorPrimary}" />

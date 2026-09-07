@@ -81,7 +81,8 @@
     <SolidColorBrush x:Key="Orb.Sidebar.Background" Color="{StaticResource Orb.Background.Secondary.Color}" />
     <SolidColorBrush x:Key="Orb.Card.Background" Color="#0F0F11" />
     <SolidColorBrush x:Key="Orb.Card.Hover" Color="#18181C" />
-    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="#1E1E22" />
+    <Color x:Key="Orb.Separator.Color">#1E1E22</Color>
+    <SolidColorBrush x:Key="Orb.SeparatorBrush" Color="{StaticResource Orb.Separator.Color}" />
     <SolidColorBrush x:Key="Orb.SeparatorSubtleBrush" Color="#16161A" />
     <SolidColorBrush x:Key="Orb.Glow.Accent" Color="{StaticResource SystemAccentColorPrimary}" Opacity="0.08"/>
     <RadialGradientBrush x:Key="Orb.Glow.Radial" GradientOrigin="0.5,0.15" Center="0.5,0.15" RadiusX="0.9" RadiusY="0.7">
