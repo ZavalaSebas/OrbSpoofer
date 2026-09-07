@@ -14,7 +14,7 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 ## Planned
 
 ### Settings (big)
-- [ ] New Settings view in sidebar: accent/theme, preferred region, token (official API mode), new-quest notifications + polling interval, deep-link vs browser toggles
+- [x] Settings view in sidebar (`settings.json`): preferred region (filters quests live), quest-link target (app vs browser), token storage + official-API toggle (reserved), alert preferences (reserved). Theme/accent stay in the header
 - [ ] Base for token / region / notification features below
 
 ### Quests

@@ -95,6 +95,7 @@ public partial class App : Application
         s.AddSingleton<DatabaseSearchViewModel>();
         s.AddSingleton<UnifiedSearchViewModel>();
         s.AddSingleton<QuestsViewModel>();
+        s.AddSingleton<SettingsViewModel>();
         s.AddSingleton<ManualViewModel>();
         s.AddSingleton<FreeGamesViewModel>();
         s.AddSingleton<MainViewModel>();

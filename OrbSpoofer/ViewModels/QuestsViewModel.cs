@@ -30,6 +30,7 @@ public partial class QuestsViewModel : ObservableObject
 
     private CancellationTokenSource? _runAllCts;
     private FileSystemWatcher? _watcher;
+    private string _regionPref = "";
     public ICollectionView QuestsView { get; }
 
     public QuestsViewModel(DiscordDatabase db, GameFaker faker, SteamSearchViewModel steamVm, IDialogService dialogs)
@@ -39,6 +40,8 @@ public partial class QuestsViewModel : ObservableObject
         _steamVm = steamVm;
         _dialogs = dialogs;
         QuestsView = CollectionViewSource.GetDefaultView(Quests);
+        // Region filter only — inserts/removes filter live, no reset needed on load.
+        QuestsView.Filter = o => o is not QuestItem q || q.IsRegionMatch;
         // No SortDescriptions to avoid Refresh/Reset black flash.
         // Order is maintained manually in Quests (smooth Move) and completion
         // opacity is animated via DataTrigger (0.32s) in the view.
@@ -98,9 +101,13 @@ public partial class QuestsViewModel : ObservableObject
             // Instead annotate with NeedsSteamMode so user knows to use Steam/Manual mode
             var filtered = all;
 
+            _regionPref = new Infrastructure.Settings.AppSettingsStore().Load().PreferredRegion ?? "";
+            var regionPref = _regionPref;
+
             foreach (var q in filtered)
             {
                 q.IsCompleted = completedIds.Contains(q.Id);
+                q.IsRegionMatch = RegionMatcher.IsMatch(q.RegionKind, q.RegionInclude, q.RegionExclude, regionPref);
                 if (!q.IsSpoofable)
                 {
                     q.NeedsSteamMode = false; // video/stream/activity open Discord instead
@@ -126,7 +133,7 @@ public partial class QuestsViewModel : ObservableObject
             }
             else
             {
-                var playable = sorted.Count(q => !q.IsCompleted && q.IsSpoofable);
+                var playable = sorted.Count(q => !q.IsCompleted && q.IsSpoofable && q.IsRegionMatch);
                 if (isInitial)
                 {
                     Quests.Clear();
@@ -134,8 +141,8 @@ public partial class QuestsViewModel : ObservableObject
                     HasNoQuests = false;
                     CanRunAll = !IsRunningAll && playable > 0;
                     StatusMessage = playable > 0
-                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable)"
-                        : $"{sorted.Count} active quest(s) loaded";
+                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable){RegionSuffix(sorted.Count)}"
+                        : $"{sorted.Count} active quest(s) loaded{RegionSuffix(sorted.Count)}";
                     OnQuestsLoaded?.Invoke();
                 }
                 else
@@ -170,6 +177,9 @@ public partial class QuestsViewModel : ObservableObject
                             existing.TaskSeconds = src.TaskSeconds;
                             existing.RegionText = src.RegionText;
                             existing.RegionKind = src.RegionKind;
+                            existing.RegionInclude = src.RegionInclude;
+                            existing.RegionExclude = src.RegionExclude;
+                            existing.IsRegionMatch = src.IsRegionMatch;
                             int cur = Quests.IndexOf(existing);
                             if (cur != i) Quests.Move(cur, i);
                         }
@@ -179,10 +189,10 @@ public partial class QuestsViewModel : ObservableObject
                         }
                     }
                     HasNoQuests = false;
-                    CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted && q.IsSpoofable);
+                    CanRunAll = !IsRunningAll && VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
                     StatusMessage = playable > 0
-                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable)"
-                        : $"{sorted.Count} active quest(s) loaded";
+                        ? $"{sorted.Count} active quest(s) loaded ({playable} playable){RegionSuffix(sorted.Count)}"
+                        : $"{sorted.Count} active quest(s) loaded{RegionSuffix(sorted.Count)}";
                     // no OnQuestsLoaded on patch -> avoids stagger second flash
                 }
             }
@@ -199,6 +209,36 @@ public partial class QuestsViewModel : ObservableObject
         }
         finally { IsLoading = false; }
     }
+
+    private string RegionSuffix(int total)
+    {
+        if (string.IsNullOrWhiteSpace(_regionPref)) return "";
+        var shown = Quests.Count(q => q.IsRegionMatch);
+        return shown == total ? "" : $" — showing {shown} of {total} (region {_regionPref.Trim().ToUpperInvariant()})";
+    }
+
+    /// <summary>Re-applies the region filter after settings change. One explicit refresh (user action).</summary>
+    public void ApplyRegionFilter()
+    {
+        try
+        {
+            _regionPref = new Infrastructure.Settings.AppSettingsStore().Load().PreferredRegion ?? "";
+            foreach (var q in Quests)
+                q.IsRegionMatch = RegionMatcher.IsMatch(q.RegionKind, q.RegionInclude, q.RegionExclude, _regionPref);
+            QuestsView.Refresh();
+            CanRunAll = !IsRunningAll && VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
+            if (Quests.Count > 0 && !HasNoQuests)
+            {
+                var playable = VisibleQuests().Count(q => !q.IsCompleted && q.IsSpoofable);
+                StatusMessage = playable > 0
+                    ? $"{VisibleQuests().Count()} active quest(s) loaded ({playable} playable){RegionSuffix(Quests.Count)}"
+                    : $"{VisibleQuests().Count()} active quest(s) loaded{RegionSuffix(Quests.Count)}";
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine($"ApplyRegionFilter failed: {ex.Message}"); }
+    }
+
+    private IEnumerable<QuestItem> VisibleQuests() => QuestsView.OfType<QuestItem>();
 
     public event Action? OnQuestsLoaded;
 
@@ -296,7 +336,7 @@ public partial class QuestsViewModel : ObservableObject
         // Smooth fade only (DataTrigger 0.32s). No Move/Refresh/Reset -> no
         // disappearance or black flash. Reorder is deferred to next
         // LoadAsync (patch with Move) if needed, not instant.
-        CanRunAll = !IsRunningAll && Quests.Any(q => !q.IsCompleted && q.IsSpoofable);
+        CanRunAll = !IsRunningAll && VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
         StatusMessage = newValue ? $"Marked \"{quest.GameName}\" as completed" : $"Marked \"{quest.GameName}\" as not completed";
         return Task.CompletedTask;
     }
@@ -311,7 +351,7 @@ public partial class QuestsViewModel : ObservableObject
             StatusMessage = "Stopping quest sequence after the current one...";
             return;
         }
-        var pending = Quests.Where(q => !q.IsCompleted && q.IsSpoofable).ToList();
+        var pending = VisibleQuests().Where(q => !q.IsCompleted && q.IsSpoofable).ToList();
         if (pending.Count == 0) { StatusMessage = "All quests are already completed."; return; }
 
         IsRunningAll = true;
@@ -384,7 +424,7 @@ public partial class QuestsViewModel : ObservableObject
             _runAllCts?.Dispose();
             _runAllCts = null;
             RunAllText = "Run all quests";
-            CanRunAll = Quests.Any(q => !q.IsCompleted && q.IsSpoofable);
+            CanRunAll = VisibleQuests().Any(q => !q.IsCompleted && q.IsSpoofable);
             StatusMessage = "Quest sequence finished.";
             if (anyCompleted) await LoadAsync();
         }

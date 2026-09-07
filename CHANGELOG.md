@@ -25,6 +25,12 @@ All notable changes to this project are documented in this file.
 ### Fixed
 - **Light theme didn't survive restart:** `ApplyTheme()` with no args defaulted to Dark without reading `theme.json`, wiping a saved Light choice on every startup. Now it loads the saved value first (`theme ??= LoadSavedTheme()`), covered by a `ThemePersistenceTests` round-trip regression test
 
+### Added
+- **Settings view:** new sidebar section with My region (filters Active Quests + Run All, `X of Y` status), quest-link target (Discord app vs browser, effective immediately), Discord token storage + official-API toggle (reserved, coming soon), and new-quest alert preferences (reserved for the watcher). Backed by `settings.json` (`AppSettingsStore`) with `RegionMatcher` unit tests
+
+### Fixed
+- **Empty Active Quests — API format change:** `api.discordquest.com/api/quests` now returns flat entries (`{id, expires_at, messages, …}`) instead of `{id, config: {…}}`, so every quest was silently skipped. `QuestService` accepts both shapes via `ParseQuests` (pure, unit-tested with flat + legacy fixtures), and unknown task types (e.g. `ACHIEVEMENT_*`) get a neutral label and open in Discord
+
 ### Changed
 - `Config` gains `QuestRegionsUrl`, `QuestHomeUrl`, `QuestHomeDeepLink`; `UrlLauncher.OpenDiscordQuestHome()` tries the app first, browser second
 - Status bar shows `N active quest(s) loaded (M playable)` when any quest is spoofable

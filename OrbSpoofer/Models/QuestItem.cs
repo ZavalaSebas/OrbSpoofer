@@ -73,7 +73,7 @@ public class QuestItem : INotifyPropertyChanged
         "PLAY_ON_XBOX" => "🎮 Xbox",
         "PLAY_ON_PLAYSTATION" => "🎮 PlayStation",
         "PLAY_ACTIVITY" => "🎯 Activity",
-        _ => "🎮 " + TaskType,
+        _ => "▫ " + TaskType,
     };
 
     private string _regionText = "🌍 Global";
@@ -84,6 +84,16 @@ public class QuestItem : INotifyPropertyChanged
     }
 
     public bool IsRegionSpecific => RegionKind != "Global";
+
+    public List<string> RegionInclude { get; set; } = [];
+    public List<string> RegionExclude { get; set; } = [];
+
+    private bool _isRegionMatch = true;
+    public bool IsRegionMatch
+    {
+        get => _isRegionMatch;
+        set { if (_isRegionMatch != value) { _isRegionMatch = value; OnPropertyChanged(); } }
+    }
 
     private string _regionKind = "Global";
     /// <summary>Global | Include (region-locked) | Exclude (blocked in listed regions).</summary>

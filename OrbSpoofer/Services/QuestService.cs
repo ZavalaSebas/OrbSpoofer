@@ -25,8 +25,14 @@ public static class QuestService
     {
         var json = await NetworkHelper.FetchJsonAsync(Config.QuestApiUrl, headers: Config.DiscordHeaders);
         var regions = await TryLoadRegionsAsync();
+        return ParseQuests(json, regions, DateTime.UtcNow);
+    }
+
+    /// <summary>Pure quest parsing (network-independent) — supports both the legacy
+    /// <c>{id, config: {...}}</c> shape and the flat <c>{id, expires_at, ...}</c> shape.</summary>
+    public static List<QuestItem> ParseQuests(JsonElement json, Dictionary<string, QuestRegion> regions, DateTime now)
+    {
         var results = new List<QuestItem>();
-        var now = DateTime.UtcNow;
 
         if (json.ValueKind != JsonValueKind.Array) return results;
 
@@ -38,7 +44,12 @@ public static class QuestService
                 var questId = idProp.GetString();
                 if (string.IsNullOrEmpty(questId)) continue;
 
-                if (!element.TryGetProperty("config", out var config)) continue;
+                // API format changed (Sep 2026): entries are now flat
+                // ({id, expires_at, messages, ...}) instead of {id, config: {...}}.
+                // Accept both shapes.
+                var config = element;
+                if (element.TryGetProperty("config", out var wrapped) && wrapped.ValueKind == JsonValueKind.Object)
+                    config = wrapped;
 
                 if (!config.TryGetProperty("expires_at", out var expiresProp)) continue;
                 DateTime expiresAt;
@@ -100,10 +111,14 @@ public static class QuestService
 
                 var regionText = "🌍 Global";
                 var regionKind = "Global";
+                var regionInclude = new List<string>();
+                var regionExclude = new List<string>();
                 if (regions.TryGetValue(questId, out var region))
                 {
                     regionText = region.Text;
                     regionKind = region.Kind;
+                    regionInclude = region.Include;
+                    regionExclude = region.Exclude;
                 }
                 results.Add(new QuestItem
                 {
@@ -118,6 +133,8 @@ public static class QuestService
                     TaskType = taskType,
                     RegionText = regionText,
                     RegionKind = regionKind,
+                    RegionInclude = regionInclude,
+                    RegionExclude = regionExclude,
                     TaskSeconds = target,
                 });
             }
@@ -144,11 +161,13 @@ public static class QuestService
         return deduped;
     }
 
+    public sealed record QuestRegion(string Text, string Kind, List<string> Include, List<string> Exclude);
+
     // Best-effort region labels from /api/regions.
     // Never fails the quest load — on any error returns an empty map (all Global).
-    private static async Task<Dictionary<string, (string Text, string Kind)>> TryLoadRegionsAsync()
+    private static async Task<Dictionary<string, QuestRegion>> TryLoadRegionsAsync()
     {
-        var map = new Dictionary<string, (string Text, string Kind)>(StringComparer.Ordinal);
+        var map = new Dictionary<string, QuestRegion>(StringComparer.Ordinal);
         try
         {
             var json = await NetworkHelper.FetchJsonAsync(Config.QuestRegionsUrl, headers: Config.DiscordHeaders);
@@ -173,10 +192,10 @@ public static class QuestService
                     }
                     map[id] = (isGlobal, includes.Count, excludes.Count) switch
                     {
-                        (true, _, _) or (_, 0, 0) => ("🌍 Global", "Global"),
-                        (_, _, > 0) when includes.Count == 0 => ("🚫 Not in " + string.Join(", ", excludes), "Exclude"),
-                        (_, 1, _) => ("📍 " + includes[0] + " only", "Include"),
-                        _ => ("📍 " + string.Join(", ", includes) + " only", "Include"),
+                        (true, _, _) or (_, 0, 0) => new QuestRegion("🌍 Global", "Global", includes, excludes),
+                        (_, _, > 0) when includes.Count == 0 => new QuestRegion("🚫 Not in " + string.Join(", ", excludes), "Exclude", includes, excludes),
+                        (_, 1, _) => new QuestRegion("📍 " + includes[0] + " only", "Include", includes, excludes),
+                        _ => new QuestRegion("📍 " + string.Join(", ", includes) + " only", "Include", includes, excludes),
                     };
                 }
                 catch { }
