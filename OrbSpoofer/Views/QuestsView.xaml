@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
         <!-- Live header -->
         <Grid Grid.Row="0" Margin="0,0,0,6">
@@ -59,7 +59,143 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="2">
+        <!-- Filters: type chips -->
+        <Grid Grid.Row="2" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="All" Margin="0,0,6,0" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
+                        Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="All">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.QuestTypeFilter, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="All">
+                                    <Setter Property="Background" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="🎮 Play" Margin="0,0,6,0" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
+                        Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="Play">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.QuestTypeFilter, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Play">
+                                    <Setter Property="Background" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="📺 Video" Margin="0,0,6,0" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
+                        Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="Video">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.QuestTypeFilter, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Video">
+                                    <Setter Property="Background" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="📡 Stream" Margin="0,0,6,0" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
+                        Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="Stream">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.QuestTypeFilter, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Stream">
+                                    <Setter Property="Background" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="▫ Other" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
+                        Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="Other">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.QuestTypeFilter, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Other">
+                                    <Setter Property="Background" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource Orb.SystemAccentBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="3">
             <!-- List always visible; IsLoading only lowers opacity (no Collapse -> no black flash) -->
                 <ListBox x:Name="QuestsList" Padding="4,4,8,6" ClipToBounds="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
                          ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="False" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel">
@@ -169,7 +305,7 @@
                                                 <Style TargetType="Button">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsVideoQuest}" Value="True">
+                                                        <DataTrigger Binding="{Binding AutoAvailable}" Value="True">
                                                             <Setter Property="Visibility" Value="Visible"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>

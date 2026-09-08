@@ -6,6 +6,9 @@ namespace OrbSpoofer.Helpers;
 public interface IDialogService
 {
     void ShowInfo(string title, string message, string? hint = null);
+    Task<bool> ShowConfirmAsync(string title, string message, string confirmText, string cancelText = "Later");
+    /// <summary>Confirm dialog whose accept button unlocks after N seconds of reading.</summary>
+    Task<bool> ShowInformedConsentAsync(string title, string message, int readSeconds, string confirmText, string cancelText = "Go back");
 }
 
 public sealed class DialogService : IDialogService
@@ -54,6 +57,88 @@ public sealed class DialogService : IDialogService
         {
             Debug.WriteLine($"DialogService.ShowInfo failed: {ex.Message}");
         }
+    }
+
+    public async Task<bool> ShowConfirmAsync(string title, string message, string confirmText, string cancelText = "Later")
+    {
+        try
+        {
+            var owner = _owner as MainWindow ?? Application.Current?.MainWindow as MainWindow;
+            if (owner != null)
+            {
+                var host = owner.DialogHostControl;
+                var dialog = new Wpf.Ui.Controls.ContentDialog(host)
+                {
+                    Title = title,
+                    Content = new System.Windows.Controls.TextBlock
+                    {
+                        Text = message,
+                        TextWrapping = System.Windows.TextWrapping.Wrap,
+                        Margin = new Thickness(0, 8, 0, 0)
+                    },
+                    PrimaryButtonText = confirmText,
+                    CloseButtonText = cancelText,
+                    IsSecondaryButtonEnabled = false,
+                };
+                var result = await dialog.ShowAsync();
+                return result == Wpf.Ui.Controls.ContentDialogResult.Primary;
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine($"ContentDialog confirm failed, fallback: {ex.Message}"); }
+        try
+        {
+            return MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        }
+        catch { return false; }
+    }
+
+    public async Task<bool> ShowInformedConsentAsync(string title, string message, int readSeconds, string confirmText, string cancelText = "Go back")
+    {
+        try
+        {
+            var owner = _owner as MainWindow ?? Application.Current?.MainWindow as MainWindow;
+            if (owner == null) return false;
+            var host = owner.DialogHostControl;
+            var remaining = Math.Max(1, readSeconds);
+            var dialog = new Wpf.Ui.Controls.ContentDialog(host)
+            {
+                Title = title,
+                Content = new System.Windows.Controls.TextBlock
+                {
+                    Text = message,
+                    TextWrapping = System.Windows.TextWrapping.Wrap,
+                    Margin = new Thickness(0, 8, 0, 0)
+                },
+                PrimaryButtonText = $"{confirmText} ({remaining})",
+                CloseButtonText = cancelText,
+                IsPrimaryButtonEnabled = false,
+                IsSecondaryButtonEnabled = false,
+            };
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (_, _) =>
+            {
+                try
+                {
+                    remaining--;
+                    if (remaining <= 0)
+                    {
+                        timer.Stop();
+                        dialog.IsPrimaryButtonEnabled = true;
+                        dialog.PrimaryButtonText = confirmText;
+                    }
+                    else dialog.PrimaryButtonText = $"{confirmText} ({remaining})";
+                }
+                catch { }
+            };
+            timer.Start();
+            try
+            {
+                var result = await dialog.ShowAsync();
+                return result == Wpf.Ui.Controls.ContentDialogResult.Primary;
+            }
+            finally { try { timer.Stop(); } catch { } }
+        }
+        catch (Exception ex) { Debug.WriteLine($"Informed consent failed: {ex.Message}"); return false; }
     }
 }
 

@@ -31,6 +31,8 @@ public partial class QuestsViewModel : ObservableObject
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private string? _activeSpoofQuestName;
 
+    [ObservableProperty] private string _questTypeFilter = "All";
+
     private CancellationTokenSource? _runAllCts;
     private CancellationTokenSource? _autoCts;
     private FileSystemWatcher? _watcher;
@@ -44,8 +46,9 @@ public partial class QuestsViewModel : ObservableObject
         _steamVm = steamVm;
         _dialogs = dialogs;
         QuestsView = CollectionViewSource.GetDefaultView(Quests);
-        // Region filter only — inserts/removes filter live, no reset needed on load.
-        QuestsView.Filter = o => o is not QuestItem q || q.IsRegionMatch;
+        // Region + type + text filters — inserts/removes filter live, no reset needed on load.
+        // Explicit Refresh() calls happen only on user filter actions (chips, debounced typing).
+        QuestsView.Filter = o => o is not QuestItem q || (q.IsRegionMatch && MatchesType(q));
         // Group by quest type (play / video / …) with dividers in the view.
         // No SortDescriptions: source order already puts playable first, completed last.
         QuestsView.GroupDescriptions.Add(new PropertyGroupDescription(nameof(QuestItem.TaskLabel)));
@@ -115,6 +118,7 @@ public partial class QuestsViewModel : ObservableObject
         try
         {
             var appSettings = new Infrastructure.Settings.AppSettingsStore().Load();
+            _officialOn = appSettings.UseOfficialApi;
             List<QuestItem> all;
             var officialFailed = false;
             if (appSettings.UseOfficialApi && !string.IsNullOrWhiteSpace(appSettings.DiscordToken))
@@ -146,6 +150,7 @@ public partial class QuestsViewModel : ObservableObject
             {
                 q.IsCompleted = completedIds.Contains(q.Id);
                 q.IsRegionMatch = RegionMatcher.IsMatch(q.RegionKind, q.RegionInclude, q.RegionExclude, regionPref);
+                q.AutoAvailable = _officialOn && q.IsVideoQuest;
                 if (!q.IsSpoofable)
                 {
                     q.NeedsSteamMode = false; // video/stream/activity open Discord instead
@@ -219,6 +224,7 @@ public partial class QuestsViewModel : ObservableObject
                             existing.RegionInclude = src.RegionInclude;
                             existing.RegionExclude = src.RegionExclude;
                             existing.IsRegionMatch = src.IsRegionMatch;
+                            existing.AutoAvailable = src.AutoAvailable;
                             int cur = Quests.IndexOf(existing);
                             if (cur != i) Quests.Move(cur, i);
                         }
@@ -280,6 +286,32 @@ public partial class QuestsViewModel : ObservableObject
 
     private IEnumerable<QuestItem> VisibleQuests() => QuestsView.OfType<QuestItem>();
 
+    private bool _officialOn;
+
+    /// <summary>Refreshes Auto availability after the danger-zone toggle changes (explicit user action).</summary>
+    public void UpdateAutomationAvailability()
+    {
+        try
+        {
+            _officialOn = new Infrastructure.Settings.AppSettingsStore().Load().UseOfficialApi;
+            foreach (var q in Quests) q.AutoAvailable = _officialOn && q.IsVideoQuest;
+            RefreshActionButtons();
+            QuestsView.Refresh();
+        }
+        catch (Exception ex) { Debug.WriteLine($"UpdateAutomationAvailability failed: {ex.Message}"); }
+    }
+
+    private bool MatchesType(QuestItem q) => QuestTypeFilter == "All" || q.QuestKind == QuestTypeFilter;
+
+    [RelayCommand]
+    private void SetQuestFilter(string type)
+    {
+        // Refresh happens in OnQuestTypeFilterChanged.
+        QuestTypeFilter = string.IsNullOrWhiteSpace(type) ? "All" : type;
+    }
+
+    partial void OnQuestTypeFilterChanged(string value) => QuestsView.Refresh();
+
     public int CompletedCount { get; private set; }
     public int PendingCount { get; private set; }
     public bool HasCompletedToClaim => CompletedCount > 0;
@@ -289,7 +321,7 @@ public partial class QuestsViewModel : ObservableObject
     {
         var visible = VisibleQuests().ToList();
         CanRunAll = !IsRunningAll && visible.Any(q => !q.IsCompleted && q.IsSpoofable);
-        CanAutoVideos = !IsAutoRunning && visible.Any(q => !q.IsCompleted && q.IsVideoQuest);
+        CanAutoVideos = _officialOn && !IsAutoRunning && visible.Any(q => !q.IsCompleted && q.IsVideoQuest);
         // Claim counts track play quests only (the spoofable ones).
         CompletedCount = Quests.Count(q => q.IsCompleted && q.IsSpoofable);
         PendingCount = Quests.Count(q => !q.IsCompleted && q.IsSpoofable);
@@ -439,6 +471,14 @@ public partial class QuestsViewModel : ObservableObject
             return;
         }
         if (quest.IsAutomating) return;
+        if (!_officialOn)
+        {
+            _dialogs.ShowInfo("Danger zone is off",
+                "Video automation lives behind the Official Discord API switch.",
+                "Enable it in Settings (danger zone) after reading the warnings.");
+            StatusMessage = "Enable the official API mode in Settings first.";
+            return;
+        }
         var token = RequireToken();
         if (token == null) return;
         if (quest.TaskSeconds <= 0)
@@ -486,6 +526,11 @@ public partial class QuestsViewModel : ObservableObject
         {
             _autoCts?.Cancel();
             StatusMessage = "Stopping video automation after the current post…";
+            return;
+        }
+        if (!_officialOn)
+        {
+            StatusMessage = "Enable the official API mode in Settings first.";
             return;
         }
         var token = RequireToken();

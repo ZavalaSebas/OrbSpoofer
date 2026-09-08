@@ -22,6 +22,7 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 - [x] Video auto-accept + auto-watch (per-quest chip + bulk run, view-paced progress, 429 backoff, local completion marking)
 - [x] New-quest watcher (polling + sidebar badge + auto-reload + orbs-only filter)
 - [x] Claim button with done/left counts (no interrupting dialogs)
+- [x] Quest list filters (search + type chips, debounced, counts follow visible set)
 - [ ] Auto-accept + auto-watch video quests (requires token mode; opt-in, off by default)
 - [ ] New-quest watcher: polling + in-app/toast alerts for fresh quests, `orbs-only` filter
 - [ ] Region explorer: browse/filter quests by region (data already available via `/api/regions`)

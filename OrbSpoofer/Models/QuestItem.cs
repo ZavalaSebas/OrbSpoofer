@@ -46,7 +46,7 @@ public class QuestItem : INotifyPropertyChanged
     public string TaskType
     {
         get => _taskType;
-        set { if (_taskType != value) { _taskType = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsVideoQuest)); OnPropertyChanged(nameof(TaskLabel)); } }
+        set { if (_taskType != value) { _taskType = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsVideoQuest)); OnPropertyChanged(nameof(IsSpoofable)); OnPropertyChanged(nameof(TaskLabel)); OnPropertyChanged(nameof(QuestKind)); } }
     }
 
     public bool IsVideoQuest => TaskType is "WATCH_VIDEO" or "WATCH_VIDEO_ON_MOBILE";
@@ -80,6 +80,14 @@ public class QuestItem : INotifyPropertyChanged
     public string AutoButtonText => IsAutomating ? "Stop ⏹" : "Auto ▶";
     public string AutoProgressText => IsAutomating ? $"{(int)(AutoProgress * TaskSeconds)}/{TaskSeconds}s" : "";
 
+    private bool _autoAvailable;
+    /// <summary>Auto UI shows only when the danger-zone official mode is enabled.</summary>
+    public bool AutoAvailable
+    {
+        get => _autoAvailable;
+        set { if (_autoAvailable != value) { _autoAvailable = value; OnPropertyChanged(); } }
+    }
+
     public string TaskDurationLabel => TaskMinutes > 0 ? $"{TaskMinutes} min" : $"{TaskSeconds} sec";
 
     public string TaskLabel => TaskType switch
@@ -93,6 +101,9 @@ public class QuestItem : INotifyPropertyChanged
         "PLAY_ACTIVITY" => "🎯 Activity",
         _ => "▫ " + TaskType,
     };
+
+    /// <summary>Coarse filter bucket: Play, Video, Stream, Other.</summary>
+    public string QuestKind => IsSpoofable ? "Play" : IsVideoQuest ? "Video" : TaskType == "STREAM_ON_DESKTOP" ? "Stream" : "Other";
 
     private string _regionText = "🌍 Global";
     public string RegionText
