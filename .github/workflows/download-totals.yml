@@ -1,0 +1,58 @@
+name: refresh download totals
+
+# Keeps the "Total downloads (all versions)" footer on every release body
+# up to date (GitHub's own per-release counters can't be changed).
+# Runs daily + on demand.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 - <<'EOF'
+          import json, os, subprocess, tempfile
+
+          def gh(*args, input_text=None):
+              r = subprocess.run(
+                  ["gh", *args], capture_output=True, text=True,
+                  input=input_text, env={**os.environ, "GH_TOKEN": os.environ["GH_TOKEN"]})
+              if r.returncode != 0:
+                  raise RuntimeError(r.stderr.strip() or "gh failed")
+              return r.stdout
+
+          releases = json.loads(gh("api", "repos/ZavalaSebas/OrbSpoofer/releases", "--paginate"))
+          total = sum(a.get("download_count", 0)
+                      for rel in releases for a in rel.get("assets", []))
+          line = f"\U0001F4E5 **Total downloads (all versions):** {total:,}"
+          print("total =", total)
+
+          import re
+          pattern = re.compile(r"\U0001F4E5 \*\*Total downloads \(all versions\):\*\* [\d,]+")
+          for rel in releases:
+              tag = rel["tag_name"]
+              body = json.loads(gh("release", "view", tag, "--json", "body"))["body"] or ""
+              if pattern.search(body):
+                  new_body = pattern.sub(line, body)
+              else:
+                  new_body = body.rstrip() + "\n\n---\n" + line + "\n"
+              if new_body != body:
+                  with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
+                      f.write(new_body)
+                      path = f.name
+                  gh("release", "edit", tag, "--notes-file", path)
+                  os.unlink(path)
+                  print("updated", tag)
+              else:
+                  print("current", tag)
+          EOF

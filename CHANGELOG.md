@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 - **Download counter:** total downloads across all releases — live shields badge in README, `📥 N downloads` stat in Credits (cached 24h, silent on failure), and every release notes footer now carries the running total (computed in the release workflow)
+- **Self-updating totals:** new scheduled `download-totals` workflow refreshes the total footer on all release bodies daily (plus manual dispatch); new releases also embed a live shields badge. Note: GitHub's own per-release asset counters can't be changed — the footer is what carries the accumulated total
 
 ## [2.2.0] - 2026-09-08
 
