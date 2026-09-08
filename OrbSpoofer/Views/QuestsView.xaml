@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
         <!-- Live header -->
         <Grid Grid.Row="0" Margin="0,0,0,6">
@@ -24,9 +24,9 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <ui:Button Appearance="Secondary" Padding="14,7" FontSize="12" Cursor="Hand" Margin="0,0,8,0"
                            Command="{Binding ClaimCommand}"
-                           ToolTip="Open Discord to claim finished quests">
+                           ToolTip="{Binding ClaimTooltip}">
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Symbol="Gift24" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <ui:SymbolIcon Symbol="Open24" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding ClaimText}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     </StackPanel>
                 </ui:Button>
@@ -49,18 +49,8 @@
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="1" Margin="0,8,0,14" Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="10" Padding="12,10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-            <Grid>
-                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                <Border Width="28" Height="28" CornerRadius="8" Background="{DynamicResource Orb.ElevatedBrush}" Margin="0,0,10,0">
-                    <ui:SymbolIcon Symbol="Info24" FontSize="14" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <TextBlock Grid.Column="1" Text="Video quests can't be spoofed — hit 📺 to open them in Discord. Region badges show availability." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap"/>
-            </Grid>
-        </Border>
-
-        <!-- Filters: type chips -->
-        <Grid Grid.Row="2" Margin="0,0,0,12">
+        <!-- Filters: type chips + info tooltip -->
+        <Grid Grid.Row="1" Margin="0,8,0,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Button Content="All" Margin="0,0,6,0" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
                         Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="All">
@@ -166,7 +156,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Button Content="▫ Other" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
+                <Button Content="▫ Other" Margin="0,0,6,0" Cursor="Hand" Padding="12,6" FontSize="11" FontWeight="SemiBold" BorderThickness="1"
                         Command="{Binding DataContext.SetQuestFilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="Other">
                     <Button.Style>
                         <Style TargetType="Button">
@@ -192,10 +182,15 @@
                         </Style>
                     </Button.Style>
                 </Button>
+                <Border Width="28" Height="28" CornerRadius="14" Margin="6,0,0,0" Background="{DynamicResource Orb.ElevatedBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        ToolTip="Video quests can't be spoofed — open them in Discord (↗ button or Claim link). Region badges show availability. Hidden quests stay out of Run All."
+                        Cursor="Help" VerticalAlignment="Center">
+                    <TextBlock Text="ⓘ" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
             <!-- List always visible; IsLoading only lowers opacity (no Collapse -> no black flash) -->
                 <ListBox x:Name="QuestsList" Padding="4,4,8,6" ClipToBounds="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0"
                          ItemsSource="{Binding QuestsView}" VirtualizingPanel.IsVirtualizing="False" ScrollViewer.CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel">
@@ -367,36 +362,32 @@
                                             <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding NeedsSteamMode}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
                                             <TextBlock FontSize="11" Foreground="{DynamicResource ErrorBrush}" Text="⚠ Steam required"/>
                                         </Border>
+                                        <TextBlock FontSize="10" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" Cursor="Hand" VerticalAlignment="Center" Margin="6,0,0,0"
+                                                   Text="Claim in Discord ↗"
+                                                   ToolTip="Open Discord quest home to accept &amp; claim">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSpoofable}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                            <TextBlock.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.OpenQuestHomeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                            </TextBlock.InputBindings>
+                                        </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
-                                <Border Grid.Column="2" Width="30" Height="30" CornerRadius="15" Cursor="Hand" Tag="{Binding}" ToolTip="Toggle completed" BorderThickness="1.5" Background="{DynamicResource Orb.ElevatedBrush}" BorderBrush="{DynamicResource BorderBrush}" VerticalAlignment="Center" Margin="0,0,10,0" PreviewMouseLeftButtonDown="ToggleCompleted_Click">
+                                <Border Grid.Column="3" Width="30" Height="30" CornerRadius="15" Cursor="Hand" Tag="{Binding}" ToolTip="Toggle completed" BorderThickness="1.5" Background="{DynamicResource Orb.ElevatedBrush}" BorderBrush="{DynamicResource Orb.SystemAccentBrush}" VerticalAlignment="Center" PreviewMouseLeftButtonDown="ToggleCompleted_Click">
                                     <Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Background" Value="#57F287"/><Setter Property="BorderBrush" Value="#57F287"/></DataTrigger></Style.Triggers></Style></Border.Style>
                                     <TextBlock Text="✓" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Hidden"/><Style.Triggers><DataTrigger Binding="{Binding IsCompleted}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
                                     </TextBlock>
                                 </Border>
-                                <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                                    <!-- Always reserves space (Opacity, not Visibility) so play buttons align across cards -->
-                                    <TextBlock FontSize="10" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" Cursor="Hand" HorizontalAlignment="Center" Margin="0,0,0,4"
-                                               Text="Claim in Discord ↗"
-                                               ToolTip="Open Discord quest home to accept &amp; claim">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Opacity" Value="0"/>
-                                                <Setter Property="IsHitTestVisible" Value="False"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSpoofable}" Value="False">
-                                                        <Setter Property="Opacity" Value="1"/>
-                                                        <Setter Property="IsHitTestVisible" Value="True"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                        <TextBlock.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.OpenQuestHomeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                        </TextBlock.InputBindings>
-                                    </TextBlock>
-                                <Button Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Cursor="Hand" Padding="0" Width="44" Height="44" BorderThickness="0" Background="Transparent">
+                                <Button Grid.Column="2" VerticalAlignment="Center" Margin="0,0,10,0" Command="{Binding DataContext.SpoofCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Cursor="Hand" Padding="0" Width="44" Height="44" BorderThickness="0" Background="Transparent">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="ToolTip" Value="Spoof"/>
@@ -440,7 +431,6 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                </StackPanel>
                             </Grid>
                         </Border>
                     </DataTemplate>

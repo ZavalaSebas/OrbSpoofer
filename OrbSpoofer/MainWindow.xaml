@@ -52,7 +52,7 @@
         <!-- Soft Mica veil -->
         <Border Grid.RowSpan="4" Background="{DynamicResource Orb.VeilBrush}" Opacity="0.45" IsHitTestVisible="False"/>
 
-        <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Icon="OS.png" Height="48" Padding="12,0" Background="Transparent"/>
+        <ui:TitleBar Grid.Row="0" Title="" Icon="OS.png" Height="48" Padding="12,0" Background="Transparent"/>
 
         <!-- Header — gradient + subtle border + glow bottom -->
         <Border Grid.Row="1" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,0,1" Padding="22,14">

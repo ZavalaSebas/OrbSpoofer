@@ -315,7 +315,10 @@ public partial class QuestsViewModel : ObservableObject
     public int CompletedCount { get; private set; }
     public int PendingCount { get; private set; }
     public bool HasCompletedToClaim => CompletedCount > 0;
-    public string ClaimText => $"Claim · {CompletedCount} done, {PendingCount} left";
+    public string ClaimText => $"Open Discord ({CompletedCount} done, {PendingCount} left)";
+    public string ClaimTooltip => CompletedCount > 0 || PendingCount > 0
+        ? $"Open Discord quest home ({CompletedCount} done, {PendingCount} left)"
+        : "Open Discord quest home";
 
     private void RefreshActionButtons()
     {
@@ -329,6 +332,7 @@ public partial class QuestsViewModel : ObservableObject
         OnPropertyChanged(nameof(PendingCount));
         OnPropertyChanged(nameof(HasCompletedToClaim));
         OnPropertyChanged(nameof(ClaimText));
+        OnPropertyChanged(nameof(ClaimTooltip));
     }
 
     [RelayCommand]

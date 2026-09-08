@@ -17,7 +17,7 @@
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock Text="Search" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Text="One result per game. Badge shows Discord, Steam, or Both." Margin="0,2,0,0"/>
+                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Text="Search a game to spoof and hit ▶." Margin="0,2,0,0"/>
             </StackPanel>
         </Grid>
         <Border Grid.Row="1" Margin="0,14,0,14" Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
