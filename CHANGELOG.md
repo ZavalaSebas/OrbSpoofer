@@ -12,6 +12,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **3.0 visual foundation:** refreshed the shell hierarchy, tighter title/header relationship, wider workspace rail, larger editorial section headings, new layout/typography tokens, softer 16px cards, lighter elevation, and more deliberate hover motion across all views
+
 ### Added
 - **All quest types in Active Quests:** `QuestService` no longer filters to `PLAY_ON_DESKTOP` — video, stream, activity and console quests are listed too, with a type badge (`🎮 Play`, `📡 Stream`, `📺 Video`, `📱 Mobile video`, `🎮 Xbox/PlayStation`, `🎯 Activity`). Playable quests sort first, `Run All` only runs spoofable ones
 - **Region badges:** quest regions loaded from `api.discordquest.com/api/regions` — `🌍 Global` (green), `📍 US only` (amber), `🚫 Not in AU, UK` (red). Best-effort: falls back to Global when the endpoint is unreachable

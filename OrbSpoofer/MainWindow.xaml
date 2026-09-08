@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:views="clr-namespace:OrbSpoofer.Views"
-        Title="OrbSpoofer" Height="740" Width="1060"
+        Title="OrbSpoofer" Height="760" Width="1120"
         MinHeight="640" MinWidth="920"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
@@ -52,10 +52,10 @@
         <!-- Soft Mica veil -->
         <Border Grid.RowSpan="4" Background="{DynamicResource Orb.VeilBrush}" Opacity="0.45" IsHitTestVisible="False"/>
 
-        <ui:TitleBar Grid.Row="0" Title="" Icon="OS.png" Height="48" Padding="12,0" Background="Transparent"/>
+        <ui:TitleBar Grid.Row="0" Title="" Icon="OS.png" Height="36" Padding="12,0" Background="Transparent"/>
 
         <!-- Header — gradient + subtle border + glow bottom -->
-        <Border Grid.Row="1" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,0,1" Padding="22,14">
+        <Border Grid.Row="1" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,0,1" Padding="24,12">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                     <GradientStop Color="{DynamicResource SurfaceColor}" Offset="0"/>
@@ -67,11 +67,13 @@
             </Border.Effect>
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Image Source="OS.png" Width="34" Height="34" Margin="0,0,11,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Border Width="40" Height="40" CornerRadius="12" Background="{DynamicResource Orb.ElevatedBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,12,0">
+                        <Image Source="OS.png" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="OrbSpoofer" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{StaticResource HeaderFont}"/>
-                        <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0" FontFamily="{StaticResource BodyFont}">
-                            <Run Text="Discord Orb Quest Spoofer"/><Run Text=" · " Foreground="{DynamicResource TextMutedBrush}"/><Run Text="{Binding HeaderStatus, Mode=OneWay}" Foreground="{DynamicResource SuccessBrush}"/>
+                        <TextBlock Text="OrbSpoofer" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{DynamicResource Orb.DisplayFont}"/>
+                        <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" FontFamily="{DynamicResource Orb.BodyFont}">
+                            <Run Text="DISCORD QUEST COMMAND CENTER" FontWeight="SemiBold"/><Run Text="  ·  " Foreground="{DynamicResource TextMutedBrush}"/><Run Text="{Binding HeaderStatus, Mode=OneWay}" Foreground="{DynamicResource SuccessBrush}"/>
                         </TextBlock>
                     </StackPanel>
                 </StackPanel>
@@ -304,12 +306,12 @@
         <!-- Main Content -->
         <Grid Grid.Row="2" Margin="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="SidebarColumn" Width="220"/>
+                <ColumnDefinition x:Name="SidebarColumn" Width="236"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- Sidebar — stretches with its column; the column is the single animated value -->
-            <Border x:Name="SidebarBorder" Grid.Column="0" HorizontalAlignment="Stretch" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,1,0">
+            <Border x:Name="SidebarBorder" Grid.Column="0" HorizontalAlignment="Stretch" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,0,1,0" Padding="10,12">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                         <GradientStop Color="{DynamicResource SurfaceColor}" Offset="0"/>
@@ -320,8 +322,8 @@
                     <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.22" Color="#000000"/>
                 </Border.Effect>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="12,16">
-                    <TextBlock Text="M  O  D  E  S" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="8,0,0,12" FontFamily="{StaticResource BodyFont}"
+                <StackPanel Margin="0,8">
+                     <TextBlock Text="WORKSPACE" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="12,0,0,12" FontFamily="{DynamicResource Orb.BodyFont}"
                                Visibility="{Binding SidebarCollapsed, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
                     <ui:Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="Quests">
                         <ui:Button.Style>
@@ -381,7 +383,7 @@
                         </ui:Button>
                     </StackPanel>
                     <Separator Background="{DynamicResource Orb.SeparatorBrush}" Margin="0,12,0,12"/>
-                    <TextBlock Text="I  N  F  O" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="8,0,0,12" FontFamily="{StaticResource BodyFont}"
+                     <TextBlock Text="SYSTEM" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="12,0,0,12" FontFamily="{DynamicResource Orb.BodyFont}"
                                Visibility="{Binding SidebarCollapsed, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
                     <ui:Button Appearance="Secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,10" FontSize="13" Margin="0,0,0,6" Command="{Binding NavigateCommand}" CommandParameter="Settings">
                         <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Settings24" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Settings" VerticalAlignment="Center" Visibility="{Binding DataContext.SidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/></StackPanel>
@@ -397,7 +399,7 @@
             </Border>
 
             <!-- Content Area — con glow interno + transiciones -->
-            <Grid Grid.Column="1" Margin="24,20" Background="Transparent">
+            <Grid Grid.Column="1" Margin="28,24" Background="Transparent">
                 <!-- Subtle glow behind content -->
                 <Ellipse Width="420" Height="320" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-20,-40,0" IsHitTestVisible="False" Opacity="0.04">
                     <Ellipse.Fill>

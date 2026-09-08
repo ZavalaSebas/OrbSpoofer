@@ -61,7 +61,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 
     private void AnimateSidebar(bool collapsed)
     {
-        double target = collapsed ? 48 : 220;
+        double target = collapsed ? 52 : 236;
 
         // Stop any in-flight animation first — rapid toggles otherwise race and stick.
         try { _sidebarClock?.Controller?.Stop(); } catch { }

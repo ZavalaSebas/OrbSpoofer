@@ -10,8 +10,8 @@
                 <ui:SymbolIcon Symbol="Wrench24" FontSize="18" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Manual Mode" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Text="Enter the exact process name Discord expects" Margin="0,2,0,0"/>
+                <TextBlock Text="Manual Mode" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                <TextBlock Style="{StaticResource Orb.Caption}" Text="Enter the exact process name Discord expects" Margin="0,3,0,0"/>
             </StackPanel>
         </Grid>
         <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,14,0,0" Padding="16">

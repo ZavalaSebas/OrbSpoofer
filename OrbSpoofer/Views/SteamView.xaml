@@ -10,8 +10,8 @@
                 <ui:SymbolIcon Symbol="Games24" FontSize="18" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Steam Quest Mode" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Text="Fake Steam appmanifest for games that verify Steam ownership" Margin="0,2,0,0"/>
+                <TextBlock Text="Steam Quest Mode" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                <TextBlock Style="{StaticResource Orb.Caption}" Text="Fake Steam appmanifest for games that verify Steam ownership" Margin="0,3,0,0"/>
             </StackPanel>
         </Grid>
         <Border Grid.Row="1" Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="10" Padding="12" Margin="0,14,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">

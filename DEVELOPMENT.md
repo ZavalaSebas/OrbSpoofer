@@ -233,6 +233,16 @@ Primary search path since v1.2.4. `PerformUnifiedSearch()` queries Discord DB an
 
 ## UI Components
 
+### 3.0 Visual System
+The 3.0 direction is a Quest Command Center: the shell owns navigation and global actions, views own task-specific controls, and cards provide the repeated content grammar. The visual system is intentionally token-first:
+- `Orb.Layout.*` controls page/card spacing; `Orb.CornerRadius.Card/Control` controls the shared silhouette
+- `Orb.DisplayFont` is used for view headings; `Orb.BodyFont` for captions and supporting copy
+- `Orb.Card`/`Orb.CardHover` provide the shared elevated surface and hover motion; do not create one-off card shadows in individual views
+- The workspace rail is wider in expanded mode (`236px`) and collapses to `52px`; only the grid column animates so rapid toggles cannot desynchronise the shell
+- View headers should use `Orb.SectionHeading` + `Orb.Caption` instead of manually repeating font sizes
+
+The overhaul is intentionally incremental: shell/tokens/cards first, then Active Quests, then secondary views. New controls should preserve existing commands and bindings while adopting the shared tokens.
+
 ### Theming (`Services/ThemeManager.cs`, `Styles/Theme.xaml`, `Themes/DarkTheme.xaml`, `Themes/LightTheme.xaml`)
 Palette lives in the theme dictionaries (identical keys, `Dark` default); `Styles/Theme.xaml` holds structure/styles/semantic colors only. `ApplyTheme()` swaps the merged-dictionary slot, syncs the WPF-UI theme, then re-applies the accent; choice persists in `theme.json` (`ThemeSettings.Theme`). Toggled from the header ☀️/🌙 button (`MainViewModel.ToggleThemeCommand`, `AppTheme` + `EnumToVisibilityConverter`).
 The accent picker (8 presets, same file) applies app-wide via `ApplyAccent()`, which replaces the `SystemAccentColorPrimary/Secondary/Tertiary` colors plus every derived brush (`Orb.SystemAccentBrush`, `PrimaryBrush`, `SecondaryBrush`, `AccentFillColor*`, glow alpha variants). Rules for XAML authors:

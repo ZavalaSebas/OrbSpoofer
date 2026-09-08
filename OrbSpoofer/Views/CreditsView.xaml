@@ -16,8 +16,8 @@
                     <ui:SymbolIcon Symbol="Info24" FontSize="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="Credits &amp; Info" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <TextBlock Text="About the project and how it works" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
+                    <TextBlock Text="Credits &amp; Info" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                    <TextBlock Text="About the project and how it works" Style="{StaticResource Orb.Caption}" Margin="0,3,0,0"/>
                 </StackPanel>
             </Grid>
 

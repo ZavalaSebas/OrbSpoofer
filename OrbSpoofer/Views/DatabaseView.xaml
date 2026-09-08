@@ -15,8 +15,8 @@
                 <ui:SymbolIcon Symbol="Database24" FontSize="18" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Discord Database" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding DbSourceText}" Margin="0,2,0,0"/>
+                <TextBlock Text="Discord Database" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                <TextBlock Style="{StaticResource Orb.Caption}" Text="{Binding DbSourceText}" Margin="0,3,0,0"/>
             </StackPanel>
         </Grid>
 

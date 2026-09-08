@@ -18,8 +18,8 @@
                 <ui:SymbolIcon Symbol="Trophy24" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Active Quests" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                <TextBlock Text="Play, stream &amp; video quests — ▶ spoofs, 📺 opens Discord" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
+                <TextBlock Text="Active Quests" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                <TextBlock Text="Play, stream &amp; video quests — ▶ spoofs, 📺 opens Discord" Style="{StaticResource Orb.Caption}" Margin="0,3,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <ui:Button Appearance="Secondary" Padding="14,7" FontSize="12" Cursor="Hand" Margin="0,0,8,0"

@@ -16,8 +16,8 @@
                 <ui:SymbolIcon Symbol="Search24" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <TextBlock Text="Search" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Text="Search a game to spoof and hit ▶." Margin="0,2,0,0"/>
+                <TextBlock Text="Search" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                <TextBlock Style="{StaticResource Orb.Caption}" Text="Search a game to spoof and hit ▶." Margin="0,3,0,0"/>
             </StackPanel>
         </Grid>
         <Border Grid.Row="1" Margin="0,14,0,14" Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">

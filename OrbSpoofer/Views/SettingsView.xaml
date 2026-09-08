@@ -10,8 +10,8 @@
                     <ui:SymbolIcon Symbol="Settings24" FontSize="22" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="Settings" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Region, quest links, official API &amp; notifications" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
+                    <TextBlock Text="Settings" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
+                    <TextBlock Text="Region, quest links, official API &amp; notifications" Style="{StaticResource Orb.Caption}" Margin="0,3,0,0"/>
                 </StackPanel>
             </Grid>
 

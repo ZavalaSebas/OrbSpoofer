@@ -38,8 +38,17 @@
     <Thickness x:Key="Orb.Spacing.SM">8</Thickness>
     <Thickness x:Key="Orb.Spacing.MD">12</Thickness>
     <Thickness x:Key="Orb.Spacing.LG">16</Thickness>
-    <CornerRadius x:Key="Orb.CornerRadius.Card">12</CornerRadius>
-    <CornerRadius x:Key="Orb.CornerRadius.Control">8</CornerRadius>
+    <CornerRadius x:Key="Orb.CornerRadius.Card">16</CornerRadius>
+    <CornerRadius x:Key="Orb.CornerRadius.Control">10</CornerRadius>
+
+    <!-- 3.0 layout tokens -->
+    <Thickness x:Key="Orb.Layout.Page">28,24,28,20</Thickness>
+    <Thickness x:Key="Orb.Layout.Card">20</Thickness>
+    <Thickness x:Key="Orb.Layout.CompactCard">14</Thickness>
+    <CornerRadius x:Key="Orb.CornerRadius.Pill">999</CornerRadius>
+    <FontFamily x:Key="Orb.DisplayFont">Segoe UI Variable Display, Segoe UI Variable, Segoe UI</FontFamily>
+    <FontFamily x:Key="Orb.BodyFont">Segoe UI Variable Text, Segoe UI Variable, Segoe UI</FontFamily>
+    <SolidColorBrush x:Key="Orb.FocusBrush" Color="{DynamicResource SystemAccentColorPrimary}" Opacity="0.22"/>
 
     <!-- Motion — professional, smooth -->
     <Duration x:Key="Orb.Motion.Fast">0:0:0.18</Duration>
@@ -52,6 +61,28 @@
     <KeySpline x:Key="Orb.Easing.Emphasized">0.2,0,0,1</KeySpline>
     <KeySpline x:Key="Orb.Easing.Standard">0.4,0,0.2,1</KeySpline>
 
+    <Style x:Key="Orb.IconTile" TargetType="Border">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+    </Style>
+
+    <Style x:Key="Orb.SectionHeading" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource Orb.DisplayFont}"/>
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+
+    <Style x:Key="Orb.Caption" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource Orb.BodyFont}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+    </Style>
+
     <!-- NOTE: palette brushes (Orb.Card.*, Orb.SeparatorBrush, glows, header/sidebar
          gradients) live in the theme dictionaries so Light/Dark can differ. -->
 
@@ -61,7 +92,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Orb.SeparatorBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource Orb.CornerRadius.Card}" />
-        <Setter Property="Padding" Value="14" />
+        <Setter Property="Padding" Value="16" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
         <Setter Property="RenderTransform">
@@ -74,7 +105,7 @@
         </Setter>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.18" Color="#000000"/>
+                <DropShadowEffect BlurRadius="18" ShadowDepth="1" Opacity="0.12" Color="#000000"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -92,10 +123,10 @@
                 <Trigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.006" Duration="{StaticResource Orb.Motion.Fast}">
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.01" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.006" Duration="{StaticResource Orb.Motion.Fast}">
+                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.01" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-2" Duration="{StaticResource Orb.Motion.Fast}">
