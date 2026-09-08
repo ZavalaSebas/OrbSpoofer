@@ -1,3 +1,4 @@
-Active Quests fixed after the quest feed changed format
-Pending updates now pop up right when the app opens (Skip keeps the sidebar reminder)
+All quest types with region badges, filters and grouping
+Video auto-watch, new-quest watcher and claim flow (token mode in Settings)
+Settings section, Light/Dark theme and refreshed interface
 Bug fixes and stability improvements

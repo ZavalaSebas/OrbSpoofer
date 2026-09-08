@@ -5,7 +5,7 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0" Background="{DynamicResource Orb.Tint.WarningBg}" BorderBrush="{DynamicResource Orb.Tint.WarningBorder}" BorderThickness="1">
                 <ui:SymbolIcon Symbol="Wrench24" FontSize="18" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
@@ -13,6 +13,9 @@
                 <TextBlock Text="Manual Mode" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
                 <TextBlock Style="{StaticResource Orb.Caption}" Text="Enter the exact process name Discord expects" Margin="0,3,0,0"/>
             </StackPanel>
+            <Border Grid.Column="2" CornerRadius="999" Padding="10,5" Background="{DynamicResource Orb.Tint.WarningBg}" BorderBrush="{DynamicResource Orb.Tint.WarningBorder}" BorderThickness="1" VerticalAlignment="Center">
+                <TextBlock Text="LOCAL PROCESS" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}"/>
+            </Border>
         </Grid>
         <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,14,0,0" Padding="16">
             <StackPanel>

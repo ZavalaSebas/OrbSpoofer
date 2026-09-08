@@ -5,7 +5,7 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1">
                 <ui:SymbolIcon Symbol="Games24" FontSize="18" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
@@ -13,6 +13,9 @@
                 <TextBlock Text="Steam Quest Mode" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
                 <TextBlock Style="{StaticResource Orb.Caption}" Text="Fake Steam appmanifest for games that verify Steam ownership" Margin="0,3,0,0"/>
             </StackPanel>
+            <Border Grid.Column="2" CornerRadius="999" Padding="10,5" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" VerticalAlignment="Center">
+                <TextBlock Text="STEAM OWNERSHIP" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Orb.Tint.InfoText}"/>
+            </Border>
         </Grid>
         <Border Grid.Row="1" Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="10" Padding="12" Margin="0,14,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
             <Grid>
@@ -124,10 +127,11 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasNoResults, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Width="56" Height="56" CornerRadius="14" Background="{DynamicResource Orb.Tint.InfoBg}" HorizontalAlignment="Center" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1">
-                    <ui:SymbolIcon Symbol="Games24" FontSize="24" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border Style="{StaticResource Orb.EmptyIcon}" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}">
+                    <ui:SymbolIcon Symbol="Games24" FontSize="28" Foreground="{DynamicResource Orb.Tint.InfoText}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
-                <TextBlock Text="Search a Steam game and click ▶ to spoof" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                <TextBlock Text="Explore Steam" Style="{StaticResource Orb.EmptyTitle}" Margin="0,14,0,0"/>
+                <TextBlock Text="Search for a game, then choose ▶ to spoof its Steam presence." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,5,0,0" MaxWidth="320" TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
     </Grid>

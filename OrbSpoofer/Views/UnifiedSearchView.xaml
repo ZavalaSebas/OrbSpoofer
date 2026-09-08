@@ -5,7 +5,7 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <Border Width="36" Height="36" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -19,12 +19,18 @@
                 <TextBlock Text="Search" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
                 <TextBlock Style="{StaticResource Orb.Caption}" Text="Search a game to spoof and hit ▶." Margin="0,3,0,0"/>
             </StackPanel>
+            <Border Grid.Column="2" CornerRadius="999" Padding="10,5" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="Database24" FontSize="12" Foreground="{DynamicResource Orb.Tint.InfoText}" Margin="0,0,5,0"/>
+                    <TextBlock Text="DISCORD + STEAM" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Orb.Tint.InfoText}"/>
+                </StackPanel>
+            </Border>
         </Grid>
-        <Border Grid.Row="1" Margin="0,14,0,14" Background="{DynamicResource SurfaceBrush}" CornerRadius="12" Padding="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+        <Border Grid.Row="1" Margin="0,18,0,16" Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                 <ui:SymbolIcon Grid.Column="0" Symbol="Search24" FontSize="16" Foreground="{DynamicResource TextMutedBrush}" Margin="10,0,6,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" VerticalContentAlignment="Center" Padding="0,10"
+                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="14" VerticalContentAlignment="Center" Padding="0,13"
                          Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" BorderBrush="Transparent">
                     <TextBox.Style>
                         <Style TargetType="TextBox">
@@ -164,10 +170,11 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding HasNoResults, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Border Width="56" Height="56" CornerRadius="14" Background="{DynamicResource Orb.ElevatedBrush}" HorizontalAlignment="Center" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                    <ui:SymbolIcon Symbol="Search24" FontSize="24" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border Style="{StaticResource Orb.EmptyIcon}">
+                    <ui:SymbolIcon Symbol="Search24" FontSize="28" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
-                <TextBlock Text="{Binding NoResultsText}" FontSize="14" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                <TextBlock Text="Ready when you are" Style="{StaticResource Orb.EmptyTitle}" Margin="0,14,0,0"/>
+                <TextBlock Text="{Binding NoResultsText}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,5,0,0" MaxWidth="320" TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
     </Grid>

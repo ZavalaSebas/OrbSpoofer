@@ -83,6 +83,24 @@
         <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
     </Style>
 
+    <Style x:Key="Orb.EmptyIcon" TargetType="Border">
+        <Setter Property="Width" Value="72"/>
+        <Setter Property="Height" Value="72"/>
+        <Setter Property="CornerRadius" Value="22"/>
+        <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="Orb.EmptyTitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource Orb.DisplayFont}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
     <!-- NOTE: palette brushes (Orb.Card.*, Orb.SeparatorBrush, glows, header/sidebar
          gradients) live in the theme dictionaries so Light/Dark can differ. -->
 

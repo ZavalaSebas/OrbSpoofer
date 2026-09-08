@@ -22,17 +22,17 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 - [x] Video auto-accept + auto-watch (per-quest chip + bulk run, view-paced progress, 429 backoff, local completion marking)
 - [x] New-quest watcher (polling + sidebar badge + auto-reload + orbs-only filter)
 - [x] Claim button with done/left counts (no interrupting dialogs)
-- [x] Quest list filters (search + type chips, debounced, counts follow visible set)
-- [ ] Auto-accept + auto-watch video quests (requires token mode; opt-in, off by default)
-- [ ] New-quest watcher: polling + in-app/toast alerts for fresh quests, `orbs-only` filter
-- [ ] Region explorer: browse/filter quests by region (data already available via `/api/regions`)
-- [ ] Claim reminder after timer finishes (`Claim in Discord ↗`)
-- [ ] Quest list filters (by type) + in-list search
-- [ ] Orb reward badge with Nitro 1.2x multiplier note
+- [x] Quest list filters (type chips with counts, counts follow visible set)
+- [x] Quest list grouped by type with dividers
+- [x] Open Discord button with play done/left counts (replaces interrupting dialogs)
+- [x] Danger zone: informed consent (5s read + 4 confirmations), Auto UI gated behind it
+- [x] Compact quests header (info banner folded into tooltip, empty TitleBar text)
+- [ ] Orb reward badge with Nitro 1.2x multiplier note (paused)
 
 ### Polish
-- [ ] Release 2.2.0 (version bump + WhatsNew + push)
+- [x] Release 2.2.0 (version bump + WhatsNew + push)
+- [x] 3.0 visual foundation (tokens, shell, section headings, mission radar, contextual pills, empty states)
 
 ### Epic (future major)
-- [ ] Redesign / rebrand evaluation (name, logo, palette, landing) + separate announcement if it grows
+- [ ] Full 3.0 redesign / rebrand (name, logo, palette, landing) + separate announcement if it grows
 - [ ] No embedded VPN — region viewing is already solved via the global mirror list; enrollment is server-side

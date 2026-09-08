@@ -193,9 +193,11 @@ Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllV
 8. Spoofable quests are cross-referenced against `DiscordDatabase.Games` by `application.id` or fuzzy name match — those with no win32 executable are flagged `NeedsSteamMode = true`. Non-spoofable quests (video/stream/activity) skip this and open Discord instead
 9. `SpoofAsync` spoofs `PLAY_ON_DESKTOP` via `GameFaker` (auto-routing to Steam mode when there is a Steam SKU but no win32 exe); anything else opens quest home in the **Discord desktop app** via deep link (`discord://-/quest-home`) with browser fallback (`https://discord.com/quest-home`) through `UrlLauncher.OpenDiscordQuestHome()`. Watching a video outside Discord grants no progress — the client reports `video-progress` to your account, so enrollment + watching must happen inside Discord
 10. `Run All` only queues spoofable, non-completed quests; video/stream quests are never auto-run
+11. Display filtering (region preference, type chips) runs through `ICollectionView.Filter` — inserts filter live, explicit `Refresh()` only on user filter actions, so background reloads never flash. Counts (`Run All` / Auto / Claim) follow the visible set
+12. The list groups by `TaskLabel` with divider headers; source order already puts playable first and completed last inside each group
 
 ### Completed Quests
-- Toggle via circular button (32×32, `CornerRadius="16"`) next to the spoof button
+- Toggle via circular button (30×30, accent ring) at the end of each quest card, after the ▶ play button
 - State persisted to `%LOCALAPPDATA%\OrbSpoofer/completed_quests.json` as a `HashSet<string>` of quest IDs
 - Auto-completed when the quest timer finishes — `--quest-id` is passed through command-line args to the timer process, which saves the ID before shutdown
 - Each tab click re-fetches from the API (quests are time-sensitive), re-applies completed state, and re-sorts
@@ -205,7 +207,8 @@ Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllV
 - If the quest API fails on first launch, the app silently falls back to **Unified Search** (since v1.2.4)
 - If the user manually clicks Active Quests later and it fails, a "no quests found" message is shown
 - Sidebar: **Active Quests** + **Search** at the top; Database / Steam / Manual live under a collapsed **▸ Advanced** panel
-- Each quest card shows: game image (54×54), game name, quest name, reward, duration (`15 min` or `14 sec` via `TaskDurationLabel`), expiry date, **task type badge** (`TaskLabel`), **region badge** (green Global / amber `US only` / red `Not in …`), action button (▶ spoof for play, ↗ open-in-Discord otherwise), **"Claim in Discord ↗"** link (non-spoofable only, `OpenQuestHomeCommand`), completion toggle, and **"⚠ Steam required"** label (when `NeedsSteamMode` is true)
+- Header row: `Open Discord (N done, M left)` for play quests (always opens quest home), `Auto videos` bulk run (danger-zone only), `Run All` for spoofable quests, plus a mission-radar count and type chips with live counts
+- Each quest card shows: game image (54×54, rounded clip), game name, quest name, reward, duration (`15 min` or `14 sec` via `TaskDurationLabel`), expiry date, **task type badge** (`TaskLabel`), **region badge** (green Global / amber `US only` / red `Not in …`), **"Claim in Discord ↗"** link in the badges row (non-spoofable only, `OpenQuestHomeCommand`), action button (▶ spoof for play, ↗ open-in-Discord otherwise, `Auto ▶` chip on video cards when danger-zone is on), completion toggle at the end, and **"⚠ Steam required"** label (when `NeedsSteamMode` is true)
 - Completed quests: card opacity 0.45, strikethrough on game/quest names, green filled circle with ✓
 - Toggle animation: fade out → re-sort → staggered fade in
 - `ListBoxItem` style for quests list overrides default selection/hover colors (no blue highlight)
@@ -240,6 +243,7 @@ The 3.0 direction is a Quest Command Center: the shell owns navigation and globa
 - `Orb.Card`/`Orb.CardHover` provide the shared elevated surface and hover motion; do not create one-off card shadows in individual views
 - The workspace rail is wider in expanded mode (`236px`) and collapses to `52px`; only the grid column animates so rapid toggles cannot desynchronise the shell
 - View headers should use `Orb.SectionHeading` + `Orb.Caption` instead of manually repeating font sizes
+- Active Quests owns the first 3.0 dashboard strip (`VisibleQuestCount`, `PlayableQuestCount`, `VideoQuestCount`); these metrics are derived from the same filtered `ICollectionView`, never from a second quest collection
 
 The overhaul is intentionally incremental: shell/tokens/cards first, then Active Quests, then secondary views. New controls should preserve existing commands and bindings while adopting the shared tokens.
 

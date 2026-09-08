@@ -30,6 +30,12 @@ public partial class QuestsViewModel : ObservableObject
     [ObservableProperty] private bool _isAutoRunning;
     [ObservableProperty] private string _statusMessage = "";
     [ObservableProperty] private string? _activeSpoofQuestName;
+    [ObservableProperty] private int _visibleQuestCount;
+    [ObservableProperty] private int _playableQuestCount;
+    [ObservableProperty] private int _videoQuestCount;
+    [ObservableProperty] private int _playCount;
+    [ObservableProperty] private int _streamCount;
+    [ObservableProperty] private int _otherCount;
 
     [ObservableProperty] private string _questTypeFilter = "All";
 
@@ -325,6 +331,12 @@ public partial class QuestsViewModel : ObservableObject
         var visible = VisibleQuests().ToList();
         CanRunAll = !IsRunningAll && visible.Any(q => !q.IsCompleted && q.IsSpoofable);
         CanAutoVideos = _officialOn && !IsAutoRunning && visible.Any(q => !q.IsCompleted && q.IsVideoQuest);
+        VisibleQuestCount = visible.Count;
+        PlayableQuestCount = visible.Count(q => q.IsSpoofable);
+        VideoQuestCount = visible.Count(q => q.IsVideoQuest);
+        PlayCount = visible.Count(q => q.QuestKind == "Play");
+        StreamCount = visible.Count(q => q.QuestKind == "Stream");
+        OtherCount = visible.Count(q => q.QuestKind != "Play" && q.QuestKind != "Video" && q.QuestKind != "Stream");
         // Claim counts track play quests only (the spoofable ones).
         CompletedCount = Quests.Count(q => q.IsCompleted && q.IsSpoofable);
         PendingCount = Quests.Count(q => !q.IsCompleted && q.IsSpoofable);

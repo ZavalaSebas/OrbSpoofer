@@ -10,10 +10,13 @@ All notable changes to this project are documented in this file.
 ### Added
 - **Update dialog on startup:** when an update is pending, the update window pops up right after launch (Skip/close keeps the sidebar reminder), instead of only showing the sidebar badge
 
-## [Unreleased]
+## [2.2.0] - 2026-09-08
 
 ### Changed
 - **3.0 visual foundation:** refreshed the shell hierarchy, tighter title/header relationship, wider workspace rail, larger editorial section headings, new layout/typography tokens, softer 16px cards, lighter elevation, and more deliberate hover motion across all views
+- **3.0 Active Quests dashboard:** live counts follow region/type filtering and existing commands, surfaced in the radar strip and filter chips
+- **3.0 mission radar:** replaced the repetitive metric-card grid with a single compact strip — live count plus type chips that carry their own counts (`All (26)`, `Play (12)`…), with an info tooltip instead of a full-width banner
+- **3.0 advanced modes:** Search now identifies its Discord + Steam scope, while Database, Steam and Manual expose their source/mode as quiet contextual pills instead of competing with the title
 
 ### Added
 - **All quest types in Active Quests:** `QuestService` no longer filters to `PLAY_ON_DESKTOP` — video, stream, activity and console quests are listed too, with a type badge (`🎮 Play`, `📡 Stream`, `📺 Video`, `📱 Mobile video`, `🎮 Xbox/PlayStation`, `🎯 Activity`). Playable quests sort first, `Run All` only runs spoofable ones
@@ -43,7 +46,7 @@ All notable changes to this project are documented in this file.
 - **Danger zone:** the official API section lives last in Settings with red styling, and enabling it requires a 5-second forced read plus 4 confirmations (secondary account, token risk, testing-only). Auto video UI stays hidden until the option is active
 - **Video auto-accept + auto-watch:** per-quest Auto chip (with live `12/115s` progress, re-click to stop) and header Auto videos bulk run. Enrolls via `POST enroll`, then reports increasing `video-progress` timestamps paced like a real viewer (7s cadence, enrollment-clock cap, jitter, 60s backoff on 429). Completed quests are marked locally; failures fall back gracefully. Requires token; use at your own risk
 - **New-quest watcher:** opt-in polling (Settings, 5–480 min) that learns the current list silently on first tick, then badges fresh arrivals on Active Quests, announces them in the status bar and auto-reloads the list. Orbs-only filter included; known IDs persist in `watcher_known.json`. Works with mirror or official API
-- **Claim button with counts:** completions accumulate quietly (no popups mid-flow) and the header always shows `Claim · N done, M left` for play quests — one click opens Discord when everything is ready
+- **Open Discord button with counts:** completions accumulate quietly (no popups mid-flow) and the header always shows `Open Discord (N done, M left)` for play quests — one click opens Discord when everything is ready
 - **Quest list filters:** type chips (All, 🎮 Play, 📺 Video, 📡 Stream, ▫ Other) filtering the live view; Run All / Auto / Claim counts follow the visible set
 - **Quest list grouped by type:** `🎮 Play`, `📺 Video`, … sections with dividers and counts (`ICollectionView` grouping over the manual order, no extra resets)
 

@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.4-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.2.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
 
@@ -20,7 +20,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.1.4 — Quest API hotfix + update dialog on startup.** Active Quests work again after Discord's quest feed changed format, and pending updates now pop up as soon as the app opens (Skip keeps the sidebar reminder). [See changelog](./CHANGELOG.md#214--2026-09-07).
+> **✨ New in 2.2.0 — Quests command center.** All quest types with region badges, type filters and grouping, video auto-watch (token), new-quest watcher, Settings, Light/Dark theme and a refreshed interface. [See changelog](./CHANGELOG.md#220--2026-09-08).
 
 <br/>
 
@@ -141,13 +141,14 @@ Select a game, hit Spoof, go back to the menu, pick another one, repeat. All pro
 
 When OrbSpoofer launches, it automatically fetches all active Discord quests from `api.discordquest.com` (plus regions from `api/regions`). If you have any quests in progress, they appear right away — no searching needed.
 
-1. Open OrbSpoofer — Active Quests are shown by default
+1. Open OrbSpoofer — Active Quests are shown by default, grouped by type with live counts
 2. **Play quests:** double-click a quest card (or click ▶) to start spoofing — a timer window opens, keep it running until the quest is done
-3. **Video / stream quests:** click ↗ (or `Claim in Discord ↗`) to open them directly in the **Discord desktop app** (`discord://-/quest-home`) — they must be accepted and watched inside Discord to earn the reward
+3. **Video / stream quests:** click ↗ to open them directly in the **Discord desktop app** (`discord://-/quest-home`) — they must be accepted and watched inside Discord to earn the reward. With a token + the danger-zone mode you can auto-watch them instead
+4. When everything is done, hit **Open Discord (N done, M left)** to claim
 
 **A few things to know:**
 
-- Every quest shows a **type badge** (🎮 Play, 📡 Stream, 📺 Video…) and a **region badge** (🌍 Global, 📍 US only, 🚫 Not in …)
+- Every quest shows a **type badge** (🎮 Play, 📡 Stream, 📺 Video…) and a **region badge** (🌍 Global, 📍 US only, 🚫 Not in …); filter by type with the chips or by region in Settings
 - Only **PLAY_ON_DESKTOP** quests can be spoofed; the rest open in Discord. `Run All` skips non-spoofable quests automatically
 - Promotional quests (published by Discord) are filtered out
 
