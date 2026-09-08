@@ -10,6 +10,11 @@ All notable changes to this project are documented in this file.
 ### Added
 - **Update dialog on startup:** when an update is pending, the update window pops up right after launch (Skip/close keeps the sidebar reminder), instead of only showing the sidebar badge
 
+## [Unreleased]
+
+### Added
+- **Download counter:** total downloads across all releases — live shields badge in README, `📥 N downloads` stat in Credits (cached 24h, silent on failure), and every release notes footer now carries the running total (computed in the release workflow)
+
 ## [2.2.0] - 2026-09-08
 
 ### Changed

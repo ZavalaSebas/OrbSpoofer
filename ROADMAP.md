@@ -31,6 +31,7 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 
 ### Polish
 - [x] Release 2.2.0 (version bump + WhatsNew + push)
+- [x] Download counter (README badge + in-app stat + running total in release notes)
 - [x] 3.0 visual foundation (tokens, shell, section headings, mission radar, contextual pills, empty states)
 
 ### Epic (future major)

@@ -79,7 +79,16 @@ jobs:
           }
           # For merge commits with extra header, ensure we still get clean body
           # (already handled by stripping subject; no special case needed)
+          # Append the running total across ALL releases (best-effort, never fails the release)
+          try {
+            $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/ZavalaSebas/OrbSpoofer/releases?per_page=100" -Headers @{ Authorization = "Bearer $env:GITHUB_TOKEN"; "User-Agent" = "OrbSpoofer-release" } -TimeoutSec 20
+            $total = 0
+            foreach ($r in $releases) { foreach ($a in $r.assets) { $total += [long]$a.download_count } }
+            if ($total -gt 0) { $msg = "$msg`n`n---`n📥 **Total downloads (all versions):** $("{0:N0}" -f $total)" }
+          } catch { Write-Host "Total downloads lookup failed: $($_.Exception.Message)" }
           $msg | Out-File -FilePath $env:RUNNER_TEMP/release_body.md -Encoding utf8NoBOM
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: softprops/action-gh-release@v3
         with:

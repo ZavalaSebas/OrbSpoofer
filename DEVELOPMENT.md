@@ -213,6 +213,9 @@ Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllV
 - Toggle animation: fade out → re-sort → staggered fade in
 - `ListBoxItem` style for quests list overrides default selection/hover colors (no blue highlight)
 
+### Download stats (`Services/GitHubStats.cs`)
+Total downloads across all releases via `GET api.github.com/repos/{owner}/{repo}/releases` (summed `download_count`), cached 24h in `github_stats.json`, silent on failure. Surfaced as `MainViewModel.DownloadsText` in Credits; the release workflow appends the running total to every release body.
+
 ### Config keys
 - `QuestApiUrl` — `https://api.discordquest.com/api/quests`
 - `QuestRegionsUrl` — `https://api.discordquest.com/api/regions`

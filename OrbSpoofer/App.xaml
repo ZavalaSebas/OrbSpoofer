@@ -11,6 +11,7 @@
             <conv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
             <conv:EnumEqualsConverter x:Key="EnumEqualsConverter"/>
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <conv:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />

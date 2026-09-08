@@ -30,6 +30,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _versionText = "";
     [ObservableProperty] private string _headerStatus = "Loading...";
     [ObservableProperty] private string _gameCountText = "";
+    [ObservableProperty] private string _downloadsText = "";
     [ObservableProperty] private string _statusMessage = "Loading...";
     [ObservableProperty] private string _dbSourceText = "";
     [ObservableProperty] private bool _hasUpdate;
@@ -171,11 +172,23 @@ public partial class MainViewModel : ObservableObject
             await CheckForUpdateAsync();
             QuestWatcher.NewQuestsFound += OnNewQuestsFound;
             QuestWatcher.Restart();
+            _ = LoadDownloadStatsAsync();
         }
         catch (Exception ex)
         {
             StatusMessage = $"Failed to load: {ex.Message}";
         }
+    }
+
+    private async Task LoadDownloadStatsAsync()
+    {
+        try
+        {
+            var total = await GitHubStats.GetTotalDownloadsAsync();
+            var formatted = GitHubStats.FormatDownloads(total);
+            if (!string.IsNullOrEmpty(formatted)) DownloadsText = formatted;
+        }
+        catch { }
     }
 
     private async Task<bool> TryLoadQuestsAsync()
