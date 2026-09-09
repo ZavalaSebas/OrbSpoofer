@@ -18,9 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - env:
+      - name: Refresh totals on all release notes
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 - <<'EOF'
+        shell: bash
+        run: |
+          python3 - <<'PYEOF'
           import json, os, subprocess, tempfile
 
           def gh(*args, input_text=None):
@@ -55,4 +58,4 @@ jobs:
                   print("updated", tag)
               else:
                   print("current", tag)
-          EOF
+          PYEOF
