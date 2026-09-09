@@ -1453,6 +1453,7 @@
       <div class="hero-proof-item"><strong>0 GB</strong><span>Game downloads</span></div>
       <div class="hero-proof-item"><strong>15 min</strong><span>Quest timer</span></div>
       <div class="hero-proof-item"><strong>1 file</strong><span>Zero setup</span></div>
+      <div class="hero-proof-item"><strong id="totalDownloads">…</strong><span>Total downloads</span></div>
     </div>
   </header>
 
@@ -1836,6 +1837,17 @@
             }
           });
         }
+      })
+      .catch(function() {});
+    fetch('https://api.github.com/repos/ZavalaSebas/OrbSpoofer/releases?per_page=100')
+      .then(r => r.json())
+      .then(data => {
+        var total = 0;
+        (data || []).forEach(function(rel) {
+          (rel.assets || []).forEach(function(a) { total += a.download_count || 0; });
+        });
+        var el = document.getElementById('totalDownloads');
+        if (el && total > 0) el.textContent = total.toLocaleString('en-US');
       })
       .catch(function() {});
   </script>
