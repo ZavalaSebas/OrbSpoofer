@@ -76,19 +76,27 @@ public class DiscordDatabase
     {
         try
         {
-            if (!Infrastructure.Cache.CacheStore.TryLoad<string>(CachePath, Config.MaxCacheAgeDays, out var rawJson) || rawJson == null)
-                return false;
-            var json = JsonSerializer.Deserialize<JsonElement>(rawJson);
-            ParseGames(json);
-            Source = "Local Cache";
-            CacheAgeDays = (int)(DateTime.Now - File.GetLastWriteTime(CachePath)).TotalDays;
-            return true;
+            // Fresh copy first; expired copy as last resort (preservation over
+            // freshness — an old game→exe mapping still spoofs fine).
+            if (TryParseCache(Config.MaxCacheAgeDays)) return true;
+            return TryParseCache(int.MaxValue);
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to load DB cache: {ex.Message}");
             return false;
         }
+    }
+
+    private bool TryParseCache(int maxAgeDays)
+    {
+        if (!Infrastructure.Cache.CacheStore.TryLoad<string>(CachePath, maxAgeDays, out var rawJson) || rawJson == null)
+            return false;
+        var json = JsonSerializer.Deserialize<JsonElement>(rawJson);
+        ParseGames(json);
+        Source = "Local Cache";
+        CacheAgeDays = (int)(DateTime.Now - File.GetLastWriteTime(CachePath)).TotalDays;
+        return true;
     }
 
     private void ParseGames(JsonElement json)

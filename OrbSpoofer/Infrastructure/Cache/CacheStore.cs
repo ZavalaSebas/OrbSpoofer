@@ -21,6 +21,24 @@ public static class CacheStore
         catch { return false; }
     }
 
+    /// <summary>Loads regardless of age (preservation last resort). Prefer
+    /// <see cref="TryLoad{T}"/> first; use this only when everything else failed.
+    /// ageDays is -1 when unknown.</summary>
+    public static bool TryLoadAnyAge<T>(string path, out T? value, out double ageDays)
+    {
+        value = default;
+        ageDays = -1;
+        try
+        {
+            if (!File.Exists(path)) return false;
+            ageDays = (DateTime.Now - File.GetLastWriteTime(path)).TotalDays;
+            var json = File.ReadAllText(path);
+            value = JsonSerializer.Deserialize<T>(json);
+            return value is not null;
+        }
+        catch { return false; }
+    }
+
     public static void Save<T>(string path, T value)
     {
         try

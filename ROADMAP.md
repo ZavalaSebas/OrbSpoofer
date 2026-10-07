@@ -4,6 +4,10 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 
 ## Shipped ✅
 
+- [x] Quest cache + history (2.3.0): local `quests_cache.json`, freshness pill (Live/Cached/Offline), API warning + manual reload, Search fallback only without cache
+- [x] Preservation mode (2.3.0): expired cache copies as last resort (game DB, Steam, image URLs), no `steam_search` purge, outdated badge
+- [x] Clear cached data in Settings (2.3.0): size readout + confirmed wipe, settings/token/progress kept
+- [x] Source pills unified redesign (2.3.0)
 - [x] Hall of Fame / Special Thanks + Thanks Trang! pill (2.1.3)
 - [x] Landing page visual overhaul (2.1.3)
 - [x] All quest types (play/stream/video/activity) + region badges + Discord deep link

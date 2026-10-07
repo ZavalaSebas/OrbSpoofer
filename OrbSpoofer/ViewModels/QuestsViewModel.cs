@@ -2,10 +2,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OrbSpoofer.Helpers;
+using OrbSpoofer.Infrastructure.Settings;
 using OrbSpoofer.Models;
 using OrbSpoofer.Services;
 
@@ -38,6 +40,16 @@ public partial class QuestsViewModel : ObservableObject
     [ObservableProperty] private int _otherCount;
 
     [ObservableProperty] private string _questTypeFilter = "All";
+
+    // Data provenance: live fetch vs local cache (offline resilience).
+    [ObservableProperty] private bool _isLiveData = true;
+    [ObservableProperty] private string _dataFreshnessText = "Live";
+    [ObservableProperty] private bool _hasApiWarning;
+    [ObservableProperty] private string _apiWarningText = "";
+    [ObservableProperty] private bool _hasQuestCache;
+    [ObservableProperty] private ObservableCollection<QuestHistoryEntry> _history = [];
+    [ObservableProperty] private bool _hasHistory;
+    [ObservableProperty] private int _historyCount;
 
     private CancellationTokenSource? _runAllCts;
     private CancellationTokenSource? _autoCts;
@@ -125,25 +137,55 @@ public partial class QuestsViewModel : ObservableObject
         {
             var appSettings = new Infrastructure.Settings.AppSettingsStore().Load();
             _officialOn = appSettings.UseOfficialApi;
+            var cacheStore = new QuestCacheStore();
+            var cached = cacheStore.Load();
+            HasQuestCache = cached.HasPayload;
+            var historyLog = cached.History;
             List<QuestItem> all;
             var officialFailed = false;
-            if (appSettings.UseOfficialApi && !string.IsNullOrWhiteSpace(appSettings.DiscordToken))
+            var now = DateTime.UtcNow;
+            try
             {
-                try { all = await QuestService.GetOfficialQuestsAsync(appSettings.DiscordToken.Trim()); }
-                catch (Exception ex)
+                string questsRaw, regionsRaw;
+                if (appSettings.UseOfficialApi && !string.IsNullOrWhiteSpace(appSettings.DiscordToken))
                 {
-                    Debug.WriteLine($"Official API failed, falling back to mirror: {ex.Message}");
-                    officialFailed = true;
-                    all = await QuestService.GetActivePlayQuestsAsync();
+                    try { (questsRaw, regionsRaw) = await FetchOfficialRawStringsAsync(appSettings.DiscordToken.Trim(), cached.RegionsJson); }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Official API failed, falling back to mirror: {ex.Message}");
+                        officialFailed = true;
+                        (questsRaw, regionsRaw) = await FetchMirrorRawStringsAsync(cached.RegionsJson);
+                    }
                 }
+                else
+                {
+                    (questsRaw, regionsRaw) = await FetchMirrorRawStringsAsync(cached.RegionsJson);
+                }
+                all = QuestService.ParseQuests(JsonDocument.Parse(questsRaw).RootElement, ParseRegionsRaw(regionsRaw), now);
+                historyLog = QuestCacheHelpers.MergeHistory(historyLog, all, now);
+                cacheStore.Save(new QuestCacheData(now, questsRaw, regionsRaw, historyLog));
+                HasQuestCache = true;
+                IsLiveData = true;
+                HasApiWarning = false;
+                DataFreshnessText = "Live";
             }
-            else
+            catch (Exception ex)
             {
-                all = await QuestService.GetActivePlayQuestsAsync();
+                Debug.WriteLine($"Quest fetch failed, trying local cache: {ex.Message}");
+                if (!cached.HasPayload) throw; // new user + API down -> outer catch -> Search fallback
+                all = QuestService.ParseQuests(JsonDocument.Parse(cached.QuestsJson).RootElement, ParseRegionsRaw(cached.RegionsJson), now);
+                var fetchedAt = cached.FetchedAtUtc.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(cached.FetchedAtUtc, DateTimeKind.Utc)
+                    : cached.FetchedAtUtc.ToUniversalTime();
+                IsLiveData = false;
+                HasApiWarning = true;
+                DataFreshnessText = $"Cached · {QuestCacheHelpers.FormatAge(fetchedAt, now)}";
+                ApiWarningText = $"Couldn't refresh ({ShortApiError(ex)}) — showing last saved copy. Hit ⟳ to retry.";
             }
             var completedIds = Config.LoadCompletedQuestIds();
             var sourceSuffix = officialFailed ? " (official API failed — using mirror)"
                 : appSettings.UseOfficialApi && !string.IsNullOrWhiteSpace(appSettings.DiscordToken) ? " (official API)" : "";
+            if (!IsLiveData) sourceSuffix += " (copia guardada)";
 
             // Keep all API quests visible - don't hide those not in DB (DB may be stale)
             // Instead annotate with NeedsSteamMode so user knows to use Steam/Manual mode
@@ -171,12 +213,15 @@ public partial class QuestsViewModel : ObservableObject
 
             // Playable first (actionable in-app), then video/stream (open Discord), completed last
             var sorted = filtered.OrderBy(q => q.IsCompleted).ThenBy(q => !q.IsSpoofable).ThenBy(q => q.ExpiresAt).ToList();
+            RefreshHistoryView(historyLog, new HashSet<string>(sorted.Select(q => q.Id), StringComparer.Ordinal));
 
             if (sorted.Count == 0)
             {
                 // clear without animation if already empty
                 if (Quests.Count != 0) Quests.Clear();
-                EmptyText = "No active quests found. Try Search to spoof a game manually.";
+                EmptyText = IsLiveData
+                    ? "No active quests found. Try Search to spoof a game manually."
+                    : $"No active quests in the saved copy ({DataFreshnessText}). Try Search or hit ⟳ later.";
                 HasNoQuests = true;
                 CanRunAll = false;
                 CanAutoVideos = false;
@@ -248,8 +293,13 @@ public partial class QuestsViewModel : ObservableObject
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.WriteLine($"Quest load failed with no cache: {ex.Message}");
+            IsLiveData = false;
+            HasApiWarning = true;
+            DataFreshnessText = "Offline";
+            ApiWarningText = $"Couldn't load quests ({ShortApiError(ex)}) and there's no saved copy yet.";
             if (Quests.Count == 0)
             {
                 EmptyText = "No active quests found. The API may be unavailable — use Search to spoof a game.";
@@ -267,6 +317,63 @@ public partial class QuestsViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(_regionPref)) return "";
         var shown = Quests.Count(q => q.IsRegionMatch);
         return shown == total ? "" : $" — showing {shown} of {total} (region {_regionPref.Trim().ToUpperInvariant()})";
+    }
+
+    private static async Task<(string QuestsJson, string RegionsJson)> FetchMirrorRawStringsAsync(string cachedRegionsJson)
+    {
+        var (quests, regions) = await QuestService.FetchRawAsync();
+        return (quests.GetRawText(), regions.ValueKind == JsonValueKind.Object ? regions.GetRawText() : cachedRegionsJson);
+    }
+
+    private static async Task<(string QuestsJson, string RegionsJson)> FetchOfficialRawStringsAsync(string token, string cachedRegionsJson)
+    {
+        var (quests, regions) = await QuestService.FetchOfficialRawAsync(token);
+        return (quests.GetRawText(), regions.ValueKind == JsonValueKind.Object ? regions.GetRawText() : cachedRegionsJson);
+    }
+
+    private static Dictionary<string, QuestService.QuestRegion> ParseRegionsRaw(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return new Dictionary<string, QuestService.QuestRegion>(StringComparer.Ordinal);
+        try { return QuestService.ParseRegions(JsonDocument.Parse(raw).RootElement); }
+        catch (Exception ex) { Debug.WriteLine($"ParseRegionsRaw failed: {ex.Message}"); return new Dictionary<string, QuestService.QuestRegion>(StringComparer.Ordinal); }
+    }
+
+    private static string ShortApiError(Exception ex)
+    {
+        var msg = ex.Message ?? "";
+        if (msg.Contains("429", StringComparison.OrdinalIgnoreCase)) return "API rate-limited (429)";
+        if (msg.Contains("401", StringComparison.OrdinalIgnoreCase) || msg.Contains("403", StringComparison.OrdinalIgnoreCase)) return "API rejected the request";
+        return "API unreachable";
+    }
+
+    private void RefreshHistoryView(List<QuestHistoryEntry> log, HashSet<string> activeIds)
+    {
+        try
+        {
+            var past = log
+                .Where(e => !activeIds.Contains(e.Id))
+                .OrderByDescending(e => e.FirstSeenAtUtc)
+                .Take(50)
+                .ToList();
+            History.Clear();
+            foreach (var e in past) History.Add(e);
+            HasHistory = History.Count > 0;
+            HistoryCount = History.Count;
+        }
+        catch (Exception ex) { Debug.WriteLine($"RefreshHistoryView failed: {ex.Message}"); }
+    }
+
+    /// <summary>Drops the in-memory history view after the cache files were wiped.</summary>
+    public void ClearHistoryView()
+    {
+        try
+        {
+            History.Clear();
+            HasHistory = false;
+            HistoryCount = 0;
+            HasQuestCache = false;
+        }
+        catch (Exception ex) { Debug.WriteLine($"ClearHistoryView failed: {ex.Message}"); }
     }
 
     /// <summary>Re-applies the region filter after settings change. One explicit refresh (user action).</summary>
@@ -354,6 +461,29 @@ public partial class QuestsViewModel : ObservableObject
         StatusMessage = CompletedCount > 0
             ? $"Opened Discord — claim your {CompletedCount} completed quest(s)"
             : "Opened Discord quest home";
+    }
+
+    /// <summary>Re-spoof from the history log (quick access to recurring games).
+    /// Only still-valid quests can run; expired ones are record-only.</summary>
+    [RelayCommand]
+    private async Task SpoofFromHistoryAsync(QuestHistoryEntry? entry)
+    {
+        if (entry == null) return;
+        if (entry.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            StatusMessage = $"\"{entry.GameName}\" already expired — history is record-only.";
+            return;
+        }
+        await SpoofAsync(new QuestItem
+        {
+            Id = entry.Id,
+            GameName = entry.GameName,
+            QuestName = entry.QuestName,
+            Reward = entry.Reward,
+            ApplicationId = entry.ApplicationId,
+            TaskType = entry.TaskType,
+            ExpiresAt = entry.ExpiresAtUtc,
+        });
     }
 
     public event Action? OnQuestsLoaded;

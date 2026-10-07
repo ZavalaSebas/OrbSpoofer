@@ -305,15 +305,21 @@ All cache files are stored in `%LOCALAPPDATA%\OrbSpoofer/`:
 | `steam_search/{query}.json` | Steam Store search results | ~2-5KB each | 30 days |
 | `completed_quests.json` | User quest completion toggle | ~1KB | Never expires |
 
-### Database cache flow
+### Database cache flow (preservation: expired copies are last resort, never an error)
 
 ```
 LoadAsync():
   1. Try Discord API → if OK, save JSON to db_cache.json
   2. Try GitHub Gist → if OK, save JSON to db_cache.json
   3. Read db_cache.json → if exists and < 30 days old, use it
-  4. No cache → throw DatabaseLoadError
+  4. Read db_cache.json ignoring age → if exists, use it with "may be outdated" status
+  5. No cache at all → throw DatabaseLoadError
 ```
+
+Same fresh-first/expired-fallback pattern (`CacheStore.TryLoad` → `TryLoadAnyAge`)
+applies to `steam_search/{query}.json`, `steam_ids.json` and `image_urls.json`.
+`steam_search` files are never purged (each is a few KB). Status bar escalates past
+the TTL: `Local Cache (N games, 90d old — may be outdated)`.
 
 The cached JSON is the raw API response, re-parsed by `ParseGames()` on load. Cache age is checked via `FileInfo.LastWriteTime`.
 
@@ -362,10 +368,28 @@ Ready — 30,412 games loaded from Discord Official API
 
 ### What is NOT cached
 
-- **Quest API** (`api.discordquest.com/api/quests` + `/api/regions`) — quests are time-sensitive and change frequently, caching would show stale data
-- **Image URLs** — Discord CDN URLs are deterministic (constructed from icon hash), no benefit from caching
 - **Game images themselves** — only the URL strings are cached (in SteamIdCache), not the actual image files
 - **Completed quests** — persisted permanently (never expires), not subject to cache TTL
+
+### Quest cache (`quests_cache.json`, no TTL — preservation, not freshness)
+
+Unlike the game DB, quests are time-sensitive, so the cache never pretends to be
+fresh: `QuestsViewModel.LoadAsync()` fetches on app startup (plus event-driven
+reloads: completion watcher, run-all/auto finish, new-quest watcher, manual ⟳ —
+never on plain navigation), and only falls back to the cache when the fetch throws.
+
+- Stored raw payloads (`QuestsJson`/`RegionsJson`) + `FetchedAtUtc` + append-only
+  `History` log (capped at 200, pruned oldest-first-seen) — re-parsed on every
+  load so expiry filtering always applies to `now`
+- `IsLiveData` / `DataFreshnessText` pill under the title (`Live` vs
+  `Cached · X ago`, `Offline` when there is nothing to show) + `HasApiWarning` /
+  `ApiWarningText` bar with the short reason (429 vs unreachable) when serving
+  cache or failing outright
+- Search fallback only happens with no cache at all (new user + dead API);
+  returning users stay on Quests with cache + history
+- History (`QuestHistoryEntry`: id, names, reward, appId, task type, expiry,
+  first-seen) feeds the History expander; spoof-from-history only runs for
+  still-valid quests, expired ones are record-only
 
 ## Welcome Sentinel
 

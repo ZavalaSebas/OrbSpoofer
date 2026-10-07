@@ -18,8 +18,8 @@
                 <TextBlock Text="Discord Database" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
                 <TextBlock Style="{StaticResource Orb.Caption}" Text="{Binding DbSourceText}" Margin="0,3,0,0"/>
             </StackPanel>
-            <Border Grid.Column="2" CornerRadius="999" Padding="10,5" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" VerticalAlignment="Center">
-                <TextBlock Text="LIVE DISCORD DATA" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Orb.Tint.InfoText}"/>
+            <Border Grid.Column="2" CornerRadius="8" Padding="10,5" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" VerticalAlignment="Center">
+                <TextBlock Text="Live Discord data" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Orb.Tint.InfoText}"/>
             </Border>
         </Grid>
 

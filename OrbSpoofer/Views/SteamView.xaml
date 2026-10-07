@@ -13,8 +13,8 @@
                 <TextBlock Text="Steam Quest Mode" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
                 <TextBlock Style="{StaticResource Orb.Caption}" Text="Fake Steam appmanifest for games that verify Steam ownership" Margin="0,3,0,0"/>
             </StackPanel>
-            <Border Grid.Column="2" CornerRadius="999" Padding="10,5" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" VerticalAlignment="Center">
-                <TextBlock Text="STEAM OWNERSHIP" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Orb.Tint.InfoText}"/>
+            <Border Grid.Column="2" CornerRadius="8" Padding="10,5" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" VerticalAlignment="Center">
+                <TextBlock Text="Steam ownership" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource Orb.Tint.InfoText}"/>
             </Border>
         </Grid>
         <Border Grid.Row="1" Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="10" Padding="12" Margin="0,14,0,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">

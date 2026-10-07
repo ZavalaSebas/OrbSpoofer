@@ -8,7 +8,7 @@
 [![WPF](https://img.shields.io/badge/WPF-Desktop-5865f2?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/)
 [![Platform](https://img.shields.io/badge/Windows-10%2F11-00a4ef?style=flat-square&logo=windows&logoColor=white&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer)
 [![License](https://img.shields.io/badge/License-GPL%20v3-ff4444?style=flat-square&logo=opensourceinitiative&logoColor=white&labelColor=1a1a2e)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
+[![Version](https://img.shields.io/badge/Version-2.3.0-57F287?style=flat-square&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 [![Downloads](https://img.shields.io/github/downloads/ZavalaSebas/OrbSpoofer/total?style=flat-square&color=57F287&labelColor=1a1a2e)](https://github.com/ZavalaSebas/OrbSpoofer/releases)
 
 <br/>
@@ -21,7 +21,7 @@ Automate Discord orb quests without downloading games :)
 
 <br/>
 
-> **✨ New in 2.2.0 — Quests command center.** All quest types with region badges, type filters and grouping, video auto-watch (token), new-quest watcher, Settings, Light/Dark theme and a refreshed interface. [See changelog](./CHANGELOG.md#220--2026-09-08).
+> **✨ New in 2.3.0 — offline resilience.** Quests persist locally with history, freshness pill + manual reload, clear-cache option in Settings, and expired caches as last resort so the app keeps working. [See changelog](./CHANGELOG.md#230--2026-09-27).
 
 <br/>
 

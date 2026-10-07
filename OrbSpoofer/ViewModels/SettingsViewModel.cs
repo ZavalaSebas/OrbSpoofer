@@ -31,6 +31,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _tokenCheckResult = "";
     [ObservableProperty] private bool _tokenCheckOk;
     [ObservableProperty] private bool _isCheckingToken;
+    [ObservableProperty] private string _cacheSizeText = "";
+    [ObservableProperty] private string _cacheClearResult = "";
 
     public SettingsViewModel(QuestsViewModel quests, IDialogService dialogs)
     {
@@ -48,6 +50,7 @@ public partial class SettingsViewModel : ObservableObject
             _useDiscordAppLink = s.UseDiscordAppLink;
         }
         catch { }
+        RefreshCacheSize();
     }
 
     private void Save()
@@ -151,4 +154,33 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnPollIntervalMinutesChanged(int value) { Save(); QuestWatcher.Restart(); }
     partial void OnNotifyOrbsOnlyChanged(bool value) => Save();
     partial void OnUseDiscordAppLinkChanged(bool value) => Save();
+
+    public void RefreshCacheSize()
+    {
+        try
+        {
+            var (bytes, files) = Services.AppCacheJanitor.Measure();
+            CacheSizeText = files == 0
+                ? "No cached data on this PC."
+                : $"{Services.AppCacheJanitor.FormatBytes(bytes)} across {files} file(s).";
+        }
+        catch { CacheSizeText = ""; }
+    }
+
+    [RelayCommand]
+    private async Task ClearCacheAsync()
+    {
+        var ok = await _dialogs.ShowConfirmAsync("Clear cached data?",
+            "Deletes the game database copy, saved quest copies + history, and Steam lookups from this PC. "
+            + "Close any running spoof timers first — their Steam manifests are removed too. "
+            + "Settings, token, theme and completed quests are kept.",
+            "Clear everything", "Cancel");
+        if (!ok) return;
+        var (deleted, failed) = Services.AppCacheJanitor.Clear();
+        _quests.ClearHistoryView();
+        RefreshCacheSize();
+        CacheClearResult = failed == 0
+            ? $"✓ Cleared {deleted} file(s) — fresh copies download on next launch."
+            : $"Cleared {deleted} file(s), {failed} failed — restart the app and try again.";
+    }
 }

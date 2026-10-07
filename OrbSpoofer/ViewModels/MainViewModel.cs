@@ -149,8 +149,9 @@ public partial class MainViewModel : ObservableObject
 
             if (_db.CacheAgeDays.HasValue)
             {
-                StatusMessage = $"Database: Local Cache ({_db.Games.Count:N0} games, {_db.CacheAgeDays.Value}d old)";
-                HeaderStatus = $"{_db.Games.Count:N0} games (cached {_db.CacheAgeDays.Value}d ago)";
+                var outdated = _db.CacheAgeDays.Value > Config.MaxCacheAgeDays ? " — may be outdated" : "";
+                StatusMessage = $"Database: Local Cache ({_db.Games.Count:N0} games, {_db.CacheAgeDays.Value}d old){outdated}";
+                HeaderStatus = $"{_db.Games.Count:N0} games (cached {_db.CacheAgeDays.Value}d ago{outdated})";
             }
             else
             {
@@ -194,8 +195,9 @@ public partial class MainViewModel : ObservableObject
     private async Task<bool> TryLoadQuestsAsync()
     {
         await Quests.LoadAsync();
-        // Quests.LoadAsync sets HasNoQuests if failed; we treat no quests as fallback to search
-        return !Quests.HasNoQuests || Quests.Quests.Count > 0;
+        // Search fallback is only for new users (no local quest cache) hitting a dead API.
+        // Returning users stay on Quests with their cached copy + history.
+        return !Quests.HasNoQuests || Quests.Quests.Count > 0 || Quests.HasQuestCache;
     }
 
     private void OnNewQuestsFound(List<QuestItem> fresh)

@@ -23,10 +23,24 @@ public static class QuestService
 
     public static async Task<List<QuestItem>> GetActiveQuestsAsync()
     {
-        var json = await NetworkHelper.FetchJsonAsync(Config.QuestApiUrl, headers: Config.DiscordHeaders);
-        var regions = await TryLoadRegionsAsync();
-        return ParseQuests(json, regions, DateTime.UtcNow);
+        var (quests, regions) = await FetchRawAsync();
+        return ParseQuests(quests, ParseRegions(regions), DateTime.UtcNow);
     }
+
+    /// <summary>Raw mirror payloads (quests + regions) for caching. Throws like
+    /// the old path when the quests endpoint fails; regions may still throw and
+    /// callers fall back to cache/empty for them.</summary>
+    public static async Task<(JsonElement Quests, JsonElement Regions)> FetchRawAsync()
+    {
+        var quests = await NetworkHelper.FetchJsonAsync(Config.QuestApiUrl, headers: Config.DiscordHeaders);
+        JsonElement regions;
+        try { regions = await FetchRawRegionsAsync(); }
+        catch { regions = default; }
+        return (quests, regions);
+    }
+
+    public static async Task<JsonElement> FetchRawRegionsAsync() =>
+        await NetworkHelper.FetchJsonAsync(Config.QuestRegionsUrl, headers: Config.DiscordHeaders);
 
     /// <summary>Personalized list via the official API (user token). Region labels
     /// still come from the community regions endpoint (best-effort).</summary>
@@ -35,6 +49,16 @@ public static class QuestService
         var quests = await DiscordApiClient.GetMyQuestsAsync(token);
         var regions = await TryLoadRegionsAsync();
         return ParseQuests(quests, regions, DateTime.UtcNow);
+    }
+
+    /// <summary>Raw official payload + best-effort regions for caching.</summary>
+    public static async Task<(JsonElement Quests, JsonElement Regions)> FetchOfficialRawAsync(string token)
+    {
+        var quests = await DiscordApiClient.GetMyQuestsAsync(token);
+        JsonElement regions;
+        try { regions = await FetchRawRegionsAsync(); }
+        catch { regions = default; }
+        return (quests, regions);
     }
 
     /// <summary>Pure quest parsing (network-independent) — supports both the legacy
@@ -176,10 +200,17 @@ public static class QuestService
     // Never fails the quest load — on any error returns an empty map (all Global).
     private static async Task<Dictionary<string, QuestRegion>> TryLoadRegionsAsync()
     {
+        try { return ParseRegions(await FetchRawRegionsAsync()); }
+        catch { return new Dictionary<string, QuestRegion>(StringComparer.Ordinal); }
+    }
+
+    /// <summary>Pure regions parsing (network-independent) so cached payloads
+    /// can be re-parsed. Undefined/failed payloads yield an empty map.</summary>
+    public static Dictionary<string, QuestRegion> ParseRegions(JsonElement json)
+    {
         var map = new Dictionary<string, QuestRegion>(StringComparer.Ordinal);
         try
         {
-            var json = await NetworkHelper.FetchJsonAsync(Config.QuestRegionsUrl, headers: Config.DiscordHeaders);
             if (json.ValueKind != JsonValueKind.Object) return map;
             if (!json.TryGetProperty("quests", out var quests) || quests.ValueKind != JsonValueKind.Array) return map;
             foreach (var q in quests.EnumerateArray())

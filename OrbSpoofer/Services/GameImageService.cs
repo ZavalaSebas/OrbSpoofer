@@ -35,8 +35,6 @@ public static class GameImageService
         };
         LoadSteamIdCache();
         LoadImageCache();
-        // background cleanup of expired steam_search caches
-        try { Infrastructure.Cache.CacheStore.CleanupExpired(Path.Combine(Config.AppDataPath, Config.SteamSearchCacheDir), Config.MaxCacheAgeDays); } catch { }
     }
 
     public static async Task<string?> GetImageUrlAsync(DiscordGame game)
@@ -172,6 +170,8 @@ public static class GameImageService
         {
             if (Infrastructure.Cache.CacheStore.TryLoad<Dictionary<string, int?>>(SteamIdCachePath, Config.MaxCacheAgeDays, out var dict) && dict != null)
                 foreach (var kv in dict) SteamIdCache[kv.Key] = kv.Value;
+            else if (Infrastructure.Cache.CacheStore.TryLoadAnyAge<Dictionary<string, int?>>(SteamIdCachePath, out var old, out _) && old != null)
+                foreach (var kv in old) SteamIdCache[kv.Key] = kv.Value;
         }
         catch (Exception ex) { Debug.WriteLine($"Failed to load Steam ID cache: {ex.Message}"); }
     }
@@ -198,6 +198,8 @@ public static class GameImageService
         {
             if (Infrastructure.Cache.CacheStore.TryLoad<Dictionary<string, string?>>(ImageCachePath, Config.MaxCacheAgeDays, out var dict) && dict != null)
                 foreach (var kv in dict) Cache[kv.Key] = kv.Value;
+            else if (Infrastructure.Cache.CacheStore.TryLoadAnyAge<Dictionary<string, string?>>(ImageCachePath, out var old, out _) && old != null)
+                foreach (var kv in old) Cache[kv.Key] = kv.Value;
         }
         catch (Exception ex) { Debug.WriteLine($"Failed to load image cache: {ex.Message}"); }
     }

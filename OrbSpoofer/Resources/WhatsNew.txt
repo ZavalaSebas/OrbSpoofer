@@ -1,4 +1,4 @@
-All quest types with region badges, filters and grouping
-Video auto-watch, new-quest watcher and claim flow (token mode in Settings)
-Settings section, Light/Dark theme and refreshed interface
-Bug fixes and stability improvements
+Quests now survive API outages: local cache + history, freshness pill and manual reload
+Clear cached data from Settings (Settings, token and progress are kept)
+Expired cache copies work as last resort so the app keeps running offline
+Unified source pills and bug fixes

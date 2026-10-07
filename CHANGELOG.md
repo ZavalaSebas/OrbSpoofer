@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.3.0] - 2026-09-27
+
+### Added
+- **Quest cache + history:** Active Quests persist to `quests_cache.json` (raw payloads + history log, capped at 200) — the app survives API outages with the last known copy instead of dropping to Search
+- **Freshness pill + API warning:** header dot shows `Live` (green), `Cached · X ago` or `Offline` (amber); a warning bar explains why updates are paused (e.g. API rate-limited 429) with a manual ⟳ reload button
+- **History section:** every quest ever seen, expired ones record-only, still-valid ones re-spoofable from there
+- **Clear cached data:** new Settings card with live size readout + confirmed wipe (game DB, quest copies + history, Steam lookups). Settings, token, theme and completed quests are kept
+- **Preservation fallbacks:** expired cache copies are now last resort instead of an error (game DB, Steam search/IDs, image URLs); `steam_search` files are no longer purged on startup
+
+### Changed
+- Search fallback only happens with no local cache at all (new user + dead API); returning users stay on Quests
+- Source pills unified (Search, Database, Steam, Manual): rounded-8, sentence case, matching row badges
+
+### Fixed
+- Freshness pill stuck on green `Live` on total failure — now shows `Offline` with the failure reason
+
 ## [2.1.4] — 2026-09-07
 
 ### Fixed

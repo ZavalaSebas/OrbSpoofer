@@ -74,6 +74,33 @@
                 </StackPanel>
             </Border>
 
+            <!-- Cached data -->
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource Orb.ElevatedBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Delete24" FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Cached data" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Game database, quest copies, history and lookups on this PC" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="{Binding CacheSizeText}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10"/>
+                    <Button Content="Clear cached data" Padding="14,6" FontSize="12" Cursor="Hand" HorizontalAlignment="Left" Command="{Binding ClearCacheCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="Background" Value="{DynamicResource Orb.ElevatedBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <TextBlock Text="{Binding CacheClearResult}" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                    <TextBlock Text="Settings, token, theme and completed quests are kept." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
             <!-- Official Discord API — DANGER ZONE (last section on purpose) -->
             <Border Padding="22" Margin="4,2,4,14" ClipToBounds="False" CornerRadius="12" BorderThickness="1"
                     Background="{DynamicResource Orb.Tint.DangerBg}" BorderBrush="{DynamicResource Orb.Tint.DangerBorder}" Style="{StaticResource Orb.CardHover}">

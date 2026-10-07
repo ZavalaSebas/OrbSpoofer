@@ -97,6 +97,9 @@ public static class SteamService
         {
             if (Infrastructure.Cache.CacheStore.TryLoad<List<SteamSearchResult>>(GetSearchCachePath(query), Config.MaxCacheAgeDays, out var cached) && cached != null)
                 return cached;
+            // Expired copy as last resort (preservation): stale name→appid still resolves.
+            if (Infrastructure.Cache.CacheStore.TryLoadAnyAge<List<SteamSearchResult>>(GetSearchCachePath(query), out var old, out _) && old != null)
+                return old;
             return null;
         }
         catch (Exception ex)

@@ -13,8 +13,8 @@
                 <TextBlock Text="Manual Mode" Style="{StaticResource Orb.SectionHeading}" FontSize="25"/>
                 <TextBlock Style="{StaticResource Orb.Caption}" Text="Enter the exact process name Discord expects" Margin="0,3,0,0"/>
             </StackPanel>
-            <Border Grid.Column="2" CornerRadius="999" Padding="10,5" Background="{DynamicResource Orb.Tint.WarningBg}" BorderBrush="{DynamicResource Orb.Tint.WarningBorder}" BorderThickness="1" VerticalAlignment="Center">
-                <TextBlock Text="LOCAL PROCESS" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}"/>
+            <Border Grid.Column="2" CornerRadius="8" Padding="10,5" Background="{DynamicResource Orb.Tint.WarningBg}" BorderBrush="{DynamicResource Orb.Tint.WarningBorder}" BorderThickness="1" VerticalAlignment="Center">
+                <TextBlock Text="Local process" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}"/>
             </Border>
         </Grid>
         <Border Grid.Row="1" Style="{StaticResource Orb.Card}" Margin="0,14,0,0" Padding="16">
