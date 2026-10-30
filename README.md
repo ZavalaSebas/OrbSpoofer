@@ -179,13 +179,15 @@ When OrbSpoofer launches, it automatically fetches all active Discord quests fro
 
 ## Steam Quest Mode
 
-Some games need more than a process name. Discord also checks that Steam shows the game as downloading. Standard spoofing won't cut it — Steam Quest Mode handles it.
+Some games need more than a process name. Discord also checks Steam's library state for them, so standard spoofing won't cut it — Steam Quest Mode handles it.
 
 1. Open **▸ Advanced** → **Steam**
 2. Search for the game by name
 3. Click **Spoof**
 4. OrbSpoofer fetches game metadata from SteamCMD's API, reads your Steam ID from the registry, generates a fake `appmanifest_<appid>.acf`, and places the executable in the correct Steam directory
 5. Wait 15 minutes, close when done, auto-cleanup on exit
+
+When Steam Quest Mode is triggered from an Active Quest, the fake manifest is written as *fully installed* (`StateFlags 4`) and games launched through another client (EA app titles like FC 27) borrow the executable name from the previous release (`fc27.exe`), because that's the process Discord looks for. Discord may not show "Playing …" while progress still fills — if it stays at 0%, restart Steam and Discord and try again.
 
 <br/>
 

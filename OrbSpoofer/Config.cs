@@ -39,6 +39,8 @@ public static class Config
     public const string ManifestOneGiB = "1073741824";
     public const string ManifestPartialBytes = "27262976";
     public const string ManifestStateFlags = "1026";
+    // FullyInstalled — required for quest credit (1026 = UpdateRequired|UpdateStarted)
+    public const string ManifestStateInstalled = "4";
 
     // App data
     public static readonly string AppDataPath =

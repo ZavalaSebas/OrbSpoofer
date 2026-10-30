@@ -181,7 +181,8 @@ public static class SteamService
         else if (hasConfig && config.TryGetProperty("launch", out var launch) && launch.ValueKind == JsonValueKind.Object)
             executable = PickWindowsExe(launch);
 
-        if (string.IsNullOrEmpty(executable))
+        var hasLaunchExecutable = !string.IsNullOrEmpty(executable);
+        if (!hasLaunchExecutable)
             executable = SanitizeFileName(installDir.Split('/').LastOrDefault() ?? installDir) + ".exe";
         else
             executable = string.Join("/", executable.Split('/').Select(SanitizeFileName));
@@ -207,7 +208,8 @@ public static class SteamService
             Name = name,
             InstallDir = installDir,
             Executable = executable,
-            DepotId = depotId
+            DepotId = depotId,
+            HasLaunchExecutable = hasLaunchExecutable
         };
     }
 
@@ -271,8 +273,23 @@ public static class SteamService
     }
 
     public static string GenerateAppManifest(
-        int appId, string name, string installDir, string steamPath, string? depotId = null)
+        int appId, string name, string installDir, string steamPath, string? depotId = null, bool fullyInstalled = false)
     {
+        // Quest credit needs Steam to report the app as fully installed (StateFlags 4),
+        // otherwise Discord treats it as update-pending and never starts the session.
+        if (fullyInstalled)
+        {
+            var minimal = new System.Text.StringBuilder();
+            minimal.AppendLine("\"AppState\"");
+            minimal.AppendLine("{");
+            minimal.AppendLine($"\t\"appid\"\t\t\"{appId}\"");
+            minimal.AppendLine($"\t\"name\"\t\t\"{name}\"");
+            minimal.AppendLine($"\t\"StateFlags\"\t\t\"{Config.ManifestStateInstalled}\"");
+            minimal.AppendLine($"\t\"installdir\"\t\t\"{installDir}\"");
+            minimal.AppendLine("}");
+            return minimal.ToString();
+        }
+
         var owner = GetSteamUserId();
         var launcher = Path.Combine(steamPath, "steam.exe").Replace("/", "\\");
 
@@ -336,11 +353,11 @@ public static class SteamService
         return sb.ToString();
     }
 
-    public static bool WriteAppManifest(int appId, string name, string installDir, string steamPath, string? depotId = null)
+    public static bool WriteAppManifest(int appId, string name, string installDir, string steamPath, string? depotId = null, bool installed = false)
     {
         try
         {
-            var content = GenerateAppManifest(appId, name, installDir, steamPath, depotId);
+            var content = GenerateAppManifest(appId, name, installDir, steamPath, depotId, fullyInstalled: installed);
             var acfPath = Path.Combine(steamPath, "steamapps", $"appmanifest_{appId}.acf");
             var dir = Path.GetDirectoryName(acfPath)!;
             Directory.CreateDirectory(dir);

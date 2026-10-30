@@ -65,6 +65,58 @@ public class SteamServiceTests
     }
 
     [Fact]
+    public void GenerateAppManifest_InstalledForQuest_UsesStateFlags4()
+    {
+        var result = SteamService.GenerateAppManifest(
+            appId: 4080220,
+            name: "EA SPORTS FCT 27",
+            installDir: "EA SPORTS FC 27",
+            steamPath: @"C:\Steam",
+            depotId: null,
+            fullyInstalled: true);
+
+        Assert.Contains("\"StateFlags\"\t\t\"4\"", result);
+        Assert.DoesNotContain("1026", result);
+        Assert.DoesNotContain("InstalledDepots", result);
+    }
+
+    [Fact]
+    public void ParseAppInfo_UriLaunch_HasNoLaunchExecutable()
+    {
+        var json = JsonDocument.Parse("""
+            {"data":{"4080220":{
+              "common":{"name":"EA SPORTS FCT 27"},
+              "config":{
+                "installdir":"EA SPORTS FC 27",
+                "launch":{"0":{"executable":"steam2ea://launchgame/4080220?platform=steam&theme=fc27"}}
+              }
+            }}}
+            """).RootElement;
+
+        var info = SteamService.ParseAppInfo(json, 4080220);
+
+        Assert.NotNull(info);
+        Assert.False(info!.HasLaunchExecutable);
+        Assert.Equal("EA SPORTS FC 27", info.InstallDir);
+    }
+
+    [Fact]
+    public void ParseAppInfo_RealExe_FlagsLaunchExecutable()
+    {
+        var json = JsonDocument.Parse("""
+            {"data":{"730":{"common":{"name":"Counter-Strike 2"},"config":{
+              "installdir":"Counter-Strike Global Offensive",
+              "launch":{"0":{"executable":"game/bin/win64/cs2.exe"}}}}}}
+            """).RootElement;
+
+        var info = SteamService.ParseAppInfo(json, 730);
+
+        Assert.NotNull(info);
+        Assert.True(info!.HasLaunchExecutable);
+        Assert.Equal("game/bin/win64/cs2.exe", info.Executable);
+    }
+
+    [Fact]
     public void ParseAppInfo_MissingConfig_DoesNotThrow()
     {
         var json = JsonDocument.Parse("""

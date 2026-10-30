@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using OrbSpoofer.Exceptions;
 using OrbSpoofer.Models;
 
@@ -263,6 +264,68 @@ public class DiscordDatabase
 
     public DiscordGame? FindBySteamAppId(int steamAppId) =>
         Games.FirstOrDefault(g => g.SteamAppId == steamAppId);
+
+    private static readonly Regex VersionNumber =
+        new(@"\d+", RegexOptions.Compiled);
+
+    /// <summary>Derives the executable of a yearly title from the previous release in
+    /// the same series, e.g. "EA Sports FC 27" -> "ea sports fc 27/fc27.exe" using
+    /// FC 26's entry. Steam Quest mode needs this for games launched through an
+    /// external client (EA app), where Steam only exposes a URI and Discord has no
+    /// executable metadata of its own. Returns null when no sibling matches.</summary>
+    public string? DeriveSeriesExecutable(string gameName)
+    {
+        if (string.IsNullOrWhiteSpace(gameName)) return null;
+
+        var target = NormalizeGameName(gameName);
+        var targetMatch = VersionNumber.Match(target);
+        if (!targetMatch.Success) return null;
+        if (!long.TryParse(targetMatch.Value, out var targetNumber)) return null;
+
+        var template = VersionNumber.Replace(target, "#");
+        string? bestExe = null;
+        var bestDistance = long.MaxValue;
+
+        foreach (var game in Games)
+        {
+            var name = NormalizeGameName(game.Name);
+            var sourceMatch = VersionNumber.Match(name);
+            if (!sourceMatch.Success) continue;
+            if (VersionNumber.Replace(name, "#") != template) continue;
+            if (sourceMatch.Value.Length != targetMatch.Value.Length) continue;
+            if (!long.TryParse(sourceMatch.Value, out var sourceNumber)) continue;
+
+            var exe = GetWin32Executable(game);
+            if (exe == null || !exe.Contains(sourceMatch.Value, StringComparison.Ordinal)) continue;
+
+            var distance = Math.Abs(targetNumber - sourceNumber);
+            if (distance == 0 || distance >= bestDistance) continue;
+
+            bestDistance = distance;
+            bestExe = exe.Replace(sourceMatch.Value, targetMatch.Value, StringComparison.Ordinal);
+        }
+
+        return bestExe;
+    }
+
+    private static string NormalizeGameName(string name)
+    {
+        var cleaned = name.Replace("™", "").Replace("®", "").Replace("©", "");
+        var sb = new System.Text.StringBuilder(cleaned.Length);
+        var lastWasSpace = false;
+        foreach (var ch in cleaned.ToLowerInvariant())
+        {
+            if (char.IsWhiteSpace(ch))
+            {
+                if (!lastWasSpace && sb.Length > 0) sb.Append(' ');
+                lastWasSpace = true;
+                continue;
+            }
+            sb.Append(ch);
+            lastWasSpace = false;
+        }
+        return sb.ToString().Trim();
+    }
 
     public static bool NeedsSteamSpoof(DiscordGame game, out int steamAppId)
     {

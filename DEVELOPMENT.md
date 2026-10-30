@@ -155,9 +155,16 @@ Steam Quest mode creates an appmanifest + fake executable to make Discord detect
 ### Flow
 1. User searches by game name → `SteamService.SearchGamesAsync()` queries the Steam Store API
 2. User selects a game → `SteamService.FetchAppInfoAsync()` → `ParseAppInfo()` gets executable, installdir, depot ID from SteamCMD API
-3. `SteamService.WriteAppManifest()` generates the `.acf` file in `steamapps/`
+3. `SteamService.WriteAppManifest()` generates the `.acf` file in `steamapps/`. Quest spoofs pass `fullyInstalled: true` and get a minimal manifest with `StateFlags 4` (FullyInstalled) — with the default `1026` (UpdateRequired|UpdateStarted) Discord keeps the app as update-pending and never credits the quest
 4. `GameFaker.CreateSteamFakeGame()` copies the OrbSpoofer exe to `GetInstallExePath(steamPath, installDir, executable)` (supports nested paths like `Binaries/Win64/...`)
 5. The fake process is launched (`LaunchExecutable` passes `--discord-app-id` so the timer process can set Discord activity over IPC; quest spoofing passes the quest's `application.id`, Steam mode the matching Discord app)
+
+### URI launchers (EA app) and series-derived executables
+Some games ship a `steam2ea://launchgame/...` URI instead of an `.exe` (EA Sports FC 27, SKU `4080220`). `ParseAppInfo` can't pick a Windows executable, so it sets `HasLaunchExecutable = false` and the old fallback would invent `<installdir>.exe` — a name Discord doesn't know, which is why the quest showed presence but never progressed.
+
+`DiscordDatabase.DeriveSeriesExecutable(name)` fixes that: it finds the previous release in the same series in the detectable database and swaps the version number in its executable path (`EA Sports FC 26` → `ea sports fc 26/fc26.exe` → `ea sports fc 27/fc27.exe`). Steam mode uses only the file name and keeps Steam's `installdir`, so the fake lands exactly where the real game lives (`steamapps/common/EA SPORTS FC 27/fc27.exe`). Rules: same name template with only a numeric token differing, same digit count, executable must contain the source number, nearest release wins, trademarks (`™`/`®`/`©`) ignored.
+
+The working recipe for these quests (verified against the community method) is: `appmanifest_<appid>.acf` with `StateFlags 4`, a fake `<appid folder>/<game>.exe` under `steamapps/common/`, and Steam + Discord running. Discord may not display "Playing …" — progress can still fill.
 
 ### ParseAppInfo / PickWindowsExe
 - Missing `config` does not throw; launch entries without `oslist` default to Windows
@@ -166,7 +173,7 @@ Steam Quest mode creates an appmanifest + fake executable to make Discord detect
 - `DiscordVerifiedExes` maps known Steam AppIDs to the Discord-verified shipping binary (e.g. Tokon `3787240`)
 
 ### InstalledDepots
-The appmanifest's `InstalledDepots` section must be populated with the depot ID (same data as `StagedDepots`) so Steam recognizes the game as partially installed.
+The full appmanifest's `InstalledDepots` section must be populated with the depot ID (same data as `StagedDepots`) so Steam recognizes the game as partially installed. Quest manifests are minimal (appid, name, StateFlags, installdir) and skip depots entirely.
 
 ### Known limitation
 Steam mode is inconsistent — Discord detects the spoofed process for some games but not others. Unified Search prefers Discord Database when a win32 exe exists. The Advanced Steam status message still warns that DB mode is more reliable when both are available.

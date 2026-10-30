@@ -257,4 +257,59 @@ public class DiscordDatabaseTests
             "https://discord.com/api/v9/applications/1491208267928703226/rpc",
             DiscordDatabase.BuildAppRpcUrl("1491208267928703226"));
     }
+
+    [Fact]
+    public void DeriveSeriesExecutable_UsesPreviousRelease()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame
+        {
+            Id = "fc26",
+            Name = "EA Sports FC 26",
+            Executables = { new DiscordExecutable { Os = "win32", Name = "ea sports fc 26/fc26.exe" } }
+        });
+
+        Assert.Equal("ea sports fc 27/fc27.exe", db.DeriveSeriesExecutable("EA Sports FC 27"));
+    }
+
+    [Fact]
+    public void DeriveSeriesExecutable_PicksClosestRelease_AndIgnoresTrademarks()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame
+        {
+            Id = "fc24",
+            Name = "EA Sports FC™ 24",
+            Executables = { new DiscordExecutable { Os = "win32", Name = "ea sports fc 24/fc24.exe" } }
+        });
+        db.Games.Add(new DiscordGame
+        {
+            Id = "fc26",
+            Name = "EA Sports FC™ 26",
+            Executables = { new DiscordExecutable { Os = "win32", Name = "ea sports fc 26/fc26.exe" } }
+        });
+
+        Assert.Equal("ea sports fc 27/fc27.exe", db.DeriveSeriesExecutable("EA Sports FC 27"));
+    }
+
+    [Fact]
+    public void DeriveSeriesExecutable_NoSibling_ReturnsNull()
+    {
+        var db = new DiscordDatabase();
+        Assert.Null(db.DeriveSeriesExecutable("EA Sports FC 27"));
+    }
+
+    [Fact]
+    public void DeriveSeriesExecutable_NameWithoutNumber_ReturnsNull()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame
+        {
+            Id = "1",
+            Name = "Helldivers 2",
+            Executables = { new DiscordExecutable { Os = "win32", Name = "bin/helldivers2.exe" } }
+        });
+
+        Assert.Null(db.DeriveSeriesExecutable("Helldivers"));
+    }
 }

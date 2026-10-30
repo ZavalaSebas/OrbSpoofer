@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -86,16 +87,33 @@ public partial class SteamSearchViewModel : ObservableObject
             StatusMessage = $"Fetching app info for {item.Name}...";
             var info = await SteamService.FetchAppInfoAsync(item.Id);
             if (info == null) { StatusMessage = "Could not fetch app info from SteamCMD API"; return; }
+
+            // Games launched through another client (EA app) expose a steam2ea:// URI
+            // instead of an exe, so Steam's metadata only gives us a folder name guess.
+            // Borrow the executable from the previous title in the series (FC 26 -> fc27.exe),
+            // which is what Discord matches when the process starts.
+            var discordGame = _db.FindBySteamAppId(item.Id);
+            if (!info.HasLaunchExecutable)
+            {
+                var derived = _db.DeriveSeriesExecutable(discordGame?.Name ?? info.Name);
+                if (derived != null)
+                {
+                    info.Executable = Path.GetFileName(derived);
+                    StatusMessage = $"Steam only exposes a launcher for {info.Name}; using {info.Executable} from the previous release...";
+                }
+            }
             if (string.IsNullOrEmpty(info.Executable)) { StatusMessage = "No executable found for this game"; return; }
 
             StatusMessage = "Generating appmanifest...";
-            var ok = SteamService.WriteAppManifest(item.Id, info.Name, info.InstallDir, steamPath, info.DepotId);
+            // Quests need Steam to report the app as installed (StateFlags 4); plain
+            // Steam spoofs keep the update-pending manifest.
+            var ok = SteamService.WriteAppManifest(item.Id, info.Name, info.InstallDir, steamPath, info.DepotId, installed: questId != null);
             if (!ok) { StatusMessage = "Failed to create appmanifest"; return; }
 
             var exePath = SteamService.GetInstallExePath(steamPath, info.InstallDir, info.Executable);
             StatusMessage = "Creating fake executable...";
             var path = _faker.CreateSteamFakeGame(exePath);
-            var discordAppId = _db.FindBySteamAppId(item.Id)?.Id;
+            var discordAppId = discordGame?.Id;
 
             if (path != null && _faker.LaunchExecutable(path, out var proc, info.Name, questId, discordAppId))
             {
