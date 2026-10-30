@@ -525,7 +525,8 @@
                     </Border>
                 </StackPanel>
             </Expander.Header>
-            <ItemsControl ItemsSource="{Binding History}" Margin="0,8,0,0">
+            <ScrollViewer MaxHeight="260" Margin="0,8,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+            <ItemsControl ItemsSource="{Binding History}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="10" Padding="12,9" Margin="0,0,0,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Opacity="0.8">
@@ -547,8 +548,7 @@
                                 </StackPanel>
                                 <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Cursor="Hand" VerticalAlignment="Center" Padding="8,6"
                                         Command="{Binding DataContext.SpoofFromHistoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
-                                        ToolTip="Spoof this quest (only if still valid)"
-                                        Visibility="{Binding IsExpired, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
+                                        ToolTip="Spoof this quest again">
                                     <ui:SymbolIcon Symbol="Play24" Filled="True" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 </Button>
                             </Grid>
@@ -556,6 +556,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            </ScrollViewer>
         </Expander>
     </Grid>
 </UserControl>

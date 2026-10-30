@@ -224,6 +224,14 @@ Total downloads across all releases via `GET api.github.com/repos/{owner}/{repo}
 - `DiscordCdnBase` — `https://cdn.discordapp.com/`
 - `CompletedQuestsFile` — `"completed_quests.json"` (in `AppDataPath`)
 
+### Data sources & credits
+These public services power the app — keep requests light and don't hammer them:
+- [Discord Quest](https://discordquest.com) by [nvckai](https://github.com/nvckai) — active quests + regions (`api.discordquest.com`)
+- [Discord](https://discord.com/developers) — detectable games list (`applications/detectable`)
+- [Cynosphere](https://gist.github.com/Cynosphere/c1e77f77f0e565ddaac2822977961e76) — games list mirror (fallback)
+- [SteamCMD](https://steamcmd.net) — Steam app metadata for Steam Quest mode
+- [GamerPower](https://www.gamerpower.com) — free game giveaways
+
 ## Unified Search
 
 Primary search path since v1.2.4. `PerformUnifiedSearch()` queries Discord DB and Steam Store in parallel, then `UnifiedSearch.Merge()` produces one `UnifiedSearchItem` per game.

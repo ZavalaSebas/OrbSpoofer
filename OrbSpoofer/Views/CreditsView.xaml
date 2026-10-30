@@ -65,6 +65,80 @@
                 </StackPanel>
             </Border>
 
+            <Border Style="{StaticResource Orb.CardHover}" Padding="22" Margin="4,2,4,14" ClipToBounds="False">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource Orb.Tint.InfoBg}" BorderBrush="{DynamicResource Orb.Tint.InfoBorder}" BorderThickness="1" Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Share24" FontSize="16" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Data &amp; Acknowledgements" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Built on top of free, public APIs" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" LineHeight="19" Margin="0,0,0,12">
+                        OrbSpoofer would not be possible without the people who build and maintain these services for free. Thank you.
+                    </TextBlock>
+
+                    <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="12,9" Margin="0,0,0,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Discord Quest" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Active quests and regional availability (by nvckai)" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0"><Hyperlink NavigateUri="https://discordquest.com" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" TextDecorations="None">discordquest.com</Hyperlink></TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="12,9" Margin="0,0,0,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Discord" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Public detectable games database" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0"><Hyperlink NavigateUri="https://discord.com/developers" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" TextDecorations="None">discord.com</Hyperlink></TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="12,9" Margin="0,0,0,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Cynosphere" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Games list mirror used as a fallback" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0"><Hyperlink NavigateUri="https://gist.github.com/Cynosphere/c1e77f77f0e565ddaac2822977961e76" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" TextDecorations="None">GitHub Gist</Hyperlink></TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="12,9" Margin="0,0,0,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="SteamCMD" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Steam app metadata for Steam Quest mode" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0"><Hyperlink NavigateUri="https://steamcmd.net" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" TextDecorations="None">steamcmd.net</Hyperlink></TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="12,9" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="GamerPower" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Free game giveaways feed" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0"><Hyperlink NavigateUri="https://www.gamerpower.com" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" TextDecorations="None">gamerpower.com</Hyperlink></TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="These endpoints are free and rate-limited. Please be considerate with them." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
             <Border Padding="22" Margin="4,2,4,14" CornerRadius="12" BorderThickness="1" Background="{DynamicResource Orb.Tint.DangerBg}" BorderBrush="{DynamicResource Orb.Tint.DangerBorder}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">

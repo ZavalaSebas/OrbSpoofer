@@ -29,8 +29,16 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Data source credits:** new "Data & Acknowledgements" card in Credits, plus README/DEVELOPMENT sections thanking [Discord Quest](https://discordquest.com) (active quests + regions), Discord's detectable API, Cynosphere's mirror, SteamCMD and GamerPower
 - **Download counter:** total downloads across all releases — live shields badge in README, `📥 N downloads` stat in Credits (cached 24h, silent on failure), and every release notes footer now carries the running total (computed in the release workflow)
 - **Self-updating totals:** new scheduled `download-totals` workflow refreshes the total footer on all release bodies daily (plus manual dispatch); new releases also embed a live shields badge. Note: GitHub's own per-release asset counters can't be changed — the footer is what carries the accumulated total
+
+### Changed
+- **History:** every entry now shows the ▶ button (expired ones still report as record-only when clicked)
+
+### Fixed
+- **History overflow:** the list had no scroll container and pushed the window; it now scrolls inside a capped panel
+- **Blurry text on card hover:** the hover animation scaled cards to 1.01, re-rasterizing text; cards now lift 2px without scaling, so text stays crisp in every view
 
 ## [2.2.0] - 2026-09-08
 

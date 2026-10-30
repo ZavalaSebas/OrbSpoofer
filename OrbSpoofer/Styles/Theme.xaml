@@ -129,6 +129,8 @@
     </Style>
 
     <!-- Animated card — hover lift + accent border + shadow (no overflow).
+         No ScaleTransform on hover: non-integer scaling re-rasterizes the
+         content and makes text look blurry. Lift is a 2px translation only.
          Colors are instant Setters (not ColorAnimations) because animation targets
          can't bind DynamicResource — this keeps hover theme-aware in Light/Dark. -->
     <Style x:Key="Orb.CardHover" TargetType="Border" BasedOn="{StaticResource Orb.Card}">
@@ -141,12 +143,6 @@
                 <Trigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.01" Duration="{StaticResource Orb.Motion.Fast}">
-                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.01" Duration="{StaticResource Orb.Motion.Fast}">
-                                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="-2" Duration="{StaticResource Orb.Motion.Fast}">
                                 <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
@@ -156,8 +152,6 @@
                 <Trigger.ExitActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1" Duration="{StaticResource Orb.Motion.Fast}"/>
-                            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1" Duration="{StaticResource Orb.Motion.Fast}"/>
                             <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" To="0" Duration="{StaticResource Orb.Motion.Fast}"/>
                         </Storyboard>
                     </BeginStoryboard>

@@ -225,6 +225,20 @@ MVVM + DI (`CommunityToolkit.Mvvm` + `Microsoft.Extensions.DependencyInjection` 
 
 <br/>
 
+## 🙏 Acknowledgements
+
+OrbSpoofer runs on public data. These services are free, community-maintained, and rate-limited — thank you for keeping them open:
+
+| Service | What we use it for |
+|---|---|
+| [Discord Quest](https://discordquest.com) by [nvckai](https://github.com/nvckai) | Active quest feed + regional availability (`api.discordquest.com/api/quests`, `/api/regions`) |
+| [Discord](https://discord.com/developers) | Public detectable games database (`applications/detectable`) |
+| [Cynosphere](https://gist.github.com/Cynosphere) | Games list mirror, used when Discord's API is unreachable |
+| [SteamCMD](https://steamcmd.net) | Steam app metadata for Steam Quest mode |
+| [GamerPower](https://www.gamerpower.com) | Free game giveaways feed |
+
+<br/>
+
 ## ☕ Special Thanks / Hall of Fame
 
 Huge thanks to everyone who supports OrbSpoofer by buying a coffee — every contribution keeps the project alive and evolving 🙏
