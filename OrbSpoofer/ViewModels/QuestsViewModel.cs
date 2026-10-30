@@ -524,12 +524,14 @@ public partial class QuestsViewModel : ObservableObject
         }
 
         var exeName = game != null ? DiscordDatabase.GetWin32Executable(game) : null;
+        var usedAppMetadata = false;
         if (exeName == null && !string.IsNullOrEmpty(quest.ApplicationId))
         {
             // App missing from the detectable list (e.g. browser quests) — its
             // public app metadata still publishes the executable name.
             StatusMessage = $"Looking up {quest.GameName} executable in Discord...";
             exeName = (await _db.GetAppExecutablesAsync(quest.ApplicationId)).FirstOrDefault();
+            usedAppMetadata = exeName != null;
         }
         if (exeName == null)
         {
@@ -540,7 +542,10 @@ public partial class QuestsViewModel : ObservableObject
         var displayName = game?.Name ?? quest.GameName;
         StatusMessage = $"Creating fake process for quest: {exeName}...";
         var path = _faker.CreateFakeGame(exeName);
-        if (path != null && _faker.LaunchExecutable(path, out var proc, displayName, quest.Id, quest.ApplicationId))
+        // Apps resolved through app metadata are invisible to the process scan, so
+        // they need the IPC presence. DB-detected games keep the old behaviour.
+        var ipcAppId = usedAppMetadata ? quest.ApplicationId : null;
+        if (path != null && _faker.LaunchExecutable(path, out var proc, displayName, quest.Id, ipcAppId))
         {
             ActiveSpoofQuestName = quest.GameName;
             StatusMessage = $"Quest spoof active: {quest.GameName}";
@@ -852,12 +857,17 @@ public partial class QuestsViewModel : ObservableObject
                 return (true, null);
             }
             var exeName = game != null ? DiscordDatabase.GetWin32Executable(game) : null;
+            var usedAppMetadata = false;
             if (exeName == null && !string.IsNullOrEmpty(quest.ApplicationId))
+            {
                 exeName = (await _db.GetAppExecutablesAsync(quest.ApplicationId)).FirstOrDefault();
+                usedAppMetadata = exeName != null;
+            }
             if (exeName == null) return (false, null);
             var path = _faker.CreateFakeGame(exeName);
             if (path == null) return (false, null);
-            if (_faker.LaunchExecutable(path, out var proc, game?.Name ?? quest.GameName, quest.Id, quest.ApplicationId)) return (true, proc);
+            var ipcAppId = usedAppMetadata ? quest.ApplicationId : null;
+            if (_faker.LaunchExecutable(path, out var proc, game?.Name ?? quest.GameName, quest.Id, ipcAppId)) return (true, proc);
             return (false, null);
         }
         catch { return (false, null); }
