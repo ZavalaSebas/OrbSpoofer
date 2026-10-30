@@ -31,7 +31,7 @@ OrbSpoofer/
 │   │   ├── DiscordDatabase.cs     # Discord game database + GitHub backup
 │   │   ├── SteamService.cs        # Steam manifest generation
 │   │   ├── UnifiedSearch.cs       # Merge Discord + Steam search (one row per game)
-│   │   ├── DiscordIpc.cs          # Timer-process Discord activity (Steam spoofs)
+│   │   ├── DiscordIpc.cs          # Timer-process Discord activity (spoofs)
 │   │   ├── GameFaker.cs           # Fake game process spawning (--timer-mode, --quest-id)
 │   │   ├── QuestService.cs        # Active quests from api.discordquest.com
 │   │   ├── GameImageService.cs    # Resolves game images (Discord CDN / Steam store)
@@ -157,7 +157,7 @@ Steam Quest mode creates an appmanifest + fake executable to make Discord detect
 2. User selects a game → `SteamService.FetchAppInfoAsync()` → `ParseAppInfo()` gets executable, installdir, depot ID from SteamCMD API
 3. `SteamService.WriteAppManifest()` generates the `.acf` file in `steamapps/`
 4. `GameFaker.CreateSteamFakeGame()` copies the OrbSpoofer exe to `GetInstallExePath(steamPath, installDir, executable)` (supports nested paths like `Binaries/Win64/...`)
-5. The fake process is launched (`LaunchExecutable` may pass `--discord-app-id` when the Discord DB has a matching Steam SKU)
+5. The fake process is launched (`LaunchExecutable` passes `--discord-app-id` so the timer process can set Discord activity over IPC; quest spoofing passes the quest's `application.id`, Steam mode the matching Discord app)
 
 ### ParseAppInfo / PickWindowsExe
 - Missing `config` does not throw; launch entries without `oslist` default to Windows
@@ -182,6 +182,29 @@ Images are served from `cdn.discordapp.com`. Tokens live in `settings.json` and 
 ### Video automation (`Services/VideoQuestAutomator.cs`, `DiscordApiClient.EnrollAsync/SendVideoProgressAsync`)
 Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllVideosCommand`, one stream at a time, re-click to stop). Flow per quest: `POST enroll` (tolerates already-enrolled) → loop `POST video-progress` with `NextTimestamp` pacing (7s cadence, never ahead of `enrolledAt + 10s`, small jitter, final exact-target post) → 60s backoff ×3 on 429 → mark completed locally. Progress surfaces on `QuestItem.AutoProgress/AutoProgressText`. **ToS note:** this completes quests artificially — higher ban risk than spoofing or read-only token use. Off by default, token required, failures never fake partial progress as done.
 
+### Missing executables (`DiscordDatabase.GetAppExecutablesAsync`)
+Some quests point at apps that Discord ships with but never lists in `applications/detectable` — browser quests are the usual case (Firefox: app `1491208267928703226` is absent from the 25k-entry list, and the "Firefox" entry that does exist has `executables: []`). `SpoofAsync` / `RunSingleAsync` therefore fall back to the public app metadata endpoint (`GET discord.com/api/v9/applications/{id}/rpc`, no auth) when the DB lookup yields no win32 exe:
+- `BuildAppRpcUrl(appId)` — URL builder
+- `ParseWin32Executables(json)` — win32 entries only, `\` normalized to `/`, deduped, `is_launcher` entries moved to the end
+- `GetAppExecutablesAsync(appId)` — cached per app id, empty list on any failure (the caller shows the usual "no executable found" dialog)
+
+If the DB *and* the app metadata are both empty, play quests still route to Steam mode when a Steam SKU exists; otherwise the quest is reported as unspoofable. Manual mode keeps subfolders (`Mozilla Firefox/firefox.exe`) because Discord matches path suffixes for apps installed inside a folder.
+
+### Why IPC presence matters (`Services/DiscordIpc.cs`)
+Discord learns that a game is running through two independent paths, and a working spoof needs at least one of them:
+
+1. **Process scan** — the client matches running process names/paths against `applications/detectable`. This is what a plain fake `game.exe` relies on.
+2. **Rich Presence over IPC** — the game's own process connects to Discord's local named pipe and declares its `client_id`. No process-name guessing involved.
+
+Quests for apps missing from the detectable list (Firefox is the reference case: app `1491208267928703226` is not in the 25k-entry database, and the `Firefox` entry that exists has `executables: []`) **cannot** be detected by path 1 — renaming a random exe to `firefox.exe` gives Discord nothing to map it to, with or without the `Mozilla Firefox/` folder. Path 2 is what makes them work:
+
+- `QuestsViewModel.SpoofAsync` / `RunSingleAsync` pass `quest.ApplicationId` into `GameFaker.LaunchExecutable`
+- `GameFaker.LaunchExecutable` appends `--discord-app-id "<id>"` to the timer command line
+- `App.OnStartup` parses that argument and calls `DiscordIpc.TryConnect(appId, gameName)` *before* showing `TimerWindow`
+- `DiscordIpc` connects to the first available `discord-ipc-0…9` pipe, sends the handshake frame (opcode `0`, `{v: 1, client_id: appId}`), then `SET_ACTIVITY` (opcode `1`) with `args.pid` = its own PID and an activity with `type: 0`, `timestamps.start` and `details` = game name. It answers `PING` with `PONG` (opcodes `3`/`4`) to keep the pipe alive and disposes it when the timer exits.
+
+The timer process therefore has to stay alive for the whole duration — it is both the PID Discord associates with the activity and the IPC client holding the session. If `DiscordIpc.TryConnect` fails (Discord closed, all pipes busy, connection rejected), the spoof silently falls back to process-name detection, which is exactly the old behaviour. Steam mode has always used this same path; quest spoofing now passes the app id too, so both are consistent.
+
 ### Flow
 1. `QuestsViewModel.LoadAsync()` invokes `QuestService.GetActiveQuestsAsync()` (`GetActivePlayQuestsAsync()` is kept as a wrapper)
 2. Expired quests are excluded; **all task types are kept** — `task_config_v2` + `task_config` keys are merged and the preferred task wins (`PLAY_ON_DESKTOP` > `STREAM_ON_DESKTOP` > `PLAY_ACTIVITY` > `WATCH_VIDEO` > `WATCH_VIDEO_ON_MOBILE` > `PLAY_ON_XBOX` > `PLAY_ON_PLAYSTATION`), stored as `QuestItem.TaskType` with `TaskLabel` badge and `IsSpoofable` (`PLAY_ON_DESKTOP` only)
@@ -191,7 +214,7 @@ Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllV
 6. Completed quest IDs are loaded from `completed_quests.json` and matched against loaded quests
 7. Quests are sorted: active first, playable before video/stream, then by expiry; completed last
 8. Spoofable quests are cross-referenced against `DiscordDatabase.Games` by `application.id` or fuzzy name match — those with no win32 executable are flagged `NeedsSteamMode = true`. Non-spoofable quests (video/stream/activity) skip this and open Discord instead
-9. `SpoofAsync` spoofs `PLAY_ON_DESKTOP` via `GameFaker` (auto-routing to Steam mode when there is a Steam SKU but no win32 exe); anything else opens quest home in the **Discord desktop app** via deep link (`discord://-/quest-home`) with browser fallback (`https://discord.com/quest-home`) through `UrlLauncher.OpenDiscordQuestHome()`. Watching a video outside Discord grants no progress — the client reports `video-progress` to your account, so enrollment + watching must happen inside Discord
+9. `SpoofAsync` spoofs `PLAY_ON_DESKTOP` via `GameFaker` (auto-routing to Steam mode when there is a Steam SKU but no win32 exe, falling back to app metadata when the app is missing from the DB, and always passing the quest's app id so the timer can publish Discord activity over IPC — see above); anything else opens quest home in the **Discord desktop app** via deep link (`discord://-/quest-home`) with browser fallback (`https://discord.com/quest-home`) through `UrlLauncher.OpenDiscordQuestHome()`. Watching a video outside Discord grants no progress — the client reports `video-progress` to your account, so enrollment + watching must happen inside Discord
 10. `Run All` only queues spoofable, non-completed quests; video/stream quests are never auto-run
 11. Display filtering (region preference, type chips) runs through `ICollectionView.Filter` — inserts filter live, explicit `Refresh()` only on user filter actions, so background reloads never flash. Counts (`Run All` / Auto / Claim) follow the visible set
 12. The list groups by `TaskLabel` with divider headers; source order already puts playable first and completed last inside each group

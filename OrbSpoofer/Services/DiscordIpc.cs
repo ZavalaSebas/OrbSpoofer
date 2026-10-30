@@ -16,6 +16,10 @@ public sealed class DiscordIpc : IDisposable
     private CancellationTokenSource? _cts;
     private Task? _readLoop;
 
+    /// <summary>Publishes Rich Presence for <paramref name="applicationId"/> over Discord's
+    /// local IPC socket. This is the only signal for apps missing from
+    /// applications/detectable (browser quests), so the caller must keep the process
+    /// alive for as long as the spoof should count.</summary>
     public static DiscordIpc? TryConnect(string applicationId, string? gameName = null)
     {
         if (string.IsNullOrWhiteSpace(applicationId))

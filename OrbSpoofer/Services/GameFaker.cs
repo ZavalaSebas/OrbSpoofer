@@ -183,6 +183,9 @@ public class GameFaker
         launchedProcess = null;
         try
         {
+            // The app id makes the timer process publish Discord activity over IPC.
+            // Required for quests whose app is missing from applications/detectable
+            // (e.g. Firefox), where process-name detection alone never matches.
             var args = $"--timer-mode --exe-path \"{exePath}\" --game-name \"{gameName ?? Path.GetFileNameWithoutExtension(exePath)}\"";
             if (!string.IsNullOrEmpty(questId))
                 args += $" --quest-id \"{questId}\"";

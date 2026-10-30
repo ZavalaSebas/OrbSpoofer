@@ -29,11 +29,12 @@ public partial class ManualViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSpoof))]
     private void Spoof()
     {
-        var exeName = ExeName.Trim();
+        var exeName = ExeName.Trim().Replace('\\', '/').TrimStart('/');
         if (string.IsNullOrEmpty(exeName)) return;
         if (!exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             exeName += ".exe";
-        exeName = Path.GetFileName(exeName);
+        // Keep subfolders (e.g. "Mozilla Firefox/firefox.exe"): Discord matches
+        // path suffixes for apps whose executable lives inside an install folder.
 
         StatusMessage = $"Creating fake process: {exeName}...";
         var path = _faker.CreateFakeGame(exeName);

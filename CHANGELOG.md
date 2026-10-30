@@ -29,6 +29,9 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Quests for apps missing from the game database:** when a play quest's app id has no win32 executable in `applications/detectable`, the app now reads the public app metadata (`applications/{id}/rpc`, no auth) and spoofs that exe instead of bailing out. This unblocks browser quests like Firefox (`firefox.exe`). Results are cached per app id; Steam mode is still preferred when a Steam SKU exists, and the "no executable" dialog only appears when both lookups come back empty
+- **Manual mode accepts folder paths:** `Mozilla Firefox/firefox.exe` is no longer flattened to `firefox.exe` (`Path.GetFileName` removed), matching how Discord stores executables for apps installed inside a folder
+- **Quest spoofs now report Discord activity:** the timer process receives the quest's `application.id` (`--discord-app-id`) and sets a Rich Presence activity over IPC, the same mechanism Steam mode already used — useful when process detection alone isn't enough
 - **Data source credits:** new "Data & Acknowledgements" card in Credits, plus README/DEVELOPMENT sections thanking [Discord Quest](https://discordquest.com) (active quests + regions), Discord's detectable API, Cynosphere's mirror, SteamCMD and GamerPower
 - **Download counter:** total downloads across all releases — live shields badge in README, `📥 N downloads` stat in Credits (cached 24h, silent on failure), and every release notes footer now carries the running total (computed in the release workflow)
 - **Self-updating totals:** new scheduled `download-totals` workflow refreshes the total footer on all release bodies daily (plus manual dispatch); new releases also embed a live shields badge. Note: GitHub's own per-release asset counters can't be changed — the footer is what carries the accumulated total

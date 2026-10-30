@@ -29,8 +29,11 @@
                 <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,6">
                     <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Text="League of Legends.exe — LoL"/>
                 </Border>
-                <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,6">
                     <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Text="Overwatch.exe"/>
+                </Border>
+                <Border Background="{DynamicResource Orb.ElevatedBrush}" CornerRadius="8" Padding="10,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Text="Mozilla Firefox/firefox.exe — folder paths allowed"/>
                 </Border>
             </StackPanel>
         </Border>

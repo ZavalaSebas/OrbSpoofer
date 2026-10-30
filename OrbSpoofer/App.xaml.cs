@@ -54,6 +54,8 @@ public partial class App : Application
                 if (e.Args[i] == "--quest-id") QuestId = e.Args[i + 1];
                 if (e.Args[i] == "--discord-app-id") discordAppId = e.Args[i + 1];
             }
+            // Without an app id there is no presence at all for apps absent from
+            // applications/detectable, so the timer sends one over IPC while it runs.
             if (!string.IsNullOrEmpty(discordAppId))
                 _discordIpc = DiscordIpc.TryConnect(discordAppId, GameName);
             Exit += (_, _) => _discordIpc?.Dispose();

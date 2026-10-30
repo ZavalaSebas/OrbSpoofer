@@ -202,6 +202,65 @@ public class DiscordDatabase
         return candidates.Count > 0 ? candidates[0] : null;
     }
 
+    private readonly Dictionary<string, List<string>> _appExecutableCache = [];
+
+    /// <summary>Public app metadata endpoint (no auth).</summary>
+    public static string BuildAppRpcUrl(string appId) =>
+        $"{Config.DiscordApiBase}/applications/{appId}/rpc";
+
+    /// <summary>win32 executable names from an app metadata payload. Launchers go last.</summary>
+    public static List<string> ParseWin32Executables(JsonElement json)
+    {
+        var primary = new List<string>();
+        var launchers = new List<string>();
+        var seen = new HashSet<string>();
+
+        if (json.ValueKind != JsonValueKind.Object ||
+            !json.TryGetProperty("executables", out var exes) ||
+            exes.ValueKind != JsonValueKind.Array)
+            return primary;
+
+        foreach (var exe in exes.EnumerateArray())
+        {
+            if (exe.ValueKind != JsonValueKind.Object) continue;
+            var os = exe.TryGetProperty("os", out var osProp) ? osProp.GetString() : null;
+            if (!string.Equals(os, "win32", StringComparison.OrdinalIgnoreCase)) continue;
+            var name = exe.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : null;
+            if (string.IsNullOrWhiteSpace(name)) continue;
+
+            name = name!.Replace('\\', '/').TrimStart('/');
+            if (!seen.Add(name)) continue;
+
+            var isLauncher = exe.TryGetProperty("is_launcher", out var l) && l.ValueKind == JsonValueKind.True;
+            (isLauncher ? launchers : primary).Add(name);
+        }
+
+        primary.AddRange(launchers);
+        return primary;
+    }
+
+    /// <summary>Executables for an app missing from the detectable list (e.g. browser
+    /// quests). Cached per app id; returns an empty list on failure.</summary>
+    public async Task<List<string>> GetAppExecutablesAsync(string appId)
+    {
+        if (string.IsNullOrWhiteSpace(appId)) return [];
+        if (_appExecutableCache.TryGetValue(appId, out var cached)) return cached;
+
+        var result = new List<string>();
+        try
+        {
+            var json = await NetworkHelper.FetchJsonAsync(BuildAppRpcUrl(appId), Config.DiscordHeaders);
+            result = ParseWin32Executables(json);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"App executable lookup failed for {appId}: {ex.Message}");
+        }
+
+        _appExecutableCache[appId] = result;
+        return result;
+    }
+
     public DiscordGame? FindBySteamAppId(int steamAppId) =>
         Games.FirstOrDefault(g => g.SteamAppId == steamAppId);
 

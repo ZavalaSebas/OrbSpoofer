@@ -193,4 +193,68 @@ public class DiscordDatabaseTests
         Assert.False(DiscordDatabase.NeedsSteamSpoof(game, out var steamId));
         Assert.Equal(0, steamId);
     }
+
+    [Fact]
+    public void ParseWin32Executables_FirefoxPayload_ReturnsWin32ExeOnly()
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse("""
+            {"id":"1491208267928703226","name":"Firefox","executables":[
+              {"os":"win32","name":"firefox.exe","is_launcher":false},
+              {"os":"darwin","name":"firefox.app","is_launcher":false}
+            ]}
+            """);
+
+        var result = DiscordDatabase.ParseWin32Executables(doc.RootElement);
+
+        Assert.Single(result);
+        Assert.Equal("firefox.exe", result[0]);
+    }
+
+    [Fact]
+    public void ParseWin32Executables_LaunchersGoLast()
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse("""
+            {"executables":[
+              {"os":"win32","name":"launcher.exe","is_launcher":true},
+              {"os":"win32","name":"game.exe","is_launcher":false}
+            ]}
+            """);
+
+        var result = DiscordDatabase.ParseWin32Executables(doc.RootElement);
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("game.exe", result[0]);
+        Assert.Equal("launcher.exe", result[1]);
+    }
+
+    [Fact]
+    public void ParseWin32Executables_NormalizesBackslashesAndDeduplicates()
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse("""
+            {"executables":[
+              {"os":"win32","name":"Mozilla Firefox\\firefox.exe"},
+              {"os":"win32","name":"Mozilla Firefox/firefox.exe"}
+            ]}
+            """);
+
+        var result = DiscordDatabase.ParseWin32Executables(doc.RootElement);
+
+        Assert.Single(result);
+        Assert.Equal("Mozilla Firefox/firefox.exe", result[0]);
+    }
+
+    [Fact]
+    public void ParseWin32Executables_MissingArray_ReturnsEmpty()
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse("""{"id":"1","name":"Test"}""");
+        Assert.Empty(DiscordDatabase.ParseWin32Executables(doc.RootElement));
+    }
+
+    [Fact]
+    public void BuildAppRpcUrl_PointsToPublicAppMetadata()
+    {
+        Assert.Equal(
+            "https://discord.com/api/v9/applications/1491208267928703226/rpc",
+            DiscordDatabase.BuildAppRpcUrl("1491208267928703226"));
+    }
 }

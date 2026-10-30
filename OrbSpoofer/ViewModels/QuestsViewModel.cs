@@ -512,10 +512,9 @@ public partial class QuestsViewModel : ObservableObject
         var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
         if (matches.Count == 0)
             matches = _db.Games.Where(g => g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) || quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
-        if (matches.Count == 0) { StatusMessage = $"No matching game found for: {quest.GameName}"; return; }
 
-        var game = matches[0];
-        if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
+        var game = matches.FirstOrDefault();
+        if (game != null && DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
         {
             StatusMessage = $"{quest.GameName} has no Discord executable — using Steam mode...";
             await _steamVm.SpoofInternalAsync(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
@@ -524,16 +523,24 @@ public partial class QuestsViewModel : ObservableObject
             return;
         }
 
-        var exeName = DiscordDatabase.GetWin32Executable(game);
+        var exeName = game != null ? DiscordDatabase.GetWin32Executable(game) : null;
+        if (exeName == null && !string.IsNullOrEmpty(quest.ApplicationId))
+        {
+            // App missing from the detectable list (e.g. browser quests) — its
+            // public app metadata still publishes the executable name.
+            StatusMessage = $"Looking up {quest.GameName} executable in Discord...";
+            exeName = (await _db.GetAppExecutablesAsync(quest.ApplicationId)).FirstOrDefault();
+        }
         if (exeName == null)
         {
-            _dialogs.ShowInfo("No executable found", $"{quest.GameName} has no executable registered in Discord's database, so process spoofing won't work.", "Use Steam Quest mode or Manual mode to spoof this game.");
-            StatusMessage = $"{quest.GameName} has no executable in Discord's database";
+            _dialogs.ShowInfo("No executable found", $"{quest.GameName} has no executable registered in Discord (game database and app metadata), so process spoofing won't work.", "Use Steam Quest mode or Manual mode to spoof this game.");
+            StatusMessage = $"{quest.GameName} has no executable in Discord";
             return;
         }
+        var displayName = game?.Name ?? quest.GameName;
         StatusMessage = $"Creating fake process for quest: {exeName}...";
         var path = _faker.CreateFakeGame(exeName);
-        if (path != null && _faker.LaunchExecutable(path, out var proc, game.Name, quest.Id))
+        if (path != null && _faker.LaunchExecutable(path, out var proc, displayName, quest.Id, quest.ApplicationId))
         {
             ActiveSpoofQuestName = quest.GameName;
             StatusMessage = $"Quest spoof active: {quest.GameName}";
@@ -838,18 +845,19 @@ public partial class QuestsViewModel : ObservableObject
             var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
             if (matches.Count == 0)
                 matches = _db.Games.Where(g => g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) || quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
-            if (matches.Count == 0) return (false, null);
-            var game = matches[0];
-            if (DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
+            var game = matches.FirstOrDefault();
+            if (game != null && DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
             {
                 await _steamVm.SpoofInternalAsync(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
                 return (true, null);
             }
-            var exeName = DiscordDatabase.GetWin32Executable(game);
+            var exeName = game != null ? DiscordDatabase.GetWin32Executable(game) : null;
+            if (exeName == null && !string.IsNullOrEmpty(quest.ApplicationId))
+                exeName = (await _db.GetAppExecutablesAsync(quest.ApplicationId)).FirstOrDefault();
             if (exeName == null) return (false, null);
             var path = _faker.CreateFakeGame(exeName);
             if (path == null) return (false, null);
-            if (_faker.LaunchExecutable(path, out var proc, game.Name, quest.Id)) return (true, proc);
+            if (_faker.LaunchExecutable(path, out var proc, game?.Name ?? quest.GameName, quest.Id, quest.ApplicationId)) return (true, proc);
             return (false, null);
         }
         catch { return (false, null); }
