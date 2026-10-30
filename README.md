@@ -187,7 +187,7 @@ Some games need more than a process name. Discord also checks Steam's library st
 4. OrbSpoofer fetches game metadata from SteamCMD's API, reads your Steam ID from the registry, generates a fake `appmanifest_<appid>.acf`, and places the executable in the correct Steam directory
 5. Wait 15 minutes, close when done, auto-cleanup on exit
 
-When Steam Quest Mode is triggered from an Active Quest, the fake manifest is written as *fully installed* (`StateFlags 4`) and games launched through another client (EA app titles like FC 27) borrow the executable name from the previous release (`fc27.exe`), because that's the process Discord looks for. Discord may not show "Playing …" while progress still fills — if it stays at 0%, restart Steam and Discord and try again.
+When Steam Quest Mode is triggered from an Active Quest, OrbSpoofer writes the fake manifest as *fully installed* (`StateFlags 4`), borrows the executable name from the previous release for games launched through another client (`fc27.exe`), and offers to restart Steam and Discord so the library is rescanned before the timer starts. Discord may not show "Playing …" while progress still fills — if it stays at 0%, answer *Restart now* when prompted.
 
 <br/>
 

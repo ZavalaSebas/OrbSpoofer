@@ -166,6 +166,14 @@ Some games ship a `steam2ea://launchgame/...` URI instead of an `.exe` (EA Sport
 
 The working recipe for these quests (verified against the community method) is: `appmanifest_<appid>.acf` with `StateFlags 4`, a fake `<appid folder>/<game>.exe` under `steamapps/common/`, and Steam + Discord running. Discord may not display "Playing …" — progress can still fill.
 
+### Restarting Steam and Discord (`Services/AppRestarter.cs`)
+A fake manifest written while Discord is already running is invisible: the client scans Steam's library at startup. That is why the community method insists on restarting both apps after creating the ACF. Quest spoofs therefore ask once (*Restart now* / *Skip*) and, if accepted, run `AppRestarter.RestartAsync()` between writing the manifest/executable and launching the timer:
+
+1. `steam.exe -shutdown` → wait up to 30 s → `steam.exe -silent` → wait for the process + 4 s for the library scan
+2. kill `Discord`/`DiscordPTB`/`DiscordCanary` → wait → `%LOCALAPPDATA%\Discord\Update.exe --processStart Discord.exe` → wait for the process and for a `discord-ipc-*` pipe (so the timer can still set presence)
+
+Any failure is non-fatal: the spoof continues with the old behaviour and the status message says the quest may stay at 0 %. `Run All` never restarts anything (it would interrupt the batch); only a direct ▶ click on a Steam quest asks.
+
 ### ParseAppInfo / PickWindowsExe
 - Missing `config` does not throw; launch entries without `oslist` default to Windows
 - Skips Easy Anti-Cheat / BattlEye launcher names (`start_protected_game.exe`, etc.)

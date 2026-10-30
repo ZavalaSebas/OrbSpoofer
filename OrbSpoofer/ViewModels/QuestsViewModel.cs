@@ -517,7 +517,16 @@ public partial class QuestsViewModel : ObservableObject
         if (game != null && DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
         {
             StatusMessage = $"{quest.GameName} has no Discord executable — using Steam mode...";
-            await _steamVm.SpoofInternalAsync(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id);
+            var restart = false;
+            if (AppRestarter.IsSteamRunning() || AppRestarter.IsDiscordRunning())
+            {
+                restart = await _dialogs.ShowConfirmAsync(
+                    "Restart Steam and Discord?",
+                    $"{quest.GameName} uses Steam Quest mode. Discord only picks up the fake appmanifest when it starts, so both apps need a quick restart before the timer begins.\n\nThis closes Steam and Discord (voice calls and downloads pause) and reopens them automatically.",
+                    "Restart now",
+                    "Skip");
+            }
+            await _steamVm.SpoofInternalAsync(new SteamGameDisplayItem { Id = steamAppId, Name = quest.GameName }, quest.Id, restart);
             StatusMessage = _steamVm.StatusMessage;
             if (_steamVm.StatusMessage.Contains("active")) ActiveSpoofQuestName = quest.GameName;
             return;

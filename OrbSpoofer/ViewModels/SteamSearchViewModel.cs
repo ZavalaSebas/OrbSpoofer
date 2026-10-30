@@ -78,7 +78,7 @@ public partial class SteamSearchViewModel : ObservableObject
         await SpoofInternalAsync(item, questId: null);
     }
 
-    public async Task SpoofInternalAsync(SteamGameDisplayItem item, string? questId)
+    public async Task SpoofInternalAsync(SteamGameDisplayItem item, string? questId, bool restartApps = false)
     {
         try
         {
@@ -115,10 +115,23 @@ public partial class SteamSearchViewModel : ObservableObject
             var path = _faker.CreateSteamFakeGame(exePath);
             var discordAppId = discordGame?.Id;
 
+            // Discord scans Steam's library on startup: a manifest written while it is
+            // already running is invisible, so the quest shows presence but never counts.
+            string? restartWarning = null;
+            if (questId != null && restartApps && path != null)
+            {
+                StatusMessage = "Restarting Steam and Discord so they pick up the appmanifest...";
+                var progress = new Progress<string>(message => StatusMessage = message);
+                var (steamOk, discordOk) = await AppRestarter.RestartAsync(progress);
+                if (!steamOk || !discordOk)
+                    restartWarning = "restart failed, the quest may stay at 0%";
+            }
+
             if (path != null && _faker.LaunchExecutable(path, out var proc, info.Name, questId, discordAppId))
             {
                 if (questId != null) ActiveSpoofQuestName = info.Name;
-                StatusMessage = questId != null ? $"Quest spoof active (Steam): {info.Name}" : $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
+                var active = questId != null ? $"Quest spoof active (Steam): {info.Name}" : $"Steam spoof active: {info.Name} — Steam mode may not work for all games, use DB mode if it doesn't detect";
+                StatusMessage = restartWarning == null ? active : $"{active} ({restartWarning})";
                 if (proc != null)
                 {
                     try
