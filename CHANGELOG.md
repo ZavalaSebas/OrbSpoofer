@@ -2,31 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [2.3.0] - 2026-09-27
-
-### Added
-- **Quest cache + history:** Active Quests persist to `quests_cache.json` (raw payloads + history log, capped at 200) — the app survives API outages with the last known copy instead of dropping to Search
-- **Freshness pill + API warning:** header dot shows `Live` (green), `Cached · X ago` or `Offline` (amber); a warning bar explains why updates are paused (e.g. API rate-limited 429) with a manual ⟳ reload button
-- **History section:** every quest ever seen, expired ones record-only, still-valid ones re-spoofable from there
-- **Clear cached data:** new Settings card with live size readout + confirmed wipe (game DB, quest copies + history, Steam lookups). Settings, token, theme and completed quests are kept
-- **Preservation fallbacks:** expired cache copies are now last resort instead of an error (game DB, Steam search/IDs, image URLs); `steam_search` files are no longer purged on startup
-
-### Changed
-- Search fallback only happens with no local cache at all (new user + dead API); returning users stay on Quests
-- Source pills unified (Search, Database, Steam, Manual): rounded-8, sentence case, matching row badges
-
-### Fixed
-- Freshness pill stuck on green `Live` on total failure — now shows `Offline` with the failure reason
-
-## [2.1.4] — 2026-09-07
-
-### Fixed
-- **Empty Active Quests — quest feed format change:** `api.discordquest.com/api/quests` now returns flat entries (`{id, expires_at, messages, …}`) instead of `{id, config: {…}}`, so every quest was silently skipped. The parser accepts both shapes
-
-### Added
-- **Update dialog on startup:** when an update is pending, the update window pops up right after launch (Skip/close keeps the sidebar reminder), instead of only showing the sidebar badge
-
-## [Unreleased]
+## [2.4.0] - 2026-10-30
 
 ### Added
 - **Automatic Steam/Discord restart:** Steam quest spoofs now offer *Restart now* and reopen both apps for you (Steam `-shutdown` → `-silent`, then Discord via its `Update.exe`), waiting for the library scan and the IPC pipe before the timer starts. Without this, Discord never sees the fake appmanifest and the quest stays at 0 % even while presence shows. Only a direct ▶ click asks — `Run All` never restarts your apps mid-batch
@@ -47,6 +23,22 @@ All notable changes to this project are documented in this file.
 - **Stock-looking dialogs:** the Steam/Discord restart prompt, informed-consent warnings and the "No executable found" message now use themed `ConfirmDialog`/`InfoDialog` windows instead of `MessageBox`/Wpf.Ui `ContentDialog`, so dark/light themes and the accent picker apply
 - **History overflow:** the list had no scroll container and pushed the window; it now scrolls inside a capped panel
 - **Blurry text on card hover:** the hover animation scaled cards to 1.01, re-rasterizing text; cards now lift 2px without scaling, so text stays crisp in every view
+
+## [2.3.0] - 2026-09-27
+
+### Added
+- **Quest cache + history:** Active Quests persist to `quests_cache.json` (raw payloads + history log, capped at 200) — the app survives API outages with the last known copy instead of dropping to Search
+- **Freshness pill + API warning:** header dot shows `Live` (green), `Cached · X ago` or `Offline` (amber); a warning bar explains why updates are paused (e.g. API rate-limited 429) with a manual ⟳ reload button
+- **History section:** every quest ever seen, expired ones record-only, still-valid ones re-spoofable from there
+- **Clear cached data:** new Settings card with live size readout + confirmed wipe (game DB, quest copies + history, Steam lookups). Settings, token, theme and completed quests are kept
+- **Preservation fallbacks:** expired cache copies are now last resort instead of an error (game DB, Steam search/IDs, image URLs); `steam_search` files are no longer purged on startup
+
+### Changed
+- Search fallback only happens with no local cache at all (new user + dead API); returning users stay on Quests
+- Source pills unified (Search, Database, Steam, Manual): rounded-8, sentence case, matching row badges
+
+### Fixed
+- Freshness pill stuck on green `Live` on total failure — now shows `Offline` with the failure reason
 
 ## [2.2.0] - 2026-09-08
 
@@ -94,6 +86,14 @@ All notable changes to this project are documented in this file.
 ### Changed
 - `Config` gains `QuestRegionsUrl`, `QuestHomeUrl`, `QuestHomeDeepLink`; `UrlLauncher.OpenDiscordQuestHome()` tries the app first, browser second
 - Status bar shows `N active quest(s) loaded (M playable)` when any quest is spoofable
+
+## [2.1.4] — 2026-09-07
+
+### Fixed
+- **Empty Active Quests — quest feed format change:** `api.discordquest.com/api/quests` now returns flat entries (`{id, expires_at, messages, …}`) instead of `{id, config: {…}}`, so every quest was silently skipped. The parser accepts both shapes
+
+### Added
+- **Update dialog on startup:** when an update is pending, the update window pops up right after launch (Skip/close keeps the sidebar reminder), instead of only showing the sidebar badge
 
 ## [2.1.3] — 2026-09-04
 

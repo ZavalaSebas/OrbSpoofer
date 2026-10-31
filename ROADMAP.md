@@ -8,6 +8,11 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 - [x] Preservation mode (2.3.0): expired cache copies as last resort (game DB, Steam, image URLs), no `steam_search` purge, outdated badge
 - [x] Clear cached data in Settings (2.3.0): size readout + confirmed wipe, settings/token/progress kept
 - [x] Source pills unified redesign (2.3.0)
+- [x] Browser quests via app metadata (2.4.0): Firefox (`firefox.exe`) spoofed from public app metadata + IPC presence
+- [x] Series quests (2.4.0): EA Sports FC 27 executable derived from FC 26, fully installed Steam manifest (`StateFlags 4`)
+- [x] Automatic Steam/Discord restart (2.4.0): _Restart now_ / _Skip_, waits for library scan + IPC pipe; `Run All` never restarts
+- [x] Themed dialogs everywhere (2.4.0): restart prompt, informed consent, errors and share links follow dark/light + accent
+- [x] Correct quest matching (2.4.0): `application.id` first, whole-word name fallback; no false `Test` title or `Steam required` chip
 - [x] Hall of Fame / Special Thanks + Thanks Trang! pill (2.1.3)
 - [x] Landing page visual overhaul (2.1.3)
 - [x] All quest types (play/stream/video/activity) + region badges + Discord deep link
@@ -36,6 +41,7 @@ Direction for OrbSpoofer. Checked = shipped, unchecked = planned.
 ### Polish
 - [x] Release 2.2.0 (version bump + WhatsNew + push)
 - [x] Download counter (README badge + in-app stat + running total in release notes)
+- [x] Release 2.4.0 (version bump + WhatsNew + changelog, docs refreshed)
 - [x] 3.0 visual foundation (tokens, shell, section headings, mission radar, contextual pills, empty states)
 
 ### Epic (future major)

@@ -1,4 +1,4 @@
-Quests now survive API outages: local cache + history, freshness pill and manual reload
-Clear cached data from Settings (Settings, token and progress are kept)
-Expired cache copies work as last resort so the app keeps running offline
-Unified source pills and bug fixes
+More supported quests: Firefox Browser and EA Sports FC 27 now work
+Bug fixes: quests resolve to the right game and no longer show a false "Steam required"
+Steam and Discord restart for you when a Steam quest needs it, right from the app
+All dialogs now match the app theme, including restart and error messages
