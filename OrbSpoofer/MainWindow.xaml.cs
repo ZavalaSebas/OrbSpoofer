@@ -9,7 +9,6 @@ namespace OrbSpoofer;
 
 public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
 {
-    public Wpf.Ui.Controls.ContentDialogHost DialogHostControl => DialogHost;
     private readonly MainViewModel _vm;
 
     public MainWindow(MainViewModel vm)
@@ -208,21 +207,10 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             _vm.StatusMessage = $"Share link copied — {url}";
             try
             {
-                var host = DialogHostControl;
-                var dialog = new Wpf.Ui.Controls.ContentDialog(host)
-                {
-                    Title = "Link copied",
-                    Content = new System.Windows.Controls.TextBlock
-                    {
-                        Text = $"Copied to clipboard:\n{url}\n\nPaste it in your Discord server to share OrbSpoofer.",
-                        TextWrapping = System.Windows.TextWrapping.Wrap,
-                        Margin = new Thickness(0, 8, 0, 0)
-                    },
-                    CloseButtonText = "OK",
-                    IsPrimaryButtonEnabled = false,
-                    IsSecondaryButtonEnabled = false
-                };
-                _ = dialog.ShowAsync();
+                new UI.Windows.InfoDialog("Link copied",
+                    $"Copied to clipboard:\n{url}",
+                    "Paste it in your Discord server to share OrbSpoofer.")
+                { Owner = this }.ShowDialog();
             }
             catch { }
         }

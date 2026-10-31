@@ -22,32 +22,13 @@ public partial class CreditsView : UserControl
         {
             var url = $"{Config.RepoUrl}/releases/latest";
             System.Windows.Clipboard.SetText(url);
-            // Light feedback via clipboard + open fallback if needed
-            try
-            {
-                var win = System.Windows.Window.GetWindow(this) as MainWindow ?? System.Windows.Application.Current?.MainWindow as MainWindow;
-                var host = win?.DialogHostControl;
-                if (host != null)
-                {
-                    var dialog = new Wpf.Ui.Controls.ContentDialog(host)
-                    {
-                        Title = "Link copied",
-                        Content = new System.Windows.Controls.TextBlock
-                        {
-                            Text = $"Copied to clipboard:\n{url}\n\nPaste it in your Discord server to share OrbSpoofer.",
-                            TextWrapping = System.Windows.TextWrapping.Wrap,
-                            Margin = new System.Windows.Thickness(0, 8, 0, 0)
-                        },
-                        CloseButtonText = "OK",
-                        IsPrimaryButtonEnabled = false,
-                        IsSecondaryButtonEnabled = false
-                    };
-                    _ = dialog.ShowAsync();
-                    return;
-                }
-            }
-            catch { }
-            System.Windows.MessageBox.Show($"Copied to clipboard:\n{url}", "OrbSpoofer — Share", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            // Light feedback via clipboard + themed confirmation
+            var owner = System.Windows.Window.GetWindow(this);
+            var dialog = new OrbSpoofer.UI.Windows.InfoDialog("Link copied",
+                $"Copied to clipboard:\n{url}",
+                "Paste it in your Discord server to share OrbSpoofer.");
+            if (owner != null) dialog.Owner = owner;
+            dialog.ShowDialog();
         }
         catch (Exception ex) { Debug.WriteLine($"Share copy failed: {ex.Message}"); }
     }

@@ -204,11 +204,11 @@ public partial class QuestsViewModel : ObservableObject
                     q.NeedsSteamMode = false; // video/stream/activity open Discord instead
                     continue;
                 }
-                var matching = _db.Games.FirstOrDefault(g => g.Id == q.ApplicationId || g.Name.Contains(q.GameName, StringComparison.OrdinalIgnoreCase) || q.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
-                if (matching == null)
-                    q.NeedsSteamMode = true; // unknown game -> likely needs Steam/manual
-                else
-                    q.NeedsSteamMode = DiscordDatabase.GetWin32Executable(matching) == null;
+                var matching = _db.FindForQuest(q.ApplicationId, q.GameName);
+                // "Steam required" only when the app has a Steam SKU but no Discord
+                // executable. Apps missing from the DB (or with executables: []) can
+                // still be spoofed through app metadata, so they don't need Steam.
+                q.NeedsSteamMode = matching != null && DiscordDatabase.NeedsSteamSpoof(matching, out _);
             }
 
             // Playable first (actionable in-app), then video/stream (open Discord), completed last
@@ -511,7 +511,10 @@ public partial class QuestsViewModel : ObservableObject
         StatusMessage = $"Looking up game: {quest.GameName}...";
         var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
         if (matches.Count == 0)
-            matches = _db.Games.Where(g => g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) || quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+        {
+            var fuzzy = _db.FindBestNameMatch(quest.GameName);
+            if (fuzzy != null) matches = [fuzzy];
+        }
 
         var game = matches.FirstOrDefault();
         if (game != null && DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
@@ -858,7 +861,10 @@ public partial class QuestsViewModel : ObservableObject
         {
             var matches = _db.Games.Where(g => g.Id == quest.ApplicationId).ToList();
             if (matches.Count == 0)
-                matches = _db.Games.Where(g => g.Name.Contains(quest.GameName, StringComparison.OrdinalIgnoreCase) || quest.GameName.Contains(g.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+            {
+                var fuzzy = _db.FindBestNameMatch(quest.GameName);
+                if (fuzzy != null) matches = [fuzzy];
+            }
             var game = matches.FirstOrDefault();
             if (game != null && DiscordDatabase.NeedsSteamSpoof(game, out var steamAppId))
             {

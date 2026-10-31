@@ -55,8 +55,9 @@ OrbSpoofer/
 │       ├── TimerWindow.xaml.cs    # Countdown timer, auto-saves quest completion on finish
 │       ├── UpdateWindow.xaml.cs   # Download progress UI
 │       ├── WelcomeWindow.xaml.cs  # First-launch welcome + version-checked sentinel
-│       └── InfoDialog.xaml.cs     # Themed dialog for warnings (no executable, etc.)
-├── OrbSpoofer.Tests/              # xUnit test project (38 tests)
+│       ├── InfoDialog.xaml.cs     # Themed dialog for warnings (no executable, etc.)
+│       └── ConfirmDialog.xaml.cs  # Themed yes/no + informed-consent dialog (restart prompt, etc.)
+├── OrbSpoofer.Tests/              # xUnit test project (131 tests)
 │   ├── DiscordDatabaseTests.cs    # Search, filtering, exe matching, Steam SKU helpers
 │   ├── SteamServiceTests.cs       # Manifest generation, depots, ParseAppInfo, install paths
 │   ├── UnifiedSearchTests.cs      # Merge, badges, de-duplication, manual fallback
@@ -127,26 +128,28 @@ Benefits: human-readable, merge-friendly, no VS-generated garbage.
 - The HTTP client timeout is `Config.RequestTimeout` (10 seconds)
 - Assembly version must match csproj `<Version>` or the update check will compare wrong values
 
-## Tests (38 xUnit tests)
+## Tests (131 xUnit tests)
 
-Run with: `dotnet test OrbSpoofer.slnx -c Release`
+Run with: `dotnet test OrbSpoofer.slnx`
 
 ### DiscordDatabaseTests
 - Search by name/alias, filtering, exe matching
 - `FindBySteamAppId` / `NeedsSteamSpoof` for Steam SKU routing
+- App-metadata fallback (`BuildAppRpcUrl`, `ParseWin32Executables`, `GetAppExecutablesAsync` payloads)
+- `DeriveSeriesExecutable` (previous release, closest sibling, trademark handling)
+- `FindForQuest` / `FindBestNameMatch` (id first, whole-word only, closest length)
 
 ### SteamServiceTests
-- Manifest generation (required fields, depots, last owner)
-- `ParseAppInfo` with missing `config` and Tokon shipping exe
+- Manifest generation (required fields, depots, last owner) and the quest variant (`StateFlags 4`, minimal `AppState`)
+- `ParseAppInfo` with missing `config`, Tokon shipping exe and `steam2ea://` URI launches (`HasLaunchExecutable`)
 - Nested `GetInstallExePath`
 
-### UnifiedSearchTests
-- Discord-only, Steam-only, and Both badges
-- One row per game (Steam duplicates dropped)
-- Manual fallback for `.exe` queries and empty results
-
-### ConfigTests
-- `AssemblyVersion` is non-empty and matches `x.y.z`
+### The rest
+- `QuestServiceTests` / `QuestCacheTests` / `QuestWatcherTests` — parsing both feed shapes, dedupe, expiry, cache + history preservation
+- `UnifiedSearchTests` — Discord-only, Steam-only, Both badges; one row per game; manual fallback
+- `ViewModelTests` — manifest contents, quest filtering/commands
+- `ConfigTests`, `SettingsTests`, `ThemePersistenceTests`, `ThemeTests`, `XamlResourceAuditTests` — version, settings, theme tokens, missing-resource audit
+- `CacheStoreTests`, `AppCacheJanitorTests`, `GitHubStatsTests`, `DiscordApiClientTests`, `VideoAutomationTests` — storage, cleanup, download totals, API client, video pacing
 
 ## Steam Quest Mode
 
@@ -170,9 +173,9 @@ The working recipe for these quests (verified against the community method) is: 
 A fake manifest written while Discord is already running is invisible: the client scans Steam's library at startup. That is why the community method insists on restarting both apps after creating the ACF. Quest spoofs therefore ask once (*Restart now* / *Skip*) and, if accepted, run `AppRestarter.RestartAsync()` between writing the manifest/executable and launching the timer:
 
 1. `steam.exe -shutdown` → wait up to 30 s → `steam.exe -silent` → wait for the process + 4 s for the library scan
-2. kill `Discord`/`DiscordPTB`/`DiscordCanary` → wait → `%LOCALAPPDATA%\Discord\Update.exe --processStart Discord.exe` → wait for the process and for a `discord-ipc-*` pipe (so the timer can still set presence)
+2. close `Discord`/`DiscordPTB`/`DiscordCanary` → wait → reopen the **same branch** through its own `%LOCALAPPDATA%\<branch>\Update.exe --processStart <branch>.exe` → wait for the process and for a `discord-ipc-N` pipe (checked with `File.Exists` on `\\.\pipe\discord-ipc-0…9`, so the timer can still set presence)
 
-Any failure is non-fatal: the spoof continues with the old behaviour and the status message says the quest may stay at 0 %. `Run All` never restarts anything (it would interrupt the batch); only a direct ▶ click on a Steam quest asks.
+Any failure is non-fatal: the spoof continues with the old behaviour and the status message says the quest may stay at 0 %. `Run All` never restarts anything (it would interrupt the batch); only a direct ▶ click on a Steam quest asks, using the themed `ConfirmDialog` (*Restart now* / *Skip*).
 
 ### ParseAppInfo / PickWindowsExe
 - Missing `config` does not throw; launch entries without `oslist` default to Windows
@@ -196,6 +199,14 @@ Images are served from `cdn.discordapp.com`. Tokens live in `settings.json` and 
 
 ### Video automation (`Services/VideoQuestAutomator.cs`, `DiscordApiClient.EnrollAsync/SendVideoProgressAsync`)
 Opt-in automation for `WATCH_VIDEO` quests (per-quest Auto chip + bulk `AutoAllVideosCommand`, one stream at a time, re-click to stop). Flow per quest: `POST enroll` (tolerates already-enrolled) → loop `POST video-progress` with `NextTimestamp` pacing (7s cadence, never ahead of `enrolledAt + 10s`, small jitter, final exact-target post) → 60s backoff ×3 on 429 → mark completed locally. Progress surfaces on `QuestItem.AutoProgress/AutoProgressText`. **ToS note:** this completes quests artificially — higher ban risk than spoofing or read-only token use. Off by default, token required, failures never fake partial progress as done.
+
+### Matching quests to games (`DiscordDatabase.FindForQuest` / `FindBestNameMatch`)
+A quest carries `application.id` (the game's Discord app) and `messages.game_title`. Resolution is id-first; when the id is absent from `applications/detectable`, the fallback is a **whole-word** name match, closest length wins:
+
+- Plain `Contains` was a bug: the detectable list has an app literally named `Test` (`1435707463935594496`), and `"the la`**`test`**` Firefox Browser"` matched it before `Firefox`. The quest card then showed **"Test"**, the timer window was titled "Test", and the empty-executable `Test` entry made the card display **"⚠ Steam required"**
+- `IndexOfWholePhrase` only accepts a hit when the characters before/after are not letters/digits, so `test` inside `latest` is rejected while `Firefox` in `the latest Firefox Browser` matches
+- The closest name length wins (earliest match breaks ties), which prefers the real game (`Firefox`) over a shorter generic entry
+- `NeedsSteamMode` (the "⚠ Steam required" chip) now uses `NeedsSteamSpoof` — Steam SKU **and** no win32 exe. Apps that can be spoofed through app metadata (Firefox) no longer show it
 
 ### Missing executables (`DiscordDatabase.GetAppExecutablesAsync`)
 Some quests point at apps that Discord ships with but never lists in `applications/detectable` — browser quests are the usual case (Firefox: app `1491208267928703226` is absent from the 25k-entry list, and the "Firefox" entry that does exist has `executables: []`). `SpoofAsync` / `RunSingleAsync` therefore fall back to the public app metadata endpoint (`GET discord.com/api/v9/applications/{id}/rpc`, no auth) when the DB lookup yields no win32 exe:
@@ -228,7 +239,7 @@ The timer process therefore has to stay alive for the whole duration — it is b
 5. Promotional quests (`game_publisher = "Discord"`) are filtered out
 6. Completed quest IDs are loaded from `completed_quests.json` and matched against loaded quests
 7. Quests are sorted: active first, playable before video/stream, then by expiry; completed last
-8. Spoofable quests are cross-referenced against `DiscordDatabase.Games` by `application.id` or fuzzy name match — those with no win32 executable are flagged `NeedsSteamMode = true`. Non-spoofable quests (video/stream/activity) skip this and open Discord instead
+8. Spoofable quests are resolved against `DiscordDatabase.Games` (`FindForQuest`: id first, then whole-word name) — only apps with a Steam SKU and no win32 executable are flagged `NeedsSteamMode = true` (the ⚠ Steam required chip). Non-spoofable quests (video/stream/activity) skip this and open Discord instead
 9. `SpoofAsync` spoofs `PLAY_ON_DESKTOP` via `GameFaker` (auto-routing to Steam mode when there is a Steam SKU but no win32 exe, falling back to app metadata when the app is missing from the DB — only then does it pass the quest's app id so the timer can publish Discord activity over IPC, see above); anything else opens quest home in the **Discord desktop app** via deep link (`discord://-/quest-home`) with browser fallback (`https://discord.com/quest-home`) through `UrlLauncher.OpenDiscordQuestHome()`. Watching a video outside Discord grants no progress — the client reports `video-progress` to your account, so enrollment + watching must happen inside Discord
 10. `Run All` only queues spoofable, non-completed quests; video/stream quests are never auto-run
 11. Display filtering (region preference, type chips) runs through `ICollectionView.Filter` — inserts filter live, explicit `Refresh()` only on user filter actions, so background reloads never flash. Counts (`Run All` / Auto / Claim) follow the visible set
@@ -306,8 +317,14 @@ The accent picker (8 presets, same file) applies app-wide via `ApplyAccent()`, w
 - No `ColorAnimation.To` with theme colors (can't bind `DynamicResource`) — use instant `Setter`s + transform animations (see `Orb.CardHover`), or opacity overlays (scrollbar thumb)
 - Game thumbnails keep fixed dark tiles (art transparency is tuned for dark) with theme-aware borders, and every tile image needs a rounded `RectangleGeometry` clip — `Border.ClipToBounds` ignores `CornerRadius` and square corners bleed through
 
-### InfoDialog (`UI/Windows/InfoDialog.xaml`)
-Custom themed WPF dialog window for non-critical warnings. Used when a game has no Discord executable **and** no Steam SKU — tells the user process spoofing won't work and suggests Advanced → Steam Quest or Manual. Shown as a modal (`ShowDialog()`). Styled with the same dark theme (`BackgroundBrush`, `TextPrimaryBrush`, `PrimaryBrush` accent).
+### Dialogs (`Helpers/DialogService.cs`, `UI/Windows/InfoDialog.xaml`, `UI/Windows/ConfirmDialog.xaml`)
+Every modal uses the app theme. `DialogService` opens `InfoDialog` for messages and `ConfirmDialog` for yes/no (two `ui:Button`s, primary + cancel) against the visible shell window. **Do not** add `MessageBox` calls or Wpf.Ui `ContentDialog`s: both ignore the custom theme dictionaries (the restart prompt and the "no executable" warning used to look like stock Windows/Wpf.Ui popups).
+
+- `ShowInfo(title, message, hint?)` — "No executable found", token/danger-zone warnings
+- `ShowConfirmAsync(title, message, confirmText, cancelText)` — restart Steam/Discord prompt, clear caches
+- `ShowInformedConsentAsync(..., readSeconds, ...)` — same window with a countdown on the primary button before it unlocks
+
+Both windows reuse the FluentWindow chrome (`BackgroundBrush`, `SurfaceBrush`, `TextPrimaryBrush`, accent buttons, Mica backdrop), so dark/light themes and accent presets apply automatically. `MessageBox` remains only as a last-resort fallback when no window is visible.
 
 ### Status bar sponsor heart
 The status bar displays a ❤ icon (bottom-right) linked to the Ko-fi donation page (`Config.KofiUrl`). Defined in `MainWindow.xaml:691-694`, click handled by `Kofi_HeartClick`.
@@ -492,7 +509,7 @@ Additional conventions:
 - **No silent catch blocks** — every `catch` must at minimum log via `Debug.WriteLine()`
 - **`async void` only for WPF event handlers** — all other async methods return `Task` or `Task<T>`
 - **MVVM with CommunityToolkit.Mvvm** — `ObservableObject` + `[ObservableProperty]` + `[RelayCommand]`; ViewModels in `ViewModels/`, Views in `Views/` (UserControl, DataContext = VM). Code-behind only for animations, popup positioning, Mica.
-- **Dependency injection** — `Microsoft.Extensions.DependencyInjection` in `App.xaml.cs:ConfigureServices`; `DiscordDatabase`, `GameFaker`, `FreeGamesService` as singletons, VMs as singletons, `MainWindow` transient. `IDialogService` for `InfoDialog`. No `new` in views.
+- **Dependency injection** — `Microsoft.Extensions.DependencyInjection` in `App.xaml.cs:ConfigureServices`; `DiscordDatabase`, `GameFaker`, `FreeGamesService` as singletons, VMs as singletons, `MainWindow` transient. `IDialogService` for the themed `InfoDialog`/`ConfirmDialog`. No `new` in views.
 
 Good commit structure:
 ```
@@ -515,6 +532,8 @@ bump v1.2.0
 | `OrbSpoofer/OrbSpoofer.csproj` | Version, target framework, assembly info |
 | `OrbSpoofer/Config.cs` | All constants: URLs, paths, timeouts, cache settings |
 | `OrbSpoofer/Services/Updater.cs` | Update check, download, swap, cleanup |
+| `OrbSpoofer/Services/AppRestarter.cs` | Steam/Discord restart so a new appmanifest is picked up |
+| `OrbSpoofer/Helpers/DialogService.cs` | Themed dialogs (`InfoDialog`, `ConfirmDialog`) |
 | `OrbSpoofer/Services/NetworkHelper.cs` | HTTP client with User-Agent, JSON fetching, file download |
 | `.github/workflows/release.yml` | CI/CD: build → test → release on version bump |
-| `OrbSpoofer.Tests/` | 38 xUnit tests |
+| `OrbSpoofer.Tests/` | 131 xUnit tests |

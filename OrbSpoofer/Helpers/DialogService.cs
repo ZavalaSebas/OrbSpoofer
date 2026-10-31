@@ -19,39 +19,14 @@ public sealed class DialogService : IDialogService
 
     public void ShowInfo(string title, string message, string? hint = null)
     {
-        var full = string.IsNullOrWhiteSpace(hint) ? message : $"{message}\n\n{hint}";
         try
         {
-            var owner = _owner as MainWindow ?? Application.Current?.MainWindow as MainWindow;
-            if (owner != null)
-            {
-                try
-                {
-                    var host = owner.DialogHostControl;
-                    var dialog = new Wpf.Ui.Controls.ContentDialog(host)
-                    {
-                        Title = title,
-                        Content = new System.Windows.Controls.TextBlock
-                        {
-                            Text = full,
-                            TextWrapping = System.Windows.TextWrapping.Wrap,
-                            Margin = new Thickness(0, 8, 0, 0)
-                        },
-                        CloseButtonText = "OK",
-                        IsPrimaryButtonEnabled = false,
-                        IsSecondaryButtonEnabled = false
-                    };
-                    // ShowAsync must be awaited on UI thread; use ShowAsync().ConfigureAwait
-                    _ = dialog.ShowAsync();
-                    return;
-                }
-                catch (Exception ex) { Debug.WriteLine($"ContentDialog failed, fallback: {ex.Message}"); }
-            }
-            var fallback = new UI.Windows.InfoDialog(title, message, hint ?? "")
-            {
-                Owner = _owner ?? Application.Current?.MainWindow
-            };
-            fallback.ShowDialog();
+            var owner = OwnerWindow;
+            var lines = new List<string> { message };
+            if (!string.IsNullOrWhiteSpace(hint)) lines.Add(hint);
+            var dialog = new UI.Windows.InfoDialog(title, lines.ToArray());
+            if (owner != null) dialog.Owner = owner;
+            dialog.ShowDialog();
         }
         catch (Exception ex)
         {
@@ -59,86 +34,51 @@ public sealed class DialogService : IDialogService
         }
     }
 
-    public async Task<bool> ShowConfirmAsync(string title, string message, string confirmText, string cancelText = "Later")
+    public Task<bool> ShowConfirmAsync(string title, string message, string confirmText, string cancelText = "Later")
     {
         try
         {
-            var owner = _owner as MainWindow ?? Application.Current?.MainWindow as MainWindow;
+            var owner = OwnerWindow;
             if (owner != null)
             {
-                var host = owner.DialogHostControl;
-                var dialog = new Wpf.Ui.Controls.ContentDialog(host)
-                {
-                    Title = title,
-                    Content = new System.Windows.Controls.TextBlock
-                    {
-                        Text = message,
-                        TextWrapping = System.Windows.TextWrapping.Wrap,
-                        Margin = new Thickness(0, 8, 0, 0)
-                    },
-                    PrimaryButtonText = confirmText,
-                    CloseButtonText = cancelText,
-                    IsSecondaryButtonEnabled = false,
-                };
-                var result = await dialog.ShowAsync();
-                return result == Wpf.Ui.Controls.ContentDialogResult.Primary;
+                var dialog = new UI.Windows.ConfirmDialog(title, message, confirmText, cancelText) { Owner = owner };
+                dialog.ShowDialog();
+                return Task.FromResult(dialog.Result);
             }
         }
-        catch (Exception ex) { Debug.WriteLine($"ContentDialog confirm failed, fallback: {ex.Message}"); }
+        catch (Exception ex) { Debug.WriteLine($"ConfirmDialog failed, fallback: {ex.Message}"); }
+
         try
         {
-            return MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+            return Task.FromResult(MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes);
         }
-        catch { return false; }
+        catch { return Task.FromResult(false); }
     }
 
-    public async Task<bool> ShowInformedConsentAsync(string title, string message, int readSeconds, string confirmText, string cancelText = "Go back")
+    public Task<bool> ShowInformedConsentAsync(string title, string message, int readSeconds, string confirmText, string cancelText = "Go back")
     {
         try
         {
-            var owner = _owner as MainWindow ?? Application.Current?.MainWindow as MainWindow;
-            if (owner == null) return false;
-            var host = owner.DialogHostControl;
-            var remaining = Math.Max(1, readSeconds);
-            var dialog = new Wpf.Ui.Controls.ContentDialog(host)
-            {
-                Title = title,
-                Content = new System.Windows.Controls.TextBlock
-                {
-                    Text = message,
-                    TextWrapping = System.Windows.TextWrapping.Wrap,
-                    Margin = new Thickness(0, 8, 0, 0)
-                },
-                PrimaryButtonText = $"{confirmText} ({remaining})",
-                CloseButtonText = cancelText,
-                IsPrimaryButtonEnabled = false,
-                IsSecondaryButtonEnabled = false,
-            };
-            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            timer.Tick += (_, _) =>
-            {
-                try
-                {
-                    remaining--;
-                    if (remaining <= 0)
-                    {
-                        timer.Stop();
-                        dialog.IsPrimaryButtonEnabled = true;
-                        dialog.PrimaryButtonText = confirmText;
-                    }
-                    else dialog.PrimaryButtonText = $"{confirmText} ({remaining})";
-                }
-                catch { }
-            };
-            timer.Start();
-            try
-            {
-                var result = await dialog.ShowAsync();
-                return result == Wpf.Ui.Controls.ContentDialogResult.Primary;
-            }
-            finally { try { timer.Stop(); } catch { } }
+            var owner = OwnerWindow;
+            if (owner == null) return Task.FromResult(false);
+            var dialog = new UI.Windows.ConfirmDialog(title, message, confirmText, cancelText) { Owner = owner };
+            dialog.StartCountdown(readSeconds, confirmText);
+            dialog.ShowDialog();
+            return Task.FromResult(dialog.Result);
         }
-        catch (Exception ex) { Debug.WriteLine($"Informed consent failed: {ex.Message}"); return false; }
+        catch (Exception ex) { Debug.WriteLine($"Informed consent failed: {ex.Message}"); return Task.FromResult(false); }
+    }
+
+    /// <summary>Window dialogs should hang off the visible shell; the timer window
+    /// or a closed main window both make ShowDialog throw.</summary>
+    private Window? OwnerWindow
+    {
+        get
+        {
+            if (_owner is { IsVisible: true }) return _owner;
+            var main = Application.Current?.MainWindow;
+            return main is { IsVisible: true } ? main : null;
+        }
     }
 }
 

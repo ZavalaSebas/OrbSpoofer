@@ -195,6 +195,63 @@ public class DiscordDatabaseTests
     }
 
     [Fact]
+    public void FindBestNameMatch_DoesNotMatchGenericNameInsideAnotherWord()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame { Id = "1435707463935594496", Name = "Test" });
+        db.Games.Add(new DiscordGame { Id = "1442729602559643668", Name = "Firefox" });
+
+        // "the la[test] Firefox Browser" used to hit the "Test" app first, which
+        // made the timer window and the Steam badge show the wrong game.
+        var match = db.FindBestNameMatch("the latest Firefox Browser");
+
+        Assert.NotNull(match);
+        Assert.Equal("1442729602559643668", match!.Id);
+    }
+
+    [Fact]
+    public void FindBestNameMatch_EqualLength_TakesTheEarlierMatch()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame { Id = "browser", Name = "Browser" });
+        db.Games.Add(new DiscordGame { Id = "firefox", Name = "Firefox" });
+
+        Assert.Equal("firefox", db.FindBestNameMatch("the latest Firefox Browser")?.Id);
+    }
+
+    [Fact]
+    public void FindBestNameMatch_PrefersTheClosestName()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame { Id = "1", Name = "Call of Duty" });
+        db.Games.Add(new DiscordGame { Id = "2", Name = "Call of Duty: Modern Warfare 4" });
+
+        Assert.Equal("2", db.FindBestNameMatch("Call of Duty: Modern Warfare 4")?.Id);
+        Assert.Equal("1", db.FindBestNameMatch("Call of Duty")?.Id);
+    }
+
+    [Fact]
+    public void FindBestNameMatch_NoWholeWordMatch_ReturnsNull()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame { Id = "1", Name = "Test" });
+
+        Assert.Null(db.FindBestNameMatch("the latest Firefox Browser"));
+    }
+
+    [Fact]
+    public void FindForQuest_PrefersApplicationIdOverName()
+    {
+        var db = new DiscordDatabase();
+        db.Games.Add(new DiscordGame { Id = "1442729602559643668", Name = "Firefox" });
+        db.Games.Add(new DiscordGame { Id = "1491208267928703226", Name = "Firefox Browser" });
+
+        var match = db.FindForQuest("1491208267928703226", "the latest Firefox Browser");
+
+        Assert.Equal("1491208267928703226", match?.Id);
+    }
+
+    [Fact]
     public void ParseWin32Executables_FirefoxPayload_ReturnsWin32ExeOnly()
     {
         using var doc = System.Text.Json.JsonDocument.Parse("""

@@ -473,8 +473,7 @@
             </Grid>
         </Grid>
 
-        <!-- Dialog Host -->
-        <ui:ContentDialogHost x:Name="DialogHost" Grid.RowSpan="4" Panel.ZIndex="1000" />
+        <!-- Dialogs are themed FluentWindow modals (InfoDialog/ConfirmDialog), not ContentDialog -->
 
         <!-- Status Bar — con glow y pulso -->
         <Border Grid.Row="3" BorderBrush="{DynamicResource Orb.SeparatorBrush}" BorderThickness="0,1,0,0" Padding="16,10">

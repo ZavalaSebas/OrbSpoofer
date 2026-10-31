@@ -29,7 +29,7 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
-- **Automatic Steam/Discord restart:** Steam quest spoofs now offer *Restart now* and reopen both apps for you (Steam `-shutdown` → `-silent`, then Discord via `Update.exe`), waiting for the library scan and the IPC pipe before the timer starts. Without this, Discord never sees the fake appmanifest and the quest stays at 0 % even while presence shows
+- **Automatic Steam/Discord restart:** Steam quest spoofs now offer *Restart now* and reopen both apps for you (Steam `-shutdown` → `-silent`, then Discord via its `Update.exe`), waiting for the library scan and the IPC pipe before the timer starts. Without this, Discord never sees the fake appmanifest and the quest stays at 0 % even while presence shows. Only a direct ▶ click asks — `Run All` never restarts your apps mid-batch
 - **Quest-ready Steam manifests:** when Steam Quest Mode runs from an Active Quest, the fake `appmanifest_<appid>.acf` is now written as *fully installed* (`StateFlags 4`, minimal manifest) instead of update-pending — Discord otherwise keeps the app as "not installed" and never credits the quest
 - **Series-derived executables:** games that Steam launches through another client (EA app, `steam2ea://` URIs — e.g. EA Sports FC 27, SKU `4080220`) get their executable name from the previous release in the same series (`FC 26` → `fc27.exe`), placed under Steam's real install folder. Fixes quests where presence appeared but progress stayed at 0%
 - **Quests for apps missing from the game database:** when a play quest's app id has no win32 executable in `applications/detectable`, the app now reads the public app metadata (`applications/{id}/rpc`, no auth) and spoofs that exe instead of bailing out. This unblocks browser quests like Firefox (`firefox.exe`). Results are cached per app id; Steam mode is still preferred when a Steam SKU exists, and the "no executable" dialog only appears when both lookups come back empty
@@ -43,6 +43,8 @@ All notable changes to this project are documented in this file.
 - **History:** every entry now shows the ▶ button (expired ones still report as record-only when clicked)
 
 ### Fixed
+- **Quest resolved to the wrong game:** the Firefox play quest (`the latest Firefox Browser`) fuzzy-matched a detectable app literally named `Test` — the letters sit inside "la**test**" — so the timer window was titled *Test* and the card showed *⚠ Steam required* even though Firefox is spoofable through app metadata. Quests now resolve by `application.id` first and fall back to **whole-word** name matching (closest length wins), and the Steam chip only appears when the app really has a Steam SKU and no Discord executable
+- **Stock-looking dialogs:** the Steam/Discord restart prompt, informed-consent warnings and the "No executable found" message now use themed `ConfirmDialog`/`InfoDialog` windows instead of `MessageBox`/Wpf.Ui `ContentDialog`, so dark/light themes and the accent picker apply
 - **History overflow:** the list had no scroll container and pushed the window; it now scrolls inside a capped panel
 - **Blurry text on card hover:** the hover animation scaled cards to 1.01, re-rasterizing text; cards now lift 2px without scaling, so text stays crisp in every view
 

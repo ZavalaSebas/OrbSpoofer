@@ -265,6 +265,73 @@ public class DiscordDatabase
     public DiscordGame? FindBySteamAppId(int steamAppId) =>
         Games.FirstOrDefault(g => g.SteamAppId == steamAppId);
 
+    /// <summary>Resolves the detectable game behind a quest: exact application id
+    /// first, then a whole-word name match (see <see cref="FindBestNameMatch"/>).</summary>
+    public DiscordGame? FindForQuest(string? applicationId, string gameName)
+    {
+        if (!string.IsNullOrEmpty(applicationId))
+        {
+            var byId = Games.FirstOrDefault(g => g.Id == applicationId);
+            if (byId != null) return byId;
+        }
+        return FindBestNameMatch(gameName);
+    }
+
+    /// <summary>Name-only fallback for quests whose application id is not in the
+    /// detectable list. Only whole-word phrases match, so generic short entries
+    /// ("Test") can no longer hijack a title that merely contains those letters
+    /// ("the la<u>test</u> Firefox Browser"). The closest name length wins (and the
+    /// earliest match on ties), which keeps the real title ("Firefox") over a
+    /// shorter generic one.</summary>
+    public DiscordGame? FindBestNameMatch(string gameName)
+    {
+        var target = NormalizeGameName(gameName);
+        if (target.Length < 3) return null;
+
+        DiscordGame? best = null;
+        var bestDistance = int.MaxValue;
+        var bestPosition = int.MaxValue;
+
+        foreach (var game in Games)
+        {
+            var name = NormalizeGameName(game.Name);
+            if (name.Length < 3) continue;
+
+            var forward = IndexOfWholePhrase(target, name);
+            var backward = forward < 0 ? IndexOfWholePhrase(name, target) : -1;
+            if (forward < 0 && backward < 0) continue;
+
+            var position = forward >= 0 ? forward : 0;
+            var distance = Math.Abs(name.Length - target.Length);
+            if (distance > bestDistance) continue;
+            if (distance == bestDistance && position >= bestPosition) continue;
+
+            bestDistance = distance;
+            bestPosition = position;
+            best = game;
+        }
+
+        return best;
+    }
+
+    /// <summary>Index of <paramref name="phrase"/> in <paramref name="text"/> when it
+    /// is delimited by non-alphanumerics (so "test" does not match inside "latest").</summary>
+    private static int IndexOfWholePhrase(string text, string phrase)
+    {
+        var index = 0;
+        while (index <= text.Length - phrase.Length)
+        {
+            index = text.IndexOf(phrase, index, StringComparison.Ordinal);
+            if (index < 0) return -1;
+            var end = index + phrase.Length;
+            var startsClean = index == 0 || !char.IsLetterOrDigit(text[index - 1]);
+            var endsClean = end == text.Length || !char.IsLetterOrDigit(text[end]);
+            if (startsClean && endsClean) return index;
+            index++;
+        }
+        return -1;
+    }
+
     private static readonly Regex VersionNumber =
         new(@"\d+", RegexOptions.Compiled);
 

@@ -1,0 +1,39 @@
+<ui:FluentWindow x:Class="OrbSpoofer.UI.Windows.ConfirmDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="OrbSpoofer" Width="460"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round">
+    <Grid Background="{DynamicResource BackgroundBrush}" Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="OrbSpoofer" Height="32" Margin="-24,-24,-24,12" Background="{DynamicResource SurfaceBrush}"/>
+
+        <TextBlock x:Name="TitleText" Grid.Row="1" FontSize="18" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap"/>
+
+        <TextBlock x:Name="MessageText" Grid.Row="2" FontSize="13"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   TextWrapping="Wrap" LineHeight="22" Margin="0,0,0,4"/>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <ui:Button x:Name="CancelButton" Content="Later" Click="CancelButton_Click"
+                       Margin="0,0,8,0" MinWidth="90"/>
+            <ui:Button x:Name="PrimaryButton" Content="OK" Appearance="Primary"
+                       Click="PrimaryButton_Click" MinWidth="120"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

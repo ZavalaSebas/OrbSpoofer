@@ -151,6 +151,8 @@ When OrbSpoofer launches, it automatically fetches all active Discord quests fro
 
 - Every quest shows a **type badge** (🎮 Play, 📡 Stream, 📺 Video…) and a **region badge** (🌍 Global, 📍 US only, 🚫 Not in …); filter by type with the chips or by region in Settings
 - Only **PLAY_ON_DESKTOP** quests can be spoofed; the rest open in Discord. `Run All` skips non-spoofable quests automatically
+- Apps missing from Discord's game list (browsers like **Firefox**) still work: OrbSpoofer reads their public app metadata for the executable and reports Discord activity over IPC while the timer runs, so the quest is credited without a process-name guess
+- **⚠ Steam required** means the game is only on Steam with no Discord executable (like EA Sports FC 27) — OrbSpoofer switches to Steam Quest mode and offers to restart Steam + Discord so the fake manifest is picked up
 - Promotional quests (published by Discord) are filtered out
 
 **If Active Quests don't load** (API down, no internet, etc.), the app automatically falls back to **Search**. You can also switch modes manually from the sidebar at any time.
@@ -163,7 +165,7 @@ When OrbSpoofer launches, it automatically fetches all active Discord quests fro
 
 **Free Games (new)** — Auto-detects free games on **Steam** and **Epic** via GamerPower, badge with counter, anchored popup and direct `Claim`. Strikethrough price + `$0`.
 
-**Fluent UI 2.0 (revamped)** — `FluentWindow` + `Mica`, `TitleBar`, `SymbolIcon`, `ProgressRing`, `InfoBar` and `ContentDialogHost`. Dark theme with `Orb.*` tokens and accent picker (8 presets) persisted.
+**Fluent UI 2.0 (revamped)** — `FluentWindow` + `Mica`, `TitleBar`, `SymbolIcon`, `ProgressRing`, `InfoBar` and themed dialog windows. Dark theme with `Orb.*` tokens and accent picker (8 presets) persisted.
 
 **Centralized search** — Single `UnifiedSearch` for Discord + Steam, one row per game with badges `Discord`/`Steam`/`Both`/`DLC`/`Manual`, 150ms debounce and `Parallel` for images. `DLC` at the end or hidden.
 
